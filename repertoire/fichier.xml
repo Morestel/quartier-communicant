@@ -146,7 +146,7 @@
     <expediteur>Jean-Pierre</expediteur>
     <nbMessages>3</nbMessages>
     <message>
-        <dateEnvoi> 10:15:30 01-02-1999</dateEnvoi>
+        <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
         <offreCollab>
             <description>Une offre de collaboration</description>

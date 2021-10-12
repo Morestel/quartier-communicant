@@ -17,18 +17,24 @@
             <div th:switch="${message.type}"> 
                 <div th:case="'offreCollab'">
                     [[ ${message.type} ]] <br>
+                    [[ ${message.dateEnvoi} ]] <br>
+                    [[ ${message.dureeValidite} ]] <br>
                     [[ ${message.description}]] <br>
                     [[ ${message.dateDebut}]] <br>
                     [[ ${message.dateFin}]] <br> <br>
                 </div>
                 <div th:case="'demandeCollab'">
                     [[ ${message.type} ]] <br>
+                    [[ ${message.dateEnvoi} ]] <br>
+                    [[ ${message.dureeValidite} ]] <br>
                     [[ ${message.description}]] <br>
                     [[ ${message.dateDebut}]] <br>
                     [[ ${message.dateFin}]] <br> <br>
                 </div>
                 <div th:case="'reponseGenerique'">
                     [[ ${message.type} ]] <br>
+                    [[ ${message.dateEnvoi} ]] <br>
+                    [[ ${message.dureeValidite} ]] <br>
                     [[ ${message.msg}]] <br>
                     [[ ${message.idMsgPrecedent}]] <br> <br>
                 </div>

@@ -102,33 +102,46 @@ public class Fichier {
             String msg;
             String idMsgPrecedent;
 
+            String dateEnvoi;
+            String dureeValidite;
+
             Message m;
             // On commence par gérer les offre de collaborations
             for (int i = 0; i < oCollab.getLength(); i++){
+                
+                dateEnvoi = oCollab.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
+                dureeValidite = oCollab.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
                 description = oCollab.item(0).getChildNodes().item(1).getTextContent();
                 dateDebut = oCollab.item(0).getChildNodes().item(3).getChildNodes().item(1).getTextContent();
                 dateFin = oCollab.item(0).getChildNodes().item(3).getChildNodes().item(3).getTextContent();
 
-                m = new Message("offreCollab", dateEnv.getTextContent(), dureeValid.getTextContent(), description, dateDebut, dateFin);
+                m = new Message("offreCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
                 listMess.add(m);
+
             }
 
             // Demande de collaboration
             for (int i = 0; i < dCollab.getLength(); i++){
+
+                dateEnvoi = dCollab.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
+                dureeValidite = dCollab.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
                 description = dCollab.item(0).getChildNodes().item(1).getTextContent();
                 dateDebut = dCollab.item(0).getChildNodes().item(3).getChildNodes().item(1).getTextContent();
                 dateFin = dCollab.item(0).getChildNodes().item(3).getChildNodes().item(3).getTextContent();
 
-                m = new Message("demandeCollab", dateEnv.getTextContent(), dureeValid.getTextContent(), description, dateDebut, dateFin);
+                m = new Message("demandeCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
                 listMess.add(m);
             }
 
             // Réponse générique
             for (int i = 0; i < rGenerique.getLength(); i++){
+
+                dateEnvoi = rGenerique.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
+                dureeValidite = rGenerique.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
                 msg = rGenerique.item(0).getChildNodes().item(1).getTextContent();
                 idMsgPrecedent = rGenerique.item(0).getChildNodes().item(3).getTextContent();
                 
-                m = new Message("reponseGenerique", dateEnv.getTextContent(), dureeValid.getTextContent(), msg, idMsgPrecedent);
+                m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
                 listMess.add(m);
 
             }
