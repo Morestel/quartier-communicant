@@ -140,7 +140,7 @@
 <!ELEMENT fonction (#PCDATA)>
 
 ]>
-<fichierGlobal>
+<fichierGlobal id="15">
     
     <destinataire>Emile</destinataire>
     <expediteur>Jean-Pierre</expediteur>

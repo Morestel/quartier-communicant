@@ -11,7 +11,7 @@
     [[ ${fichier.expediteur} ]]
     [[ ${fichier.destinataire} ]]
     [[ ${fichier.checksum} ]]
-
+    [[ ${fichier.id } ]]
     <ul>
         <li th:each="message : ${listeMessage}">
             <div th:switch="${message.type}"> 

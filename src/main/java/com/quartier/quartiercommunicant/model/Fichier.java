@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import lombok.Data;
 
+import org.springframework.data.annotation.Id;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,6 +22,9 @@ import org.xml.sax.SAXException;
 @Data
 public class Fichier {
     
+    @Id
+    private int id;
+
     private String expediteur;
     private String destinataire;
     private int checksum;
@@ -43,7 +47,9 @@ public class Fichier {
             Document document = db.parse(getFic());
             
             document.getDocumentElement().normalize();
-            
+            System.out.println("IDENTIFIANT = " + document.getDocumentElement().getAttribute("id"));
+            System.err.println("------------");
+            setId(Integer.valueOf(document.getDocumentElement().getAttribute("id")));
             setExpediteur(document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", ""));
             
             setDestinataire(document.getElementsByTagName("destinataire").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", ""));
@@ -86,6 +92,7 @@ public class Fichier {
                     - Demande collab
                     - Réponse générique
             */
+
             // Stock les types de messages dans une liste de noeud
             NodeList oCollab = document.getElementsByTagName("offreCollab");
             NodeList dCollab = document.getElementsByTagName("demandeCollab");
