@@ -1,21 +1,11 @@
 package com.quartier.quartiercommunicant.model;
 
-import java.io.File;
-import java.io.IOException;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
 import lombok.Data;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 @Data
 @Entity
@@ -35,7 +25,7 @@ public class Message {
 
     private String msg;
     private String idMsgPrecedent;
-    
+
     public Message(){
         
     }
