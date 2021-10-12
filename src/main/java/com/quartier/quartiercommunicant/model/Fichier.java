@@ -131,16 +131,6 @@ public class Fichier {
                 m = new Message("reponseGenerique", dateEnv.getTextContent(), dureeValid.getTextContent(), msg, idMsgPrecedent);
                 listMess.add(m);
 
-                /* 
-                <message id="7">
-        <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
-        <dureeValidite>60</dureeValidite>
-        <reponseGenerique>
-            <msg>Salut c'est non</msg>
-            <idMsgPrécédent>4</idMsgPrécédent>
-        </reponseGenerique>
-    </message>
-                */
             }
             /*
             System.err.println("Premier fils : " + mess.getFirstChild().getTextContent());
