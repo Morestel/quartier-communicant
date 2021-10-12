@@ -6,12 +6,20 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.OneToMany;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import com.quartier.quartiercommunicant.repository.MessageRepository;
+
 import lombok.Data;
 
-import org.springframework.data.annotation.Id;
+import javax.persistence.Id;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -20,6 +28,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 @Data
+@Entity
 public class Fichier {
     
     @Id
@@ -29,14 +38,21 @@ public class Fichier {
     private String destinataire;
     private int checksum;
     private File fic;
-    private List<Message> listMess;
+
+    @OneToMany(orphanRemoval = true)
+    private List<Message> listMess = new ArrayList<>();
+
+    
+    public Fichier(){
+        /* Default constructor */
+    }
 
     public Fichier(String pathname){
         setChecksum(0);
         fic = new File(pathname);
-        listMess = new ArrayList<>();
     }
 
+    /*
     public void lireEnTete() throws ParserConfigurationException,
     SAXException, IOException, DOMException, ParseException{
 
@@ -92,7 +108,7 @@ public class Fichier {
                     - Demande collab
                     - Réponse générique
             */
-
+/*
             // Stock les types de messages dans une liste de noeud
             NodeList oCollab = document.getElementsByTagName("offreCollab");
             NodeList dCollab = document.getElementsByTagName("demandeCollab");
@@ -124,7 +140,6 @@ public class Fichier {
 
                 m = new Message("offreCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
                 listMess.add(m);
-
             }
 
             // Demande de collaboration
@@ -150,7 +165,6 @@ public class Fichier {
                 
                 m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
                 listMess.add(m);
-
             }
             /*
             System.err.println("Premier fils : " + mess.getFirstChild().getTextContent());
@@ -184,7 +198,7 @@ public class Fichier {
                     // System.out.println("Salary : " + eElement.getElementsByTagName("salary").item(0).getTextContent());
                 }
             }*/
-        }
+        }/*
         catch(IOException e) {
             e.printStackTrace();
         }catch(ParserConfigurationException u){
@@ -200,6 +214,7 @@ public class Fichier {
     SAXException, IOException, DOMException, ParseException{
         
         
-        /* */
+        /* 
     }
-}
+    */
+
