@@ -24,7 +24,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -93,10 +92,14 @@ public class MainController {
         try{
             
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document document = db.parse(fic.getFic());
             
             document.getDocumentElement().normalize();
+            String s = document.toString();
+            System.out.println(s);
+            System.err.println(document);
             System.out.println("IDENTIFIANT = " + document.getDocumentElement().getAttribute("id"));
             System.err.println("------------");
             fic.setId(Integer.valueOf(document.getDocumentElement().getAttribute("id")));
@@ -123,14 +126,7 @@ public class MainController {
             System.out.println("Root Element :" + document.getDocumentElement().getNodeName());
             
             NodeList listeMessage = document.getElementsByTagName("message");
-            Node mess = document.getElementsByTagName("message").item(0);
-            Node dateEnv = document.getElementsByTagName("dateEnvoi").item(0);
-            Node dureeValid = document.getElementsByTagName("dureeValidite").item(0);
-            //setDureeValidite(dureeValid.getTextContent());
-            //setDateEnvoi(dateEnv.getTextContent());
-            
-            NodeList list = mess.getChildNodes();
-            
+
             System.out.println(document.getElementsByTagName("offreCollab").item(0).getTextContent());
             System.out.println(document.getElementsByTagName("description").item(0).getTextContent());
             
@@ -168,8 +164,8 @@ public class MainController {
             List<Message> lMessage = new ArrayList<>();
             // On commence par gérer les offre de collaborations
             for (int i = 0; i < oCollab.getLength(); i++){
-                
                 dateEnvoi = oCollab.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
+                //dateEnvoi = oCollab.item(0).getParentNode().getElementsByTagName("fd");
                 dureeValidite = oCollab.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
                 description = oCollab.item(0).getChildNodes().item(1).getTextContent();
                 dateDebut = oCollab.item(0).getChildNodes().item(3).getChildNodes().item(1).getTextContent();
