@@ -190,4 +190,21 @@
         </demandeCollab>
     </message>
 
+    <message id="9">
+            <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
+            <dureeValidite>60</dureeValidite>
+            <demandeStage>
+                <dmStage>
+                    <id>5</id>
+                    <objet>Truc</objet>
+                    <description>Lalalalala</description>
+                    <lieu>Paris</lieu>
+                    <remuneration>15</remuneration>
+                    <date>
+                        <dateDebut>10:20:20 10-02-1995</dateDebut>
+                        <duree>100</duree>
+                    </date>
+                </dmStage>
+            </demandeStage>
+    </message>
 </fichierGlobal>

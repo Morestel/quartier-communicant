@@ -12,8 +12,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.Fichier;
 import com.quartier.quartiercommunicant.model.Message;
+import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.FichierRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 
@@ -36,6 +38,9 @@ public class MainController {
 
     @Inject
     MessageRepository aMessageRepository;
+
+    @Inject
+    DemandeStageRepository aDemandeStageRepository;
 
     @RequestMapping({"index", "" })
     
@@ -142,10 +147,12 @@ public class MainController {
             NodeList oCollab = document.getElementsByTagName("offreCollab");
             NodeList dCollab = document.getElementsByTagName("demandeCollab");
             NodeList rGenerique = document.getElementsByTagName("reponseGenerique");
+            NodeList dStage = document.getElementsByTagName("demandeStage");
 
             System.out.println("Nombre d'offre collab : " + oCollab.getLength());
             System.out.println("Nombre de demande collab : " + dCollab.getLength());
-            System.out.println("Nom de réponses génériques : " + rGenerique.getLength());
+            System.out.println("Nombre de réponses génériques : " + rGenerique.getLength());
+            System.out.println("Nombre de demande de stage : " + dStage.getLength());
             
             String description;
             String dateDebut;
@@ -201,6 +208,28 @@ public class MainController {
                 idMsgPrecedent = rGenerique.item(0).getChildNodes().item(3).getTextContent();
                 
                 m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
+                lMessage = fic.getListMess();
+                lMessage.add(m);
+                fic.setListMess(lMessage);
+                aMessageRepository.save(m);
+            }
+
+            // Demande de stage
+            DemandeStage dmStage = new DemandeStage();
+            for (int i = 0; i < dStage.getLength(); i++){
+                dateEnvoi = dStage.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
+                dureeValidite = dStage.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
+                dmStage.setId(Integer.valueOf(dStage.item(0).getChildNodes().item(1).getChildNodes().item(1).getTextContent()));
+                dmStage.setObjet(dStage.item(0).getChildNodes().item(1).getChildNodes().item(3).getTextContent());
+                dmStage.setDescription(dStage.item(0).getChildNodes().item(1).getChildNodes().item(5).getTextContent());
+                dmStage.setLieu(dStage.item(0).getChildNodes().item(1).getChildNodes().item(7).getTextContent());
+                dmStage.setRemuneration(Integer.valueOf(dStage.item(0).getChildNodes().item(1).getChildNodes().item(9).getTextContent()));
+                dmStage.setDateDebut(dStage.item(0).getChildNodes().item(1).getChildNodes().item(11).getChildNodes().item(1).getTextContent());
+                dmStage.setDuree(Integer.valueOf(dStage.item(0).getChildNodes().item(1).getChildNodes().item(11).getChildNodes().item(3).getTextContent()));
+
+                // On insère la demande de stage dans le message
+                aDemandeStageRepository.save(dmStage); // On sauve la demande de stage
+                m = new Message("demandeStage", dateEnvoi, dureeValidite, dmStage);
                 lMessage = fic.getListMess();
                 lMessage.add(m);
                 fic.setListMess(lMessage);

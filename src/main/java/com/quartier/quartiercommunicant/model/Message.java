@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 import lombok.Data;
 
@@ -26,6 +27,8 @@ public class Message {
     private String msg;
     private String idMsgPrecedent;
 
+    @OneToOne
+    private DemandeStage demandeStage;
     public Message(){
         
     }
@@ -47,6 +50,14 @@ public class Message {
         setDureeValidite(dureeValidite);
         setMsg(msg);
         setIdMsgPrecedent(idMsgPrecedent);
+    }
+
+    // Message demande de stage
+    public Message(String type, String dateEnvoi, String dureeValidite, DemandeStage demandeStage){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setDemandeStage(demandeStage);
     }
 }
 
