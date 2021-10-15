@@ -31,6 +31,10 @@ public class Message {
     private DemandeStage demandeStage;
     @OneToOne
     private ReponseStage reponseStage;
+    @OneToOne
+    private DemandeCatalogue demandeCatalogue;
+    @OneToOne
+    private EnvoiBonCommande envoiBonCommande;
     
     public Message(){
         
@@ -64,12 +68,27 @@ public class Message {
     }
 
     // Message réponse de stage
-    // Message demande de stage
     public Message(String type, String dateEnvoi, String dureeValidite, ReponseStage reponseStage){
         setType(type);
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setReponseStage(reponseStage);
+    }
+
+    // Message demande de catalogue
+    public Message(String type, String dateEnvoi, String dureeValidite, DemandeCatalogue demandeCatalogue){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setDemandeCatalogue(demandeCatalogue);
+    }
+
+    // Message envoi bon de commande
+    public Message(String type, String dateEnvoi, String dureeValidite, EnvoiBonCommande envoiBonCommande){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setEnvoiBonCommande(envoiBonCommande);
     }
 }
 

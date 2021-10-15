@@ -25,13 +25,16 @@ import com.quartier.quartiercommunicant.model.FormationStage;
 import com.quartier.quartiercommunicant.model.Message;
 import com.quartier.quartiercommunicant.model.ReponseStage;
 import com.quartier.quartiercommunicant.repository.CVRepository;
+import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
+import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
 import com.quartier.quartiercommunicant.repository.EtatCivilRepository;
 import com.quartier.quartiercommunicant.repository.ExperienceRepository;
 import com.quartier.quartiercommunicant.repository.FichierRepository;
 import com.quartier.quartiercommunicant.repository.FormationStageRepository;
 import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
+import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
 import com.quartier.quartiercommunicant.model.*;
 
@@ -73,6 +76,15 @@ public class MainController {
     @Inject
     LettreRepository aLettreRepository;
 
+    @Inject
+    DemandeCatalogueRepository aDemandeCatalogueRepository;
+
+    @Inject
+    EnvoiBonCommandeRepository aBonCommandeRepository;
+
+    @Inject
+    ProduitRepository aProduitRepository;
+
     @RequestMapping({"index", "" })
     
     public String index(Model model){
@@ -103,16 +115,7 @@ public class MainController {
         }catch(ParseException w){
             w.printStackTrace();
         }
-        /*
-        for (Message m : fic.getListMess()){
-            System.out.println();
-            System.out.println(m.getType());
-            System.out.println(m.getDescription());
-            System.out.println(m.getDateDebut());
-            System.out.println(m.getDateFin());
-            System.out.println();
-        }
-        */
+        
         model.addAttribute("listeMessage", fic.getListMess());
         model.addAttribute("fichier", fic);
         return "index";
@@ -191,6 +194,7 @@ public class MainController {
             String lieu;
             String objet;
             String duree;
+            int quantite;
 
             String msg;
             String idMsgPrecedent;
@@ -198,8 +202,14 @@ public class MainController {
             String dateEnvoi;
             String dureeValidite;
 
+            String dateCommande;
+
             Message m;
             List<Message> lMessage = new ArrayList<>();
+
+            Produit produit = new Produit();
+            List<Produit> listeProduit = new ArrayList<>();
+
             DemandeStage dmStage = new DemandeStage();
             ReponseStage rpStage = new ReponseStage();
             CV cv = new CV();
@@ -207,6 +217,8 @@ public class MainController {
             FormationStage formationStage = new FormationStage();
             Experience experience = new Experience();
             Lettre lettre = new Lettre();
+            DemandeCatalogue demandeCatalogue = new DemandeCatalogue();
+            EnvoiBonCommande envoiBonCommande = new EnvoiBonCommande();
 
             NodeList nList = document.getElementsByTagName("message");
             for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -282,7 +294,7 @@ public class MainController {
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
                     }
-
+                    /*
                     // Réponse de stage
                     if (elem.getElementsByTagName("reponseStage").getLength() > 0){
                         
@@ -334,6 +346,47 @@ public class MainController {
                         lMessage.add(m);
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
+                    }
+                    */
+                    /*
+                    // Demande de catalogue
+                    if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
+                        id = elem.getElementsByTagName("identifiant").item(0).getTextContent();
+                        quantite = Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent());
+
+                        demandeCatalogue = new DemandeCatalogue(Integer.valueOf(id), quantite);
+                        aDemandeCatalogueRepository.save(demandeCatalogue);
+
+                        m = new Message("demandeCatalogue", dateEnvoi, dureeValidite, demandeCatalogue);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
+                    }
+                    */
+                    // Envoi de bon de commande
+                    if (elem.getElementsByTagName("envoiBonCommande").getLength() > 0){
+
+                        id = elem.getElementsByTagName("numCommande").item(0).getTextContent();
+                        dateCommande = elem.getElementsByTagName("dateCommande").item(0).getTextContent(); 
+                
+                        produit = new Produit(Integer.valueOf(elem.getElementsByTagName("produit").item(0).getAttributes().item(0).getTextContent())
+                                            , elem.getElementsByTagName("nom").item(0).getTextContent()
+                                            , Integer.valueOf(elem.getElementsByTagName("prix").item(0).getTextContent())
+                                            , Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent())); 
+                        
+                                            
+                        aProduitRepository.save(produit);                
+                        listeProduit.add(produit);
+                        envoiBonCommande = new EnvoiBonCommande(Integer.valueOf(id), dateCommande, listeProduit, Integer.valueOf(elem.getElementsByTagName("prixCommande").item(0).getTextContent()));
+                        aBonCommandeRepository.save(envoiBonCommande);
+
+                        m = new Message("envoiBonCommande", dateEnvoi, dureeValidite, envoiBonCommande);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
+
                     }
                 }
             }

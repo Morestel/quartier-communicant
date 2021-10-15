@@ -280,4 +280,36 @@
             </rpStage>
         </reponseStage>
     </message>
+
+    <message id="9">
+        <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
+        <dureeValidite>60</dureeValidite>
+        <demandeCatalogue>
+            <catalogueDemande>
+                <titreCatalogueDemande>
+                    <identifiant>201</identifiant>
+                </titreCatalogueDemande>
+                <quantite>6</quantite>
+            </catalogueDemande>
+        </demandeCatalogue>
+    </message>
+
+    <message id="1">
+        <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
+        <dureeValidite>60</dureeValidite>
+        <envoiBonCommande>
+            <numCommande>5</numCommande>
+            <dateCommande>29-01-1255</dateCommande>
+            <listeProduit>
+                <produit identifiant="16">
+                    <nom>Boulette</nom>
+                    <prix>118</prix>
+                    <quantite>16</quantite>
+                </produit>
+            </listeProduit>
+            <prixCommande>250</prixCommande>
+        </envoiBonCommande>
+    </message>
+
+
 </fichierGlobal>
