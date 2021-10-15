@@ -29,6 +29,9 @@ public class Message {
 
     @OneToOne
     private DemandeStage demandeStage;
+    @OneToOne
+    private ReponseStage reponseStage;
+    
     public Message(){
         
     }
@@ -58,6 +61,15 @@ public class Message {
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setDemandeStage(demandeStage);
+    }
+
+    // Message réponse de stage
+    // Message demande de stage
+    public Message(String type, String dateEnvoi, String dureeValidite, ReponseStage reponseStage){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setReponseStage(reponseStage);
     }
 }
 

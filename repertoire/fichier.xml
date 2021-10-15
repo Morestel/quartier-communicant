@@ -225,4 +225,59 @@
             </dmStage>
         </demandeStage>
 </message>
+
+
+<message id="12">
+        <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
+        <dureeValidite>60</dureeValidite>
+        <reponseStage>
+            <rpStage>
+                <id>4</id>
+                <objet>Réponse</objet>
+                <cv>
+                    <etatcivil>
+                        <nom>Pierre</nom>
+                        <prenom>Maurice</prenom>
+                        <dateNaissance>28-01-2520</dateNaissance>
+                        <lieuResidence>Istanbul</lieuResidence>
+                        <photo>httt://photo.com</photo>
+                        <email>idozadza@gmail.com</email>
+                        <tel>0474545445</tel>
+                    </etatcivil>
+                    <formationStage>
+                        <titre>UJM</titre>
+                        <date>
+                            <dateDebut>10:20:20 10-02-1995</dateDebut>
+                            <duree>100</duree>
+                        </date>
+                        <lieu>Paris</lieu>
+                        <mention>Informatique</mention>
+                        <description>C'est fou</description>
+                    </formationStage>
+                    <experience>
+                        <titre>Ljsak</titre>
+                        <date>
+                            <dateDebut>10:20:20 10-02-1995</dateDebut>
+                            <duree>100</duree>
+                        </date>
+                        <lieu>Paris</lieu>
+                        <fonction>Ttt</fonction>
+                        <description>Je ne sais pas</description>
+                    </experience>
+                </cv>
+                <lettre>
+                    <etatcivil>
+                        <nom>Pierre</nom>
+                        <prenom>Maurice</prenom>
+                        <dateNaissance>28-01-2520</dateNaissance>
+                        <lieuResidence>Istanbul</lieuResidence>
+                        <photo>httt://photo.com</photo>
+                        <email>idozadza@gmail.com</email>
+                        <tel>0474545445</tel>
+                    </etatcivil>
+                    <description>Jnekzenzkeznekjz</description>
+                </lettre>
+            </rpStage>
+        </reponseStage>
+    </message>
 </fichierGlobal>

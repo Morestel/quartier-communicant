@@ -11,7 +11,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.text.Format;
 import java.text.ParseException;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +21,21 @@ import javax.inject.Inject;
 
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.Fichier;
+import com.quartier.quartiercommunicant.model.FormationStage;
 import com.quartier.quartiercommunicant.model.Message;
+import com.quartier.quartiercommunicant.model.ReponseStage;
+import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
+import com.quartier.quartiercommunicant.repository.EtatCivilRepository;
+import com.quartier.quartiercommunicant.repository.ExperienceRepository;
 import com.quartier.quartiercommunicant.repository.FichierRepository;
+import com.quartier.quartiercommunicant.repository.FormationStageRepository;
+import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
+import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
+import com.quartier.quartiercommunicant.model.*;
 
+import org.springframework.data.spel.ExpressionDependencies.ExpressionDependency;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +54,24 @@ public class MainController {
 
     @Inject
     DemandeStageRepository aDemandeStageRepository;
+
+    @Inject
+    ReponseStageRepository aReponseStageRepository;
+
+    @Inject
+    CVRepository aCvRepository;
+
+    @Inject 
+    EtatCivilRepository aEtatCivilRepository;
+
+    @Inject
+    ExperienceRepository aExperienceRepository;
+
+    @Inject
+    FormationStageRepository aFormationStageRepository;
+
+    @Inject
+    LettreRepository aLettreRepository;
 
     @RequestMapping({"index", "" })
     
@@ -171,7 +201,12 @@ public class MainController {
             Message m;
             List<Message> lMessage = new ArrayList<>();
             DemandeStage dmStage = new DemandeStage();
-        
+            ReponseStage rpStage = new ReponseStage();
+            CV cv = new CV();
+            EtatCivil etatCivil = new EtatCivil();
+            FormationStage formationStage = new FormationStage();
+            Experience experience = new Experience();
+            Lettre lettre = new Lettre();
 
             NodeList nList = document.getElementsByTagName("message");
             for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -248,7 +283,58 @@ public class MainController {
                         aMessageRepository.save(m);
                     }
 
-                    // 
+                    // Réponse de stage
+                    if (elem.getElementsByTagName("reponseStage").getLength() > 0){
+                        
+                        id = elem.getElementsByTagName("id").item(0).getTextContent();
+                        objet = elem.getElementsByTagName("objet").item(0).getTextContent();
+                        
+                        // Remplissage de l'état civil
+                        etatCivil = new EtatCivil(elem.getElementsByTagName("nom").item(0).getTextContent()
+                                                , elem.getElementsByTagName("prenom").item(0).getTextContent()
+                                                , elem.getElementsByTagName("dateNaissance").item(0).getTextContent()
+                                                , elem.getElementsByTagName("lieuResidence").item(0).getTextContent()
+                                                , elem.getElementsByTagName("photo").item(0).getTextContent()
+                                                , elem.getElementsByTagName("email").item(0).getTextContent()
+                                                , Integer.valueOf(elem.getElementsByTagName("tel").item(0).getTextContent()));
+                        aEtatCivilRepository.save(etatCivil);
+
+                        // Remplissage de la formation
+                        formationStage = new FormationStage(elem.getElementsByTagName("titre").item(0).getTextContent()
+                                                          , elem.getElementsByTagName("dateDebut").item(0).getTextContent()
+                                                          , Integer.valueOf(elem.getElementsByTagName("duree").item(0).getTextContent())
+                                                          , elem.getElementsByTagName("lieu").item(0).getTextContent()
+                                                          , elem.getElementsByTagName("mention").item(0).getTextContent()
+                                                          , elem.getElementsByTagName("description").item(0).getTextContent());
+                        
+                        aFormationStageRepository.save(formationStage);
+                                    
+                        // Remplissage de l'expérience
+                        experience = new Experience(elem.getElementsByTagName("titre").item(0).getTextContent()
+                                                  , elem.getElementsByTagName("dateDebut").item(0).getTextContent()
+                                                  , Integer.valueOf(elem.getElementsByTagName("duree").item(0).getTextContent())
+                                                  , elem.getElementsByTagName("lieu").item(0).getTextContent()
+                                                  , elem.getElementsByTagName("fonction").item(0).getTextContent()
+                                                  , elem.getElementsByTagName("description").item(0).getTextContent());
+
+                        aExperienceRepository.save(experience);
+
+                        cv = new CV(etatCivil, formationStage, experience);
+                        aCvRepository.save(cv);
+
+                        lettre = new Lettre(etatCivil,
+                                            elem.getElementsByTagName("description").item(0).getTextContent());
+                        aLettreRepository.save(lettre);
+
+                        rpStage = new ReponseStage(objet, cv, lettre);
+                        aReponseStageRepository.save(rpStage);
+                        
+                        m = new Message("reponseStage", dateEnvoi, dureeValidite, rpStage);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
+                    }
                 }
             }
         }
