@@ -1,5 +1,15 @@
 package com.quartier.quartiercommunicant.controller;
 
+import java.io.File;
+import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
@@ -154,6 +164,12 @@ public class MainController {
             String dateDebut;
             String dateFin;
 
+            String id;
+            String remuneration;
+            String lieu;
+            String objet;
+            String duree;
+
             String msg;
             String idMsgPrecedent;
 
@@ -162,107 +178,87 @@ public class MainController {
 
             Message m;
             List<Message> lMessage = new ArrayList<>();
-            // On commence par gérer les offre de collaborations
-            for (int i = 0; i < oCollab.getLength(); i++){
-                dateEnvoi = oCollab.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
-                //dateEnvoi = oCollab.item(0).getParentNode().getElementsByTagName("fd");
-                dureeValidite = oCollab.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
-                description = oCollab.item(0).getChildNodes().item(1).getTextContent();
-                dateDebut = oCollab.item(0).getChildNodes().item(3).getChildNodes().item(1).getTextContent();
-                dateFin = oCollab.item(0).getChildNodes().item(3).getChildNodes().item(3).getTextContent();
-
-                m = new Message("offreCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
-                lMessage = fic.getListMess();
-                lMessage.add(m);
-                fic.setListMess(lMessage);
-                aMessageRepository.save(m);
-               
-            }
-
-            // Demande de collaboration
-            for (int i = 0; i < dCollab.getLength(); i++){
-
-                dateEnvoi = dCollab.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
-                dureeValidite = dCollab.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
-                description = dCollab.item(0).getChildNodes().item(1).getTextContent();
-                dateDebut = dCollab.item(0).getChildNodes().item(3).getChildNodes().item(1).getTextContent();
-                dateFin = dCollab.item(0).getChildNodes().item(3).getChildNodes().item(3).getTextContent();
-
-                m = new Message("demandeCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
-                lMessage = fic.getListMess();
-                lMessage.add(m);
-                fic.setListMess(lMessage);
-                aMessageRepository.save(m);
-            }
-
-            // Réponse générique
-            for (int i = 0; i < rGenerique.getLength(); i++){
-
-                dateEnvoi = rGenerique.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
-                dureeValidite = rGenerique.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
-                msg = rGenerique.item(0).getChildNodes().item(1).getTextContent();
-                idMsgPrecedent = rGenerique.item(0).getChildNodes().item(3).getTextContent();
-                
-                m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
-                lMessage = fic.getListMess();
-                lMessage.add(m);
-                fic.setListMess(lMessage);
-                aMessageRepository.save(m);
-            }
-
-            // Demande de stage
             DemandeStage dmStage = new DemandeStage();
-            for (int i = 0; i < dStage.getLength(); i++){
-                dateEnvoi = dStage.item(0).getParentNode().getFirstChild().getNextSibling().getTextContent();
-                dureeValidite = dStage.item(0).getParentNode().getFirstChild().getNextSibling().getNextSibling().getNextSibling().getTextContent();
-                dmStage.setId(Integer.valueOf(dStage.item(0).getChildNodes().item(1).getChildNodes().item(1).getTextContent()));
-                dmStage.setObjet(dStage.item(0).getChildNodes().item(1).getChildNodes().item(3).getTextContent());
-                dmStage.setDescription(dStage.item(0).getChildNodes().item(1).getChildNodes().item(5).getTextContent());
-                dmStage.setLieu(dStage.item(0).getChildNodes().item(1).getChildNodes().item(7).getTextContent());
-                dmStage.setRemuneration(Integer.valueOf(dStage.item(0).getChildNodes().item(1).getChildNodes().item(9).getTextContent()));
-                dmStage.setDateDebut(dStage.item(0).getChildNodes().item(1).getChildNodes().item(11).getChildNodes().item(1).getTextContent());
-                dmStage.setDuree(Integer.valueOf(dStage.item(0).getChildNodes().item(1).getChildNodes().item(11).getChildNodes().item(3).getTextContent()));
+        
 
-                // On insère la demande de stage dans le message
-                aDemandeStageRepository.save(dmStage); // On sauve la demande de stage
-                m = new Message("demandeStage", dateEnvoi, dureeValidite, dmStage);
-                lMessage = fic.getListMess();
-                lMessage.add(m);
-                fic.setListMess(lMessage);
-                aMessageRepository.save(m);
-            }
-            /*
-            System.err.println("Premier fils : " + mess.getFirstChild().getTextContent());
-            NodeList nL = document.getDocumentElement().getChildNodes();
-            
-            for (int j = 0; j < list.getLength(); j++){
-                System.err.println("Item " + j + " " + list.item(j).getTextContent());
-                System.out.println();
-            }
-            
-            
-            System.out.println("----------------------------");
-
-            for (int i = 0; i < nList.getLength(); i++){
-                System.out.println("Message numéro " + i);
-                System.out.println(nList.item(i).getTextContent());
-                System.out.println();
-            }
-            */
-            /*
+            NodeList nList = document.getElementsByTagName("message");
             for (int temp = 0; temp < nList.getLength(); temp++) {
-                Node nNode = list.item(temp);
+                Node nNode = nList.item(temp);
                 System.out.println(nNode.getNodeName());
                 System.out.println("\nCurrent Element :" + nNode.getNodeName());
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element eElement = (Element) nNode;
-                    System.out.println("Message: " + eElement.getElementsByTagName("message").item(0).getTextContent());
-                    // System.out.println("Employee id : " + eElement.getAttribute("id"));
-                    // System.out.println("First Name : " + eElement.getElementsByTagName("firstname").item(0).getTextContent());
-                    // System.out.println("Last Name : " + eElement.getElementsByTagName("lastname").item(0).getTextContent());
-                    // System.out.println("Salary : " + eElement.getElementsByTagName("salary").item(0).getTextContent());
+                    Element elem = (Element) nNode;
+                    //System.out.println("Employee id : " + elem.getAttribute("id"));
+                    System.out.println("Date d'envoi : " + elem.getElementsByTagName("dateEnvoi").item(0).getTextContent());
+                    System.out.println("Durée validité : " + elem.getElementsByTagName("dureeValidite").item(0).getTextContent());
+                    dateEnvoi = elem.getElementsByTagName("dateEnvoi").item(0).getTextContent();
+                    dureeValidite = elem.getElementsByTagName("dureeValidite").item(0).getTextContent();
+
+                    // Offre de collaborations
+                    if (elem.getElementsByTagName("offreCollab").getLength() > 0){
+
+                        description = elem.getElementsByTagName("description").item(0).getTextContent();
+                        dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
+                        dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();
+
+                        m = new Message("offreCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
+                        System.err.println("Sauvegarde effectuée");
+                    }
+                    
+                    // Demande de collaboration
+                    if (elem.getElementsByTagName("demandeCollab").getLength() > 0){
+
+                        description = elem.getElementsByTagName("description").item(0).getTextContent();
+                        dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
+                        dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();   
+                        
+                        m = new Message("demandeCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
+                    }
+
+                    // Réponse générique
+                    if (elem.getElementsByTagName("reponseGenerique").getLength() > 0){
+
+                        msg = elem.getElementsByTagName("msg").item(0).getTextContent();
+                        idMsgPrecedent = elem.getElementsByTagName("idMsgPrécédent").item(0).getTextContent();
+
+                        m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
+                    }
+
+                    // Demande de stage                    
+                    if (elem.getElementsByTagName("demandeStage").getLength() > 0){
+
+                        id = elem.getElementsByTagName("id").item(0).getTextContent();
+                        objet = elem.getElementsByTagName("objet").item(0).getTextContent();
+                        description = elem.getElementsByTagName("description").item(0).getTextContent();
+                        lieu = elem.getElementsByTagName("lieu").item(0).getTextContent();
+                        dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
+                        remuneration = elem.getElementsByTagName("remuneration").item(0).getTextContent();
+                        duree = elem.getElementsByTagName("duree").item(0).getTextContent();
+                        dmStage = new DemandeStage(Integer.valueOf(id), description, objet, lieu, Integer.valueOf(remuneration), dateDebut, Integer.valueOf(duree));
+                            
+                        aDemandeStageRepository.save(dmStage); // On sauve la demande de stage
+                        m = new Message("demandeStage", dateEnvoi, dureeValidite, dmStage);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
+                    }
+
+                    // 
                 }
-            }*/
+            }
         }
         catch(IOException e) {
             e.printStackTrace();

@@ -23,7 +23,8 @@ public class DemandeStage {
         /* */
     }
 
-    public DemandeStage(String description, String objet, String lieu, int remuneration, String dateDebut, int duree){
+    public DemandeStage(int id, String description, String objet, String lieu, int remuneration, String dateDebut, int duree){
+        setId(id);
         setDescription(description);
         setObjet(objet);
         setLieu(lieu);

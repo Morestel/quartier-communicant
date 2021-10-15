@@ -145,7 +145,7 @@
     <destinataire>Emile</destinataire>
     <expediteur>Jean-Pierre</expediteur>
     <nbMessages>3</nbMessages>
-    <message>
+    <message id="4">
         <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
         <offreCollab>
@@ -157,7 +157,7 @@
         </offreCollab>
     </message>
 
-    <message>
+    <message id="6">
         <dateEnvoi> 10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
         <offreCollab>
@@ -201,10 +201,28 @@
                     <lieu>Paris</lieu>
                     <remuneration>15</remuneration>
                     <date>
-                        <dateDebut>10:20:20 10-02-1995</dateDebut>
+                        <dateDebut>10:20:20 10-02-1995412</dateDebut>
                         <duree>100</duree>
                     </date>
                 </dmStage>
             </demandeStage>
     </message>
+
+    <message id="9">
+        <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
+        <dureeValidite>60</dureeValidite>
+        <demandeStage>
+            <dmStage>
+                <id>12</id>
+                <objet>Opop</objet>
+                <description>Llllll</description>
+                <lieu>Paris</lieu>
+                <remuneration>15</remuneration>
+                <date>
+                    <dateDebut>10:20:20 10-02-19</dateDebut>
+                    <duree>0</duree>
+                </date>
+            </dmStage>
+        </demandeStage>
+</message>
 </fichierGlobal>
