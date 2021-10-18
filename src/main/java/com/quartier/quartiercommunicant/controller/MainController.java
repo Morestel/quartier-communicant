@@ -85,8 +85,12 @@ public class MainController {
     @Inject
     ProduitRepository aProduitRepository;
 
+    @RequestMapping("envoi")
+    public String envoiMessage(){
+        return "EnvoiMessage";
+    }
+
     @RequestMapping({"index", "" })
-    
     public String index(Model model){
     
         File repertoire = new File("repertoire");
