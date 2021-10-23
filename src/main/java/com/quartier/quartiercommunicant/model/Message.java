@@ -12,9 +12,9 @@ import lombok.Data;
 @Entity
 public class Message {
     
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    
     @Id
-    private int id;
+    private String id;
 
     private String contenu;
     private String dateEnvoi;

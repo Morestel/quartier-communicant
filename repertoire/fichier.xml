@@ -143,9 +143,9 @@
 <fichierGlobal id="15">
     
     <destinataire>Emile</destinataire>
-    <expediteur>Jean-Pierre</expediteur>
+    <expediteur>Magasin</expediteur>
     <nbMessages>3</nbMessages>
-    <message id="4">
+    <message id="MAG-4">
         <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
         <offreCollab>
@@ -169,16 +169,16 @@
         </offreCollab>
     </message>
 
-    <message id="7">
+    <message id="5">
         <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
         <reponseGenerique>
-            <msg>Salut c'est non</msg>
+            <msg>Quand tu veux</msg>
             <idMsgPrécédent>4</idMsgPrécédent>
         </reponseGenerique>
     </message>
 
-    <message id="5">
+    <message id="L7">
         <dateEnvoi> 10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
         <demandeCollab>
@@ -195,7 +195,7 @@
             <dureeValidite>60</dureeValidite>
             <demandeStage>
                 <dmStage>
-                    <id>5</id>
+                    <id>89</id>
                     <objet>Truc</objet>
                     <description>Lalalalala</description>
                     <lieu>Paris</lieu>
@@ -208,14 +208,32 @@
             </demandeStage>
     </message>
 
-    <message id="9">
+    <message id="19">
         <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
         <demandeStage>
             <dmStage>
-                <id>12</id>
+                <id>122</id>
                 <objet>Opop</objet>
                 <description>Llllll</description>
+                <lieu>Paris</lieu>
+                <remuneration>15</remuneration>
+                <date>
+                    <dateDebut>10:20:20 10-02-19</dateDebut>
+                    <duree>10</duree>
+                </date>
+            </dmStage>
+        </demandeStage>
+</message>
+
+<message id="191">
+        <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
+        <dureeValidite>60</dureeValidite>
+        <demandeStage>
+            <dmStage>
+                <id>1965</id>
+                <objet>Popo</objet>
+                <description>Qqqqq</description>
                 <lieu>Paris</lieu>
                 <remuneration>15</remuneration>
                 <date>
@@ -223,9 +241,19 @@
                     <duree>0</duree>
                 </date>
             </dmStage>
+            <dmStage>
+                <id>3</id>
+                <objet>test</objet>
+                <description>DEMANDESTAGE V DEUX</description>
+                <lieu>Marseille</lieu>
+                <remuneration>115</remuneration>
+                <date>
+                    <dateDebut>10:20:20 10-02-19</dateDebut>
+                    <duree>10</duree>
+                </date>
+            </dmStage>
         </demandeStage>
 </message>
-
 
 <message id="12">
         <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>

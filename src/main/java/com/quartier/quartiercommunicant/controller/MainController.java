@@ -27,6 +27,7 @@ import com.quartier.quartiercommunicant.model.ReponseStage;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
+import com.quartier.quartiercommunicant.repository.DmStageRepository;
 import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
 import com.quartier.quartiercommunicant.repository.EtatCivilRepository;
 import com.quartier.quartiercommunicant.repository.ExperienceRepository;
@@ -57,6 +58,9 @@ public class MainController {
 
     @Inject
     DemandeStageRepository aDemandeStageRepository;
+
+    @Inject
+    DmStageRepository aDmStageRepository;
 
     @Inject
     ReponseStageRepository aReponseStageRepository;
@@ -154,8 +158,40 @@ public class MainController {
         }
 
     }
+    
 
+    // Indique si l'id a besoin de changer pour suivre le bon format
+    public boolean formatIdMessage(String id){
+        
+        if (id.length() > 5){
+            System.err.println(id.substring(0, 4).equals("MAG-"));
+            if (id.substring(0, 4).equals("MAG-") || id.substring(0, 4).equals("ENT-") || id.substring(0, 4).equals("ECO-")){
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    // Rajoute un préfixe pour indiquer de qui est le message (Afin d'éviter un remplacement des messages dans la base de données au cas où un message de deux entités différentes aient le même id)
+    public String ajoutPrefixe(String id, String expediteur){
+        String finalId;
+        if (expediteur.toLowerCase().matches("ecole")){
+            finalId = "ECO-";
+        }
+        else if (expediteur.toLowerCase().matches("entreprise")){
+            finalId = "ENT-";
+        }
+        else if (expediteur.toLowerCase().matches("magasin")){
+            finalId = "MAG-";
+        }
+        else{
+            finalId = "UNK-"; // Pour inconnu
+        }
+        return finalId + id;
+    }
     public void lireMessage(Fichier fic){
+        
         try {
             
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -193,13 +229,14 @@ public class MainController {
             String dateDebut;
             String dateFin;
 
+            String id_message;
             String id;
             String remuneration;
             String lieu;
             String objet;
             String duree;
             int quantite;
-
+            
             String msg;
             String idMsgPrecedent;
 
@@ -214,7 +251,8 @@ public class MainController {
             Produit produit = new Produit();
             List<Produit> listeProduit = new ArrayList<>();
 
-            DemandeStage dmStage = new DemandeStage();
+            DemandeStage demandeStage = new DemandeStage();
+            DmStage dmStage = new DmStage();
             ReponseStage rpStage = new ReponseStage();
             CV cv = new CV();
             EtatCivil etatCivil = new EtatCivil();
@@ -224,14 +262,32 @@ public class MainController {
             DemandeCatalogue demandeCatalogue = new DemandeCatalogue();
             EnvoiBonCommande envoiBonCommande = new EnvoiBonCommande();
 
+            int nbDmStage = 0;
+            List<DmStage> listDmStage = new ArrayList<>(); 
             NodeList nList = document.getElementsByTagName("message");
+
+            // On stock tous les id dans une liste pour vérifier qu'on ai pas deux fois les mêmes
+            List<String> listId = new ArrayList<>();
+            for (int l = 0; l < nList.getLength(); l++){
+                Node nNode = nList.item(l);
+                if (nNode.getNodeType() == Node.ELEMENT_NODE){
+                    Element elem = (Element) nNode;
+                    listId.add(elem.getAttribute("id"));
+                }
+            }
+            
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
                 System.out.println(nNode.getNodeName());
                 System.out.println("\nCurrent Element :" + nNode.getNodeName());
+               
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element elem = (Element) nNode;
-                    //System.out.println("Employee id : " + elem.getAttribute("id"));
+                    id_message = elem.getAttribute("id");
+                    if (formatIdMessage(id_message)){ // On regarde si c'est déjà au bon format, sinon on le met nous même
+                        id_message = ajoutPrefixe(id_message, fic.getExpediteur());
+                    }
+                    System.err.println(id_message);
                     System.out.println("Date d'envoi : " + elem.getElementsByTagName("dateEnvoi").item(0).getTextContent());
                     System.out.println("Durée validité : " + elem.getElementsByTagName("dureeValidite").item(0).getTextContent());
                     dateEnvoi = elem.getElementsByTagName("dateEnvoi").item(0).getTextContent();
@@ -245,6 +301,7 @@ public class MainController {
                         dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();
 
                         m = new Message("offreCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
+                        m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
@@ -253,6 +310,7 @@ public class MainController {
                     }
                     
                     // Demande de collaboration
+                    
                     if (elem.getElementsByTagName("demandeCollab").getLength() > 0){
 
                         description = elem.getElementsByTagName("description").item(0).getTextContent();
@@ -260,6 +318,7 @@ public class MainController {
                         dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();   
                         
                         m = new Message("demandeCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
+                        m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
@@ -273,31 +332,49 @@ public class MainController {
                         idMsgPrecedent = elem.getElementsByTagName("idMsgPrécédent").item(0).getTextContent();
 
                         m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
+                        m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
                     }
-
+                    
+                    
                     // Demande de stage                    
                     if (elem.getElementsByTagName("demandeStage").getLength() > 0){
+                        demandeStage = new DemandeStage();
+                        dmStage = new DmStage();
+                        listDmStage = new ArrayList<>();
+                        nbDmStage = elem.getElementsByTagName("dmStage").getLength();
+                        System.err.println("Nombre de demandes de stage: " + nbDmStage);
+                        for (int dmStageTemp = 0; dmStageTemp < nbDmStage; dmStageTemp++){
 
-                        id = elem.getElementsByTagName("id").item(0).getTextContent();
-                        objet = elem.getElementsByTagName("objet").item(0).getTextContent();
-                        description = elem.getElementsByTagName("description").item(0).getTextContent();
-                        lieu = elem.getElementsByTagName("lieu").item(0).getTextContent();
-                        dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
-                        remuneration = elem.getElementsByTagName("remuneration").item(0).getTextContent();
-                        duree = elem.getElementsByTagName("duree").item(0).getTextContent();
-                        dmStage = new DemandeStage(Integer.valueOf(id), description, objet, lieu, Integer.valueOf(remuneration), dateDebut, Integer.valueOf(duree));
-                            
-                        aDemandeStageRepository.save(dmStage); // On sauve la demande de stage
-                        m = new Message("demandeStage", dateEnvoi, dureeValidite, dmStage);
+                            id = elem.getElementsByTagName("id").item(dmStageTemp).getTextContent();
+                            objet = elem.getElementsByTagName("objet").item(dmStageTemp).getTextContent();
+                            description = elem.getElementsByTagName("description").item(dmStageTemp).getTextContent();
+                            lieu = elem.getElementsByTagName("lieu").item(dmStageTemp).getTextContent();
+                            dateDebut = elem.getElementsByTagName("dateDebut").item(dmStageTemp).getTextContent();
+                            remuneration = elem.getElementsByTagName("remuneration").item(dmStageTemp).getTextContent();
+                            duree = elem.getElementsByTagName("duree").item(dmStageTemp).getTextContent();
+                            System.err.println("DUREE " + duree);
+                            System.err.println("INFORMATION DEMANDE DE STAGE : " + id + " " + objet + " " + description + " " + lieu + " " + dateDebut + " " + remuneration + " " + duree);
+
+                            dmStage = new DmStage(Integer.valueOf(id), description, objet, lieu, Integer.valueOf(remuneration), dateDebut, Integer.valueOf(duree));
+                            listDmStage.add(dmStage);
+                            System.err.println("Taille de la liste " + listDmStage.size());
+                            aDmStageRepository.save(dmStage);
+                        }
+                        demandeStage = new DemandeStage(listDmStage);
+                        aDemandeStageRepository.save(demandeStage); // On sauve la demande de stage
+                        m = new Message("demandeStage", dateEnvoi, dureeValidite, demandeStage);
+                        m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
                     }
+
+                    
                     /*
                     // Réponse de stage
                     if (elem.getElementsByTagName("reponseStage").getLength() > 0){
@@ -346,6 +423,7 @@ public class MainController {
                         aReponseStageRepository.save(rpStage);
                         
                         m = new Message("reponseStage", dateEnvoi, dureeValidite, rpStage);
+                        m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
@@ -362,12 +440,14 @@ public class MainController {
                         aDemandeCatalogueRepository.save(demandeCatalogue);
 
                         m = new Message("demandeCatalogue", dateEnvoi, dureeValidite, demandeCatalogue);
+                        m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
                     }
                     */
+                    
                     // Envoi de bon de commande
                     if (elem.getElementsByTagName("envoiBonCommande").getLength() > 0){
 
@@ -386,6 +466,7 @@ public class MainController {
                         aBonCommandeRepository.save(envoiBonCommande);
 
                         m = new Message("envoiBonCommande", dateEnvoi, dureeValidite, envoiBonCommande);
+                        m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
