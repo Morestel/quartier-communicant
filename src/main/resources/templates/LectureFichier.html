@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labo</title>
+</head>
+<body>
+    
+    [[ ${fichier.expediteur} ]]
+    [[ ${fichier.destinataire} ]]
+    [[ ${fichier.checksum} ]]
+    [[ ${fichier.id } ]]
+    <ul>
+        <li th:each="message : ${listeMessage}">
+            <div th:switch="${message.type}"> 
+                <div th:case="'offreCollab'">
+                    [[ ${message.type} ]] <br>
+                    [[ ${message.dateEnvoi} ]] <br>
+                    [[ ${message.dureeValidite} ]] <br>
+                    [[ ${message.description}]] <br>
+                    [[ ${message.dateDebut}]] <br>
+                    [[ ${message.dateFin}]] <br> <br>
+                </div>
+                <div th:case="'demandeCollab'">
+                    [[ ${message.type} ]] <br>
+                    [[ ${message.dateEnvoi} ]] <br>
+                    [[ ${message.dureeValidite} ]] <br>
+                    [[ ${message.description}]] <br>
+                    [[ ${message.dateDebut}]] <br>
+                    [[ ${message.dateFin}]] <br> <br>
+                </div>
+                <div th:case="'reponseGenerique'">
+                    [[ ${message.type} ]] <br>
+                    [[ ${message.dateEnvoi} ]] <br>
+                    [[ ${message.dureeValidite} ]] <br>
+                    [[ ${message.msg}]] <br>
+                    [[ ${message.idMsgPrecedent}]] <br> <br>
+                </div>
+                <div th:case="'demandesStage'">
+                    [[ ${message.type} ]] <br>
+                    [[ ${message.dateEnvoi} ]] <br>
+                    [[ ${message.dureeValidite} ]] <br>
+                    [[ ${message.demandeStage.objet} ]] <br>
+                    [[ ${message.demandeStage.description} ]] <br>
+                    [[ ${message.demandeStage.lieu} ]] <br>
+                    [[ ${message.demandeStage.remuneration} ]] <br>
+                    [[ ${message.demandeStage.dateDebut} ]] <br>
+                    [[ ${message.demandeStage.duree} ]] <br> <br>
+
+                </div>
+                <div th:case="*">
+                    <p>Unknown type of message</p>
+                </div>
+              </div>
+        </li>
+    </ul>
+</body>
+</html>

@@ -2,6 +2,11 @@ package com.quartier.quartiercommunicant.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,6 +47,7 @@ import com.quartier.quartiercommunicant.model.*;
 import org.springframework.data.spel.ExpressionDependencies.ExpressionDependency;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.w3c.dom.DOMException;
 
@@ -89,29 +95,96 @@ public class MainController {
     @Inject
     ProduitRepository aProduitRepository;
 
-    @RequestMapping("envoi")
+    String tmpExpediteur = "";
+
+    @RequestMapping("envoiMessage")
     public String envoiMessage(){
         return "EnvoiMessage";
     }
 
     @RequestMapping({"index", "" })
     public String index(Model model){
-    
-        File repertoire = new File("repertoire");
+       File repertoire = new File("repertoire/");
+        List<File> listeFichier = new ArrayList<>();
+        try{
+            if (repertoire.listFiles().length > 0){
+                for (File f : repertoire.listFiles()){
+                    if (f.isFile()){
+                        System.err.println(f.getName());
+                        listeFichier.add(f);
+                    }
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        /*
+        List<Fichier> listeFichier = new ArrayList<>();
+        listeFichier = aFichierRepository.findAll();
+        */
+        model.addAttribute("listeFichier", listeFichier);
+        return "index";
+    }
 
-        Fichier fic = new Fichier(repertoire.getName() + "/fichier.xml");
-        System.out.println(fic.getFic().length());
+
+    @RequestMapping("/fichier/{id}")
+    public String lectureFichier(Model model, @PathVariable String id){
+        Fichier fic = aFichierRepository.findFichierById(Integer.valueOf(id));
+        System.out.println(fic.getDestinataire());
+                
+        model.addAttribute("listeMessage", fic.getListMess());
+        model.addAttribute("fichier", fic);
+
+        return "LectureFichier";
+    }
+
+    public void deplacer_fichier(String source, String destination){
+        try {
+            Path tmp = Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            System.err.println("Impossible de déplacer le fichier");
+            e.printStackTrace();
+        }
+    }
+
+
+    @RequestMapping("/lecture/{nom}")
+    public String lecture(Model model, @PathVariable String nom){
+        Fichier fic = new Fichier("repertoire/" + nom + ".xml");
         if (fic.getFic().length() > 10000){
             System.err.println("Trop de caractères");
         }
 
-       
-    
         try{
-            lireEnTete(fic);
-            lireMessage(fic);
+            String statut_en_tete = lireEnTete(fic);
 
-            aFichierRepository.save(fic);
+            switch(statut_en_tete){
+                case "OK": // C'est ok on passe à la suite
+                    break;
+                case "ERR-IDFICHIER": // Id de fichier déjà traité
+                    System.err.println("Fichier déjà traité");
+                    System.out.println("Nom expéditeur " + tmpExpediteur);
+                   
+                    deplacer_fichier(nom + ".xml","erreur/" + tmpExpediteur);
+                    model.addAttribute("raison", "Fichier déjà traité - Déplacement dans le dossier erreur");
+                    return "ErreurLecture";
+                    
+                case "ERR-DESTINATAIRE": // Mauvais destinataire = Pas nous
+                    System.err.println("Mauvais destinataire");
+            }
+
+            String statut_messages = lireMessage(fic);
+            switch(statut_messages){
+                case "OK": // C'est bon on sauvegarde
+                    aFichierRepository.save(fic);
+                    break;
+                case "ERR-CHECKSUM":
+                    model.addAttribute("raison", "Checksum non conforme - Rejet du fichier");
+                    return "ErreurLecture";
+                    
+            }
+
+            
         }catch(ParserConfigurationException u){
            u.printStackTrace();
         }catch(SAXException v){
@@ -123,13 +196,14 @@ public class MainController {
         }catch(ParseException w){
             w.printStackTrace();
         }
-        
+
         model.addAttribute("listeMessage", fic.getListMess());
         model.addAttribute("fichier", fic);
-        return "index";
+        
+        return "LectureFichier";
     }
 
-    public void lireEnTete(Fichier fic) throws ParserConfigurationException,
+    public String lireEnTete(Fichier fic) throws ParserConfigurationException,
     SAXException, IOException, DOMException, ParseException{
 
         try{
@@ -145,10 +219,25 @@ public class MainController {
             System.err.println(document);
             System.out.println("IDENTIFIANT = " + document.getDocumentElement().getAttribute("id"));
             System.err.println("------------");
-            fic.setId(Integer.valueOf(document.getDocumentElement().getAttribute("id")));
-            fic.setExpediteur(document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", ""));
+            int id = Integer.valueOf(document.getDocumentElement().getAttribute("id"));
             
-            fic.setDestinataire(document.getElementsByTagName("destinataire").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", ""));
+            tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
+            fic.setExpediteur(tmpExpediteur);
+            
+            String destinataire = document.getElementsByTagName("destinataire").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
+            if (!destinataire.equals("Laboratoire")){
+                return "ERR-DESTINATAIRE";
+            }
+            fic.setDestinataire(destinataire);
+
+            System.out.println("Vérification si le fichier a déjà été traité ...");
+            for (Fichier f : aFichierRepository.findAll()){
+                if (f.getId() == id){ // Fichier déjà traité
+                    return "ERR-IDFICHIER";
+                }
+            }
+            fic.setId(id);
+            
             
             int check = Integer.parseInt(document.getElementsByTagName("nbMessages").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", ""));
             fic.setChecksum(check);
@@ -156,6 +245,7 @@ public class MainController {
         }catch(IOException e){
             e.printStackTrace();
         }
+        return "OK";
 
     }
     
@@ -190,7 +280,7 @@ public class MainController {
         }
         return finalId + id;
     }
-    public void lireMessage(Fichier fic){
+    public String lireMessage(Fichier fic){
         
         try {
             
@@ -265,6 +355,10 @@ public class MainController {
             int nbDmStage = 0;
             List<DmStage> listDmStage = new ArrayList<>(); 
             NodeList nList = document.getElementsByTagName("message");
+
+            if (fic.getChecksum() != nList.getLength()){
+                return "ERR-CHECKSUM";
+            }
 
             // On stock tous les id dans une liste pour vérifier qu'on ai pas deux fois les mêmes
             List<String> listId = new ArrayList<>();
@@ -485,5 +579,6 @@ public class MainController {
         }catch(NullPointerException ex){
             ex.printStackTrace();
     }
+    return "OK";
 }
 }

@@ -7,54 +7,20 @@
     <title>Labo</title>
 </head>
 <body>
-    
-    [[ ${fichier.expediteur} ]]
-    [[ ${fichier.destinataire} ]]
-    [[ ${fichier.checksum} ]]
-    [[ ${fichier.id } ]]
     <ul>
-        <li th:each="message : ${listeMessage}">
-            <div th:switch="${message.type}"> 
-                <div th:case="'offreCollab'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.description}]] <br>
-                    [[ ${message.dateDebut}]] <br>
-                    [[ ${message.dateFin}]] <br> <br>
-                </div>
-                <div th:case="'demandeCollab'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.description}]] <br>
-                    [[ ${message.dateDebut}]] <br>
-                    [[ ${message.dateFin}]] <br> <br>
-                </div>
-                <div th:case="'reponseGenerique'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.msg}]] <br>
-                    [[ ${message.idMsgPrecedent}]] <br> <br>
-                </div>
-                <div th:case="'demandesStage'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.demandeStage.objet} ]] <br>
-                    [[ ${message.demandeStage.description} ]] <br>
-                    [[ ${message.demandeStage.lieu} ]] <br>
-                    [[ ${message.demandeStage.remuneration} ]] <br>
-                    [[ ${message.demandeStage.dateDebut} ]] <br>
-                    [[ ${message.demandeStage.duree} ]] <br> <br>
+    <li th:each="f : ${listeFichier}">
+        <a th:href="@{/lecture/fichier}">Fichier</a>
+    </li>
 
-                </div>
-                <div th:case="*">
-                    <p>Unknown type of message</p>
-                </div>
-              </div>
-        </li>
-    </ul>
+    <li>
+        <a th:href="@{/envoi/}">Envoi</a>
+    </li>
+    <li>
+        <a th:href="@{/archive/}">Archive</a>
+    </li>
+    <li>
+        <a th:href="@{/erreur/}">Erreur</a>
+    </li>
+</ul>
 </body>
 </html>

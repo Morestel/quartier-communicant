@@ -4,9 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.Cascade;
 
 import lombok.Data;
 
@@ -22,7 +26,7 @@ public class Fichier {
     private int checksum;
     private File fic;
 
-    @OneToMany(orphanRemoval = true)
+    @ManyToMany(cascade = CascadeType.REMOVE)
     private List<Message> listMess = new ArrayList<>();
 
     

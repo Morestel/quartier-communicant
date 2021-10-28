@@ -144,7 +144,7 @@
     
     <destinataire>Laboratoire</destinataire>
     <expediteur>Magasin</expediteur>
-    <nbMessages>10</nbMessages>
+    <nbMessages>3</nbMessages>
     <message id="MAG-4">
         <dateEnvoi>10:15:30 01-02-1999</dateEnvoi>
         <dureeValidite>60</dureeValidite>
