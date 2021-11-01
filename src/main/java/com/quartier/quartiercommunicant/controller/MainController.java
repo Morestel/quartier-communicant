@@ -2,10 +2,13 @@ package com.quartier.quartiercommunicant.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,11 +27,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.quartier.quartiercommunicant.model.DemandeStage;
-import com.quartier.quartiercommunicant.model.Fichier;
-import com.quartier.quartiercommunicant.model.FormationStage;
-import com.quartier.quartiercommunicant.model.Message;
-import com.quartier.quartiercommunicant.model.ReponseStage;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
@@ -44,11 +42,15 @@ import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
 import com.quartier.quartiercommunicant.model.*;
 
+
+import org.springframework.web.multipart.MultipartFile;
+
 import org.springframework.data.spel.ExpressionDependencies.ExpressionDependency;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.w3c.dom.DOMException;
 
 
@@ -97,14 +99,12 @@ public class MainController {
 
     String tmpExpediteur = "";
 
-    @RequestMapping("envoiMessage")
-    public String envoiMessage(){
-        return "EnvoiMessage";
-    }
-
-    @RequestMapping({"index", "" })
+    
+    @RequestMapping(value = {"index", "" }, method = RequestMethod.GET)
     public String index(Model model){
-       File repertoire = new File("repertoire/");
+        
+        model.addAttribute("form", new UploadForm());
+        File repertoire = new File("repertoire/");
         List<File> listeFichier = new ArrayList<>();
         try{
             if (repertoire.listFiles().length > 0){
@@ -124,6 +124,50 @@ public class MainController {
         */
         model.addAttribute("listeFichier", listeFichier);
         return "index";
+    }
+
+    @RequestMapping(path = "/upload", method = RequestMethod.POST)
+    public String upload(Model model, UploadForm uploadForm) {
+
+        if (uploadForm.getFile().isEmpty()) {
+            return "update-user";
+        }
+
+        // Check if directory exist
+
+        Path path = Paths.get("repertoire");
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectory(path);
+            } catch (NoSuchFileException ex) {
+                System.err.println(ex);
+            } catch (IOException ex) {
+                System.err.println(ex);
+            }
+        }
+
+        int dot = uploadForm.getFile().getOriginalFilename().lastIndexOf(".");
+        String extention = "";
+        if (dot > 0) {
+            extention = uploadForm.getFile().getOriginalFilename().substring(dot).toLowerCase();
+        }
+
+        if (!extention.equals(".xml")) {
+            return "redirect:/index";
+        }
+
+        String filename = uploadForm.getFile().getOriginalFilename();
+        Path uploadfile = Paths.get("repertoire/" + filename);
+
+        try (OutputStream os = Files.newOutputStream(uploadfile, StandardOpenOption.CREATE)) {
+            byte[] bytes = uploadForm.getFile().getBytes();
+            os.write(bytes);
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
+       
+        return "redirect:/index";
+
     }
 
 
@@ -150,7 +194,8 @@ public class MainController {
 
     @RequestMapping("/lecture/{nom}")
     public String lecture(Model model, @PathVariable String nom){
-        Fichier fic = new Fichier("repertoire/" + nom + ".xml");
+        
+        Fichier fic = new Fichier("repertoire/" + nom);
         if (fic.getFic().length() > 10000){
             System.err.println("Trop de caractères");
         }
@@ -165,7 +210,7 @@ public class MainController {
                     System.err.println("Fichier déjà traité");
                     System.out.println("Nom expéditeur " + tmpExpediteur);
                    
-                    deplacer_fichier(nom + ".xml","erreur/" + tmpExpediteur);
+                    deplacer_fichier(nom,"erreur/" + tmpExpediteur);
                     model.addAttribute("raison", "Fichier déjà traité - Déplacement dans le dossier erreur");
                     return "ErreurLecture";
                     
@@ -184,6 +229,8 @@ public class MainController {
                     
             }
 
+            // Tout s'est bien passé on déplace le fichier dans les archives
+            deplacer_fichier(nom, "archive/" + tmpExpediteur);
             
         }catch(ParserConfigurationException u){
            u.printStackTrace();
@@ -357,6 +404,7 @@ public class MainController {
             NodeList nList = document.getElementsByTagName("message");
 
             if (fic.getChecksum() != nList.getLength()){
+                System.err.println(fic.getChecksum() + " " + nList.getLength());
                 return "ERR-CHECKSUM";
             }
 

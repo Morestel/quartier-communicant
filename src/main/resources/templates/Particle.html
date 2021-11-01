@@ -1,36 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" media="screen" href="../style.css">
-    <title>[[ ${titre} ]]</title>
-</head>
-<body>
-    <div class="main">
-        <div class="main-content">    
-    <h1>Liste des fichiers</h1>
+<div th:fragment="Particle">
 
-    <ul>
-
-        <li th:each="f : ${listeFichier}">
-            <a th:href="@{/fichier/{id} (id = ${f.id})}">
-              <img src = "../fichier.png" class="fichier" alt = "fichier" />
-            <br>
-            [[ ${f.id} ]]
-          </a>
-        </li>
-
-    </ul>
-
-</div>
     <!-- particles.js container -->
   <div id="particles-js"></div>
 </div>
   <!-- scripts -->
-  <script src="../particles.js"></script>
-  <script src="../app.js"></script>
+  <script src="particles.js"></script>
+  <script src="app.js"></script>
   
   <!-- stats.js -->
   
@@ -53,5 +28,5 @@
     };
     requestAnimationFrame(update);
   </script>
-</body>
-</html>
+
+</div>

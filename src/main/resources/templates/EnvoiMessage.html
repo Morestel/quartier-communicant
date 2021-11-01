@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" media="screen" href="style.css">
     <title>Envoyer un message</title>
 </head>
 <body>
-    
+    <div class="main">
+        <div class="main-content">
+
     <h1>Réponse générique</h1>
-    <form method="POST">
+    <form method="POST" th:action="@{/reponseGenerique}">
 
         <h2>Destinataire</h2>
         <input type="radio" id="Magasin" name="destinataire" value="Magasin" checked>
@@ -21,7 +24,8 @@
         <input type="radio" id="Entreprise" name="destinataire" value="Entreprise" checked>
         <label for="Entreprise">Entreprise</label>
 
-        <textarea placeholder="Ecrivez votre message" required></textarea>
+        <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" required>
+        <textarea name="textarea" placeholder="Ecrivez votre message" required></textarea>
         <input type="submit" value="Envoyer" />
     </form>
 
@@ -41,7 +45,7 @@
         <textarea placeholder="Description" required></textarea>
         <input type="date" name="dateDebut" required />
         <input type="date" name="dateFin" required />
-
+        <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite"> required
         <input type="submit" value="Envoyer"/>
     </form>
     
@@ -53,7 +57,7 @@
     </form>
 
     <h1>Demande de stage</h1>
-    <form method="POST">
+    <form method="POST" th:action="@{/demandeStage}">
 
         <h2>Destinataire</h2>
     
@@ -63,9 +67,10 @@
         <input type="radio" id="Entreprise" name="destinataire" value="Entreprise" checked>
         <label for="Entreprise">Entreprise</label>
 
+        <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" required>
         <input type="text" name="objet" placeholder="Objet" required/>
         <textarea name="description" placeholder="Description" required></textarea>
-        <input type="text" name="Lieu" placeholder="Lieu" required/>
+        <input type="text" name="lieu" placeholder="Lieu" required/>
         <input type="date" name="dateDebut" required />
         <input type="date" name="dateFin" required />
         <input type="text" name="remuneration" placeholder="Rémunération" required/>
@@ -73,5 +78,46 @@
         <input type="submit" value="Envoyer" />
     </form>
 
+    <form method="POST" th:action="@{/toutEnvoyer}">
+
+      <input type="submit" value="Tout envoyer" />
+    </form>
+
+    <div id="container">
+  </div>
+    
+
+</div>
+    <!-- particles.js container -->
+  <div id="particles-js"></div>
+</div>
+  <!-- scripts -->
+  <script src="particles.js"></script>
+  <script src="app.js"></script>
+  <script src="vue.js"></script>
+  <script src="message.js"></script>
+ 
+
+  <!-- stats.js -->
+  
+  <script>
+    var count_particles, stats, update;
+    stats = new Stats;
+    stats.setMode(0);
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    count_particles = document.querySelector('.js-count-particles');
+    update = function() {
+      stats.begin();
+      stats.end();
+      if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
+        count_particles.innerText = window.pJSDom[0].pJS.particles.array.length;
+      }
+      requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  </script>
 </body>
 </html>

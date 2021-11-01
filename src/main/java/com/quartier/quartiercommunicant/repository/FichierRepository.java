@@ -17,4 +17,7 @@ public interface FichierRepository extends CrudRepository<Fichier, Integer>{
 
     @Query("SELECT f FROM Fichier f WHERE f.expediteur = ?1")
     List<Fichier> findFichierByExped(String expediteur);
+
+    @Query("SELECT f FROM Fichier f WHERE f.expediteur = ?1 AND f.destinataire = ?2")
+    List<Fichier> findFichierByInfo(String expediteur, String destinataire);
 }

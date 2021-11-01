@@ -45,15 +45,18 @@ public class NavigationController {
     public String magasin(Model model, @PathVariable String source, @PathVariable String expediteur){
 
         File repertoire;
-        if (expediteur.equals("magasin")){
+        if (expediteur.equals("Magasin")){
             repertoire = new File("repertoire/" + source + "/Magasin");
         }else if (expediteur.equals("entreprise")){
-            repertoire = new File("repertoire/Entreprise");
+            repertoire = new File("repertoire/" + source + "/Entreprise");
         }else{
-            repertoire = new File("repertoire/Ecole");
+            repertoire = new File("repertoire/" + source + "/Ecole");
         }
         List<File> lf = new ArrayList<>();
         try{
+            System.err.println(repertoire.listFiles().length);
+            System.err.println(repertoire.getAbsolutePath());
+            System.err.println(expediteur);
             if (repertoire.listFiles().length > 0){
                 for (File f : repertoire.listFiles()){
                     lf.add(f);
@@ -68,11 +71,18 @@ public class NavigationController {
         model.addAttribute("titre", source + " - " + expediteur);
         if (source.equals("archive")){
             model.addAttribute("listeFichier", listeFichier);
+            return "Archive";
+        }
+        else if(source.equals("envoi")){
+            model.addAttribute("listeFichier", listeFichier);
+            return "Envoi";
         }
         else{
+            System.err.println(lf.get(0).getName());
             model.addAttribute("listeFichier", lf);
+            return "Erreur";
         }
        
-        return "Archive";
+        
     }
 }

@@ -4,57 +4,100 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" media="screen" href="../style.css">
     <title>Labo</title>
 </head>
 <body>
-    
-    [[ ${fichier.expediteur} ]]
+    <div class="main">
+        <div class="main-content">
+
+    <span class="data">Expéditeur: </span>[[ ${fichier.expediteur} ]]
     [[ ${fichier.destinataire} ]]
-    [[ ${fichier.checksum} ]]
-    [[ ${fichier.id } ]]
+    <span class="data">Nombre de messages: </span>[[ ${fichier.checksum} ]]
+    <span class="data">ID du fichier: </span>[[ ${fichier.id } ]]
     <ul>
+      <div class="messages-list">
         <li th:each="message : ${listeMessage}">
             <div th:switch="${message.type}"> 
                 <div th:case="'offreCollab'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.description}]] <br>
-                    [[ ${message.dateDebut}]] <br>
-                    [[ ${message.dateFin}]] <br> <br>
+                  <div class="card">
+                    <h1>Offre de collaboration</h1> <br>
+                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <span class="data">Durée de validité :</span> [[ ${message.dureeValidite} ]] <br>
+                    <span class="data">Description :</span> <br>[[ ${message.description}]] <br>
+                    <span class="data">Date début :</span> [[ ${message.dateDebut}]] <br>
+                    <span class="data">Date fin :</span> [[ ${message.dateFin}]] <br> <br>
+                  </div>
                 </div>
                 <div th:case="'demandeCollab'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.description}]] <br>
-                    [[ ${message.dateDebut}]] <br>
-                    [[ ${message.dateFin}]] <br> <br>
+                  <div class="card"> 
+                    <h1>Demande de collaboration</h1> <br> <br>
+                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                    <span class="data">Description</span> [[ ${message.description}]] <br>
+                    <span class="data">Date de début : </span> [[ ${message.dateDebut}]] <br>
+                    <span class="data">Date de fin : </span> [[ ${message.dateFin}]] <br> <br>
+                  </div>
                 </div>
                 <div th:case="'reponseGenerique'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.msg}]] <br>
-                    [[ ${message.idMsgPrecedent}]] <br> <br>
+                  <div class="card"> 
+                    <h1>Réponse générique</h1> <br>
+                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <span class="data">Durée de validité:</span>[[ ${message.dureeValidite} ]] <br>
+                    <span class="data">Message ; </span>[[ ${message.msg}]] <br>
+                    <span class="data">Id message précédent:</span>[[ ${message.idMsgPrecedent}]] <br> <br>
+                  </div>
                 </div>
                 <div th:case="'demandesStage'">
-                    [[ ${message.type} ]] <br>
-                    [[ ${message.dateEnvoi} ]] <br>
-                    [[ ${message.dureeValidite} ]] <br>
-                    [[ ${message.demandeStage.objet} ]] <br>
-                    [[ ${message.demandeStage.description} ]] <br>
-                    [[ ${message.demandeStage.lieu} ]] <br>
-                    [[ ${message.demandeStage.remuneration} ]] <br>
-                    [[ ${message.demandeStage.dateDebut} ]] <br>
-                    [[ ${message.demandeStage.duree} ]] <br> <br>
-
+                  <div class="card">
+                    <h1>Demande de stage/h1> <br>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Objet :</span>[[ ${message.demandeStage.objet} ]] <br>
+                      <span class="data">Description:</span>[[ ${message.demandeStage.description} ]] <br>
+                      <span class="data">Lieu:</span>[[ ${message.demandeStage.lieu} ]] <br>
+                      <span class="data">Rémunération:</span>[[ ${message.demandeStage.remuneration} ]] <br>
+                      <span class="data">Date de début:</span>[[ ${message.demandeStage.dateDebut} ]] <br>
+                      <span class="data">Durée:</span>[[ ${message.demandeStage.duree} ]] <br> <br>
+                  </div>
                 </div>
                 <div th:case="*">
+                  <div class="card">
                     <p>Unknown type of message</p>
+                  </div>
                 </div>
               </div>
         </li>
     </ul>
+  </div>
+</div>
+    <!-- particles.js container -->
+  <div id="particles-js"></div>
+</div>
+  <!-- scripts -->
+  <script src="../particles.js"></script>
+  <script src="../app.js"></script>
+  
+  <!-- stats.js -->
+  
+  <script>
+    var count_particles, stats, update;
+    stats = new Stats;
+    stats.setMode(0);
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    count_particles = document.querySelector('.js-count-particles');
+    update = function() {
+      stats.begin();
+      stats.end();
+      if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
+        count_particles.innerText = window.pJSDom[0].pJS.particles.array.length;
+      }
+      requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  </script>
 </body>
 </html>
