@@ -30,7 +30,7 @@
     </form>
 
     <h1>Demande collaboration</h1>
-    <form method="POST">
+    <form method="POST" th:action="@{/demandeCollaboration}">
 
         <h2>Destinataire</h2>
         <input type="radio" id="Magasin" name="destinataire" value="Magasin" checked>
@@ -42,17 +42,19 @@
         <input type="radio" id="Entreprise" name="destinataire" value="Entreprise" checked>
         <label for="Entreprise">Entreprise</label>
 
-        <textarea placeholder="Description" required></textarea>
+        <textarea placeholder="Description" name="description" required></textarea>
         <input type="date" name="dateDebut" required />
         <input type="date" name="dateFin" required />
-        <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite"> required
+        <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" required> 
+        
         <input type="submit" value="Envoyer"/>
     </form>
     
     <h1>Demande catalogue</h1>
-    <form method="POST">
-        <textarea placeholder="Ecrivez votre message" required></textarea>
-
+    <form method="POST" th:action="@{/demandeCatalogue}">
+        <input type="text" name="id" placeholder="Id" required />
+        <input type="text" name="quantite" placeholder="Quantité" required />
+        <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" required>
         <input type="submit" value="Envoyer" />
     </form>
 
