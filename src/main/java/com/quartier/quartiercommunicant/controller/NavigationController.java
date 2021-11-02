@@ -78,7 +78,6 @@ public class NavigationController {
             return "Envoi";
         }
         else{
-            System.err.println(lf.get(0).getName());
             model.addAttribute("listeFichier", lf);
             return "Erreur";
         }

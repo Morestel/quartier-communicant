@@ -26,7 +26,7 @@ public class Fichier {
     private int checksum;
     private File fic;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.MERGE)
     private List<Message> listMess = new ArrayList<>();
 
     
@@ -38,4 +38,5 @@ public class Fichier {
         setChecksum(0);
         fic = new File(pathname);
     }   
+
 }

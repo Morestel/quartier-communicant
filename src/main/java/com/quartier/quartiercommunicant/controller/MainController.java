@@ -98,7 +98,7 @@ public class MainController {
     ProduitRepository aProduitRepository;
 
     String tmpExpediteur = "";
-
+    int idTmp = -1;
     
     @RequestMapping(value = {"index", "" }, method = RequestMethod.GET)
     public String index(Model model){
@@ -118,10 +118,7 @@ public class MainController {
         }catch(Exception e){
             e.printStackTrace();
         }
-        /*
-        List<Fichier> listeFichier = new ArrayList<>();
-        listeFichier = aFichierRepository.findAll();
-        */
+        
         model.addAttribute("listeFichier", listeFichier);
         return "index";
     }
@@ -174,8 +171,7 @@ public class MainController {
     @RequestMapping("/fichier/{id}")
     public String lectureFichier(Model model, @PathVariable String id){
         Fichier fic = aFichierRepository.findFichierById(Integer.valueOf(id));
-        System.out.println(fic.getDestinataire());
-                
+        
         model.addAttribute("listeMessage", fic.getListMess());
         model.addAttribute("fichier", fic);
 
@@ -216,6 +212,14 @@ public class MainController {
                     
                 case "ERR-DESTINATAIRE": // Mauvais destinataire = Pas nous
                     System.err.println("Mauvais destinataire");
+                    break;
+                case "ERR-EXPEDITEUR":
+                    System.err.println("Id fichier : " + idTmp);
+                    return "redirect:/fichier/"+idTmp;
+                    
+                default:
+                    System.err.println("Uncaught");
+                    break;
             }
 
             String statut_messages = lireMessage(fic);
@@ -270,13 +274,16 @@ public class MainController {
             
             tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
             fic.setExpediteur(tmpExpediteur);
-            
+            if (!aFichierRepository.findById(id).isEmpty() && tmpExpediteur.equals("Laboratoire")){ // Si il existe déjà et qu'on est l'expéditeur
+                idTmp = id;
+                return "ERR-EXPEDITEUR";
+            }
             String destinataire = document.getElementsByTagName("destinataire").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
             if (!destinataire.equals("Laboratoire")){
                 return "ERR-DESTINATAIRE";
             }
             fic.setDestinataire(destinataire);
-
+            
             System.out.println("Vérification si le fichier a déjà été traité ...");
             for (Fichier f : aFichierRepository.findAll()){
                 if (f.getId() == id){ // Fichier déjà traité

@@ -1,24 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" media="screen" href="../style.css">
-    <title>Labo</title>
-</head>
-<body>
-    <div class="main">
-        <div class="main-content">
 
-    <span class="data">Expéditeur: </span>[[ ${fichier.expediteur} ]]
-    [[ ${fichier.destinataire} ]]
-    <span class="data">Nombre de messages: </span>[[ ${fichier.checksum} ]]
-    <span class="data">ID du fichier: </span>[[ ${fichier.id } ]]
-    <ul>
-      <div class="messages-list">
-        <li th:each="message : ${listeMessage}">
-            <div th:switch="${message.type}"> 
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" media="screen" href="../style.css">
+  <title>Labo</title>
+</head>
+
+<body>
+  <div class="main">
+    <div id="fenetre">
+      <form method="POST" th:action="@{/reponseRapide}">
+        <div id="hiddenFenetre" style="display:none" @mousedown="presser($event)" @mousemove="deplacer($event)"
+          @mouseup="relacher()" @mouseout="relacher()">
+          <span>Réponse : </span>
+          <div>Id message précédent : {{idMsgPrecedent}}</div>
+          <input type="text" name="idMsgPrecedent" v-model="idMsgPrecedent" style="display:none" required/>
+          <textarea name="msg" placeholder="Votre Message"></textarea>
+          <input type="submit" name="submit" />
+        </div>
+      </form>
+
+      <div class="main-content">
+
+
+
+
+
+        <span class="data">Expéditeur: </span>[[ ${fichier.expediteur} ]]
+        [[ ${fichier.destinataire} ]]
+        <span class="data">Nombre de messages: </span>[[ ${fichier.checksum} ]]
+        <span class="data">ID du fichier: </span>[[ ${fichier.id } ]]
+        <div id="dirty" style="display:auto">Temp</div>
+        <ul>
+          <div class="messages-list">
+            <li th:each="message : ${listeMessage}">
+              <div th:switch="${message.type}">
                 <div th:case="'offreCollab'">
                   <div class="card">
                     <h1>Offre de collaboration</h1> <br>
@@ -30,8 +49,9 @@
                   </div>
                 </div>
                 <div th:case="'demandeCollab'">
-                  <div class="card"> 
+                  <div class="card">
                     <h1>Demande de collaboration</h1> <br> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                     <span class="data">Description</span> [[ ${message.description}]] <br>
@@ -40,7 +60,7 @@
                   </div>
                 </div>
                 <div th:case="'reponseGenerique'">
-                  <div class="card"> 
+                  <div class="card">
                     <h1>Réponse générique</h1> <br>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité:</span>[[ ${message.dureeValidite} ]] <br>
@@ -67,19 +87,22 @@
                   </div>
                 </div>
               </div>
-        </li>
-    </ul>
+            </li>
+        </ul>
+        <a th:href="@{/index}"><button class="bouton effect"><span>Back to Menu</span></button></a>
+      </div>
+    </div>
   </div>
-</div>
-    <!-- particles.js container -->
+  <!-- particles.js container -->
   <div id="particles-js"></div>
-</div>
+  </div>
   <!-- scripts -->
   <script src="../particles.js"></script>
   <script src="../app.js"></script>
-  
+  <script src="../vue.js"></script>
+  <script src="../fenetre.js"></script>
   <!-- stats.js -->
-  
+
   <script>
     var count_particles, stats, update;
     stats = new Stats;
@@ -89,7 +112,7 @@
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
     count_particles = document.querySelector('.js-count-particles');
-    update = function() {
+    update = function () {
       stats.begin();
       stats.end();
       if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
@@ -99,5 +122,14 @@
     };
     requestAnimationFrame(update);
   </script>
+
+  <script>
+    function remplacer(v) {
+      console.log(v);
+      document.getElementById("dirty").innerHTML = v;
+    }
+
+  </script>
 </body>
+
 </html>
