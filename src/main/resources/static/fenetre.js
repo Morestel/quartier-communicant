@@ -8,14 +8,22 @@ let app = Vue.createApp({
     }),
     methods: {
         afficher: function(){
-            
+            var temp = this.idMsgPrecedent;
             this.idMsgPrecedent = document.getElementById("dirty").innerHTML;
-            if (document.getElementById("hiddenFenetre").style.display == "none"){
-                document.getElementById("hiddenFenetre").style.display = "block";
+            if (temp == this.idMsgPrecedent || temp == -1){
+                if (document.getElementById("hiddenFenetre").style.display == "none"){
+                    document.getElementById("hiddenFenetre").style.display = "block";
+                }
+                else{
+                    document.getElementById("hiddenFenetre").style.display = "none";
+                }
             }
             else{
-                document.getElementById("hiddenFenetre").style.display = "none";
+                if (document.getElementById("hiddenFenetre").style.display == "none"){
+                    document.getElementById("hiddenFenetre").style.display = "block";
+                }
             }
+            
         },
 
         presser : function(event){

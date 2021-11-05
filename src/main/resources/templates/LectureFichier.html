@@ -41,6 +41,7 @@
                 <div th:case="'offreCollab'">
                   <div class="card">
                     <h1>Offre de collaboration</h1> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité :</span> [[ ${message.dureeValidite} ]] <br>
                     <span class="data">Description :</span> <br>[[ ${message.description}]] <br>
@@ -62,6 +63,7 @@
                 <div th:case="'reponseGenerique'">
                   <div class="card">
                     <h1>Réponse générique</h1> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité:</span>[[ ${message.dureeValidite} ]] <br>
                     <span class="data">Message ; </span>[[ ${message.msg}]] <br>
@@ -71,6 +73,7 @@
                 <div th:case="'demandesStage'">
                   <div class="card">
                     <h1>Demande de stage/h1> <br>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Objet :</span>[[ ${message.demandeStage.objet} ]] <br>
@@ -89,7 +92,7 @@
               </div>
             </li>
         </ul>
-        <a th:href="@{/index}"><button class="bouton effect"><span>Back to Menu</span></button></a>
+        <a th:href="@{/index}"><button class="bouton effect btm"><span>Back to Menu</span></button></a>
       </div>
     </div>
   </div>
