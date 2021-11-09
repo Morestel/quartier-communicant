@@ -402,7 +402,13 @@ public class MainController {
             FormationStage formationStage = new FormationStage();
             Experience experience = new Experience();
             Lettre lettre = new Lettre();
+
+            int nbCatalogueDemande = 0;
+            List<CatalogueDemande> listCatalogueDemande = new ArrayList<>();
             DemandeCatalogue demandeCatalogue = new DemandeCatalogue();
+            CatalogueDemande catalogueDemande= new CatalogueDemande();
+            String titreCatalogueDemande;
+
             EnvoiBonCommande envoiBonCommande = new EnvoiBonCommande();
 
             int nbDmStage = 0;
@@ -578,9 +584,10 @@ public class MainController {
                         aMessageRepository.save(m);
                     }
                     */
-                    /*
+
+                    
                     // Demande de catalogue
-                    if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
+                    /*if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
                         id = elem.getElementsByTagName("identifiant").item(0).getTextContent();
                         quantite = Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent());
 
@@ -593,8 +600,34 @@ public class MainController {
                         lMessage.add(m);
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
+                    }*/
+                    if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
+                        demandeCatalogue = new DemandeCatalogue();
+                        catalogueDemande = new CatalogueDemande();
+                        listCatalogueDemande = new ArrayList<>();
+                        nbCatalogueDemande = elem.getElementsByTagName("catalogueDemande").getLength();
+                        System.err.println("Nombre de demandes de catalogue: " + nbCatalogueDemande);
+                        for (int nbCatalogueDemandeTemp = 0; nbCatalogueDemandeTemp < nbCatalogueDemande; nbCatalogueDemandeTemp++){
+
+                            id = elem.getElementsByTagName("id").item(nbCatalogueDemandeTemp).getTextContent();
+                            titreCatalogueDemande = elem.getElementsByTagName("titreCatalogueDemande").item(nbCatalogueDemandeTemp).getTextContent();
+                            quantite = Integer.parseInt(elem.getElementsByTagName("quantite").item(nbCatalogueDemandeTemp).getTextContent());
+
+                            catalogueDemande = new CatalogueDemande(Integer.valueOf(id), titreCatalogueDemande, quantite);
+                            listCatalogueDemande.add(catalogueDemande);
+                            System.err.println("Taille de la liste " + listCatalogueDemande.size());
+                            aDmStageRepository.save(dmStage); /* CatalogueDemandeRepository TODO */
+                        }
+                        demandeStage = new DemandeStage(listDmStage);
+                        aDemandeStageRepository.save(demandeStage); // On sauve la demande de stage
+                        m = new Message("demandeStage", dateEnvoi, dureeValidite, demandeStage);
+                        m.setId(id_message);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
                     }
-                    */
+                    
                     
                     // Envoi de bon de commande
                     if (elem.getElementsByTagName("envoiBonCommande").getLength() > 0){
