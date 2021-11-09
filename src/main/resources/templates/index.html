@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,78 +8,81 @@
     <link rel="stylesheet" media="screen" href="style.css">
     <title>Labo</title>
 </head>
+
 <body>
 
     <div class="main">
         <div class="main-content">
-    <ul>
-    <li th:each="f : ${listeFichier}">
-        <a th:href="@{/lecture/{fichier} (fichier = ${f.Name})}">
-            <img src = "fichier.png" class="fichier" alt = "fichier" />
-            <br>
-            [[ ${f.Name} ]]
-        </a>
-    </li>
+            <h1>LABORATOIRE <br> TSOR Corps.</h1>
+            <div class="miniMain">
+                <ul>
+                    <li th:each="f : ${listeFichier}">
+                        <a th:href="@{/lecture/{fichier} (fichier = ${f.Name})}">
+                            <img src="fichier.png" class="fichier" alt="fichier" />
+                            <br>
+                            [[ ${f.Name} ]]
+                        </a>
+                    </li>
 
-    <li>
-        <a th:href="@{/envoi/}">
-            <img src = "dossier.jpg" class="dossier" alt ="dossier" />
-            <br>
-            Envoi
-        </a>
-    </li>
-    <li>
-        <a th:href="@{/archive/}">
-            <img src = "dossier.jpg" class="dossier" alt ="dossier" />
-            <br>
-            Archive
-        </a>
-    </li>
-    <li>
-        <a th:href="@{/erreur/}">
-            <img src = "dossier.jpg" class="dossier" alt ="dossier" />
-            <br>
-            Erreur
-        </a>
-    </li>
-</ul>
+                    <li>
+                        <a th:href="@{/envoi/}">
+                            <img src="dossier.jpg" class="dossier" alt="dossier" />
+                            <br>
+                            Envoi
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/archive/}">
+                            <img src="dossier.jpg" class="dossier" alt="dossier" />
+                            <br>
+                            Archive
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/erreur/}">
+                            <img src="dossier.jpg" class="dossier" alt="dossier" />
+                            <br>
+                            Erreur
+                        </a>
+                    </li>
+                </ul>
 
-<form method="POST" enctype="multipart/form-data" th:action="@{/upload}" th:object="${form}">
+                <form method="POST" enctype="multipart/form-data" th:action="@{/upload}" th:object="${form}">
+                    <input type="file" id="import" accept=".xml" name="import" th:field="*{file}" required />
+                    <input type="submit" class="button" value="Importer" />
+                </form>
+            </div>
+            <a th:href="@{envoiMessage}"><button class="button cmpMsg">Composer message</button></a>
+        </div>
+        <!-- particles.js container -->
+        <div id="particles-js"></div>
+    </div>
+    <!-- scripts -->
+    <script src="particles.js"></script>
+    <script src="app.js"></script>
 
-    <input type="file" id="import" accept=".xml" name="import" th:field="*{file}" required/>
-    <input type="submit" class="button" value="Importer" />
-</form>
+    <!-- stats.js -->
 
-    <a th:href="@{envoiMessage}"><button class="button">Composer message</button></a>
-</div>
-  <!-- particles.js container -->
-  <div id="particles-js"></div>
-</div>
-  <!-- scripts -->
-  <script src="particles.js"></script>
-  <script src="app.js"></script>
-  
-  <!-- stats.js -->
-  
-  <script>
-    var count_particles, stats, update;
-    stats = new Stats;
-    stats.setMode(0);
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '0px';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
-    count_particles = document.querySelector('.js-count-particles');
-    update = function() {
-      stats.begin();
-      stats.end();
-      if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
-        count_particles.innerText = window.pJSDom[0].pJS.particles.array.length;
-      }
-      requestAnimationFrame(update);
-    };
-    requestAnimationFrame(update);
-  </script>
+    <script>
+        var count_particles, stats, update;
+        stats = new Stats;
+        stats.setMode(0);
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '0px';
+        stats.domElement.style.top = '0px';
+        document.body.appendChild(stats.domElement);
+        count_particles = document.querySelector('.js-count-particles');
+        update = function () {
+            stats.begin();
+            stats.end();
+            if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
+                count_particles.innerText = window.pJSDom[0].pJS.particles.array.length;
+            }
+            requestAnimationFrame(update);
+        };
+        requestAnimationFrame(update);
+    </script>
 
 </body>
+
 </html>
