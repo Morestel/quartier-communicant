@@ -9,24 +9,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import java.text.Format;
 import java.text.ParseException;
-import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
+import com.quartier.quartiercommunicant.model.CV;
+import com.quartier.quartiercommunicant.model.DemandeCatalogue;
+import com.quartier.quartiercommunicant.model.DemandeStage;
+import com.quartier.quartiercommunicant.model.DmStage;
+import com.quartier.quartiercommunicant.model.EnvoiBonCommande;
+import com.quartier.quartiercommunicant.model.EtatCivil;
+import com.quartier.quartiercommunicant.model.Experience;
+import com.quartier.quartiercommunicant.model.Fichier;
+import com.quartier.quartiercommunicant.model.FormationStage;
+import com.quartier.quartiercommunicant.model.Lettre;
+import com.quartier.quartiercommunicant.model.Message;
+import com.quartier.quartiercommunicant.model.Produit;
+import com.quartier.quartiercommunicant.model.ReponseStage;
+import com.quartier.quartiercommunicant.model.UploadForm;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
@@ -40,18 +45,18 @@ import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
-import com.quartier.quartiercommunicant.model.*;
 
-
-import org.springframework.web.multipart.MultipartFile;
-
-import org.springframework.data.spel.ExpressionDependencies.ExpressionDependency;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 
 @Controller
@@ -137,8 +142,8 @@ public class MainController {
                 Files.createDirectory(path);
             } catch (NoSuchFileException ex) {
                 System.err.println(ex);
-            } catch (IOException ex) {
-                System.err.println(ex);
+            } catch (IOException e) {
+                System.err.println(e);
             }
         }
 

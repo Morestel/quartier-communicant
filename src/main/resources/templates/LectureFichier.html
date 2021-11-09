@@ -18,6 +18,7 @@
           <span>Réponse : </span>
           <div>Id message précédent : {{idMsgPrecedent}}</div>
           <input type="text" name="idMsgPrecedent" v-model="idMsgPrecedent" style="display:none" required />
+          <input type="text" name="destinataire" th:attr="value=${fichier.destinataire}" style="display: none;" />
           <textarea name="msg" placeholder="Votre Message"></textarea>
           <input type="submit" name="submit" />
         </div>
@@ -33,7 +34,7 @@
         [[ ${fichier.destinataire} ]]
         <span class="data">Nombre de messages: </span>[[ ${fichier.checksum} ]]
         <span class="data">ID du fichier: </span>[[ ${fichier.id } ]]
-        <div id="dirty" style="display:auto">Temp</div>
+        <div id="dirty" style="display:none">Temp</div>
         <ul>
           <div class="messages-list">
             <li th:each="message : ${listeMessage}">
@@ -104,6 +105,14 @@
   <script src="../app.js"></script>
   <script src="../vue.js"></script>
   <script src="../fenetre.js"></script>
+
+  <script>
+    function remplacer(v) {
+      console.log(v);
+      document.getElementById("dirty").innerHTML = v;
+    }
+
+  </script>
 </body>
 
 </html>
