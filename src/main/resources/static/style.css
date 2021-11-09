@@ -148,7 +148,7 @@ select {
 }
 li {
   list-style: none;
-  margin: 10% 0 10% 0;
+  margin: 5% 0 5% 0;
 }
 
 /* =============================================================================
@@ -556,7 +556,7 @@ a {
 .cmpMsg {
   position: absolute;
   right:10%;
-  margin:10%;
+  margin:5%;
 }
 
 h1 {
