@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" media="screen" href="../style.css">
-    <title>[[ ${titre} ]]</title>
-</head>
-<body>
-    
-    <div class="main">
-        <div class="main-content">
 
-    <ul>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" media="screen" href="../style.css">
+  <title>[[ ${titre} ]]</title>
+</head>
+
+<body>
+
+  <div class="main">
+    <div class="main-content">
+      <ul>
         <li>
           <a th:href="@{/{source}/Magasin (source=${source})}">
             <img src = "../dossier.png" class="dossier" alt = "dossier" />
@@ -34,14 +35,15 @@
             Ecole
           </a>
         </li>
-    </ul>
-    <a th:href="@{/index}"><button class="bouton effect btm"><span>Back to Menu</span></button></a>
-</div>
+      </ul>
+      <a th:href="@{/index}"><button class="bouton effect btm"><span>Back to Menu</span></button></a>
+    </div>
     <!-- particles.js container -->
-  <div id="particles-js"></div>
-</div>
+    <div id="particles-js"></div>
+  </div>
   <!-- scripts -->
   <script src="../particles.js"></script>
   <script src="../app.js"></script>
 </body>
+
 </html>

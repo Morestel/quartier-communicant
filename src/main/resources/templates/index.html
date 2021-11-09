@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,18 +8,21 @@
     <link rel="stylesheet" media="screen" href="style.css">
     <title>Labo</title>
 </head>
+
 <body>
 
     <div class="main">
         <div class="main-content">
-    <ul>
-    <li th:each="f : ${listeFichier}">
-        <a th:href="@{/lecture/{fichier} (fichier = ${f.Name})}">
-            <img src = "fichier.png" class="fichier" alt = "fichier" />
-            <br>
-            [[ ${f.Name} ]]
-        </a>
-    </li>
+            <h1>LABORATOIRE <br> TSOR Corps.</h1>
+            <div class="miniMain">
+                <ul>
+                    <li th:each="f : ${listeFichier}">
+                        <a th:href="@{/lecture/{fichier} (fichier = ${f.Name})}">
+                            <img src="fichier.png" class="fichier" alt="fichier" />
+                            <br>
+                            [[ ${f.Name} ]]
+                        </a>
+                    </li>
 
     <li>
         <a th:href="@{/envoi/}">
@@ -43,11 +47,21 @@
     </li>
 </ul>
 
-<form method="POST" enctype="multipart/form-data" th:action="@{/upload}" th:object="${form}">
+                <form method="POST" enctype="multipart/form-data" th:action="@{/upload}" th:object="${form}">
+                    <input type="file" id="import" accept=".xml" name="import" th:field="*{file}" required />
+                    <input type="submit" class="button" value="Importer" />
+                </form>
+            </div>
+            <a th:href="@{envoiMessage}"><button class="button cmpMsg">Composer message</button></a>
+        </div>
+        <!-- particles.js container -->
+        <div id="particles-js"></div>
+    </div>
+    <!-- scripts -->
+    <script src="particles.js"></script>
+    <script src="app.js"></script>
 
-    <input type="file" id="import" accept=".xml" name="import" th:field="*{file}" required/>
-    <input type="submit" class="button" value="Importer" />
-</form>
+    <!-- stats.js -->
 
     <a th:href="@{envoiMessage}"><button class="button">Composer message</button></a>
 </div>
@@ -59,4 +73,5 @@
   <script src="app.js"></script>
  
 </body>
+
 </html>
