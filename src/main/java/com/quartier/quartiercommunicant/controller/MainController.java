@@ -344,10 +344,11 @@ public class MainController {
             System.out.println("Root Element :" + document.getDocumentElement().getNodeName());
             
             NodeList listeMessage = document.getElementsByTagName("message");
-
+            /*
+            System.out.println(listeMessage.getLength());
             System.out.println(document.getElementsByTagName("offreCollab").item(0).getTextContent());
             System.out.println(document.getElementsByTagName("description").item(0).getTextContent());
-            
+            */
             System.out.println("Taille liste message : " + listeMessage.getLength());
 
             /* 
@@ -362,12 +363,12 @@ public class MainController {
             NodeList dCollab = document.getElementsByTagName("demandeCollab");
             NodeList rGenerique = document.getElementsByTagName("reponseGenerique");
             NodeList dStage = document.getElementsByTagName("demandeStage");
-
+            /*
             System.out.println("Nombre d'offre collab : " + oCollab.getLength());
             System.out.println("Nombre de demande collab : " + dCollab.getLength());
             System.out.println("Nombre de réponses génériques : " + rGenerique.getLength());
             System.out.println("Nombre de demande de stage : " + dStage.getLength());
-            
+            */
             String description;
             String dateDebut;
             String dateFin;
