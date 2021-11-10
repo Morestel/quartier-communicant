@@ -7,6 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" media="screen" href="style.css">
   <title>Envoyer un message</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;400&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -103,6 +107,81 @@
         </form>
       </div>
 
+      <div class="liste-envoi">
+        <div th:if="${listeEntreprise.size > 0}">
+        <h1>Actuellement dans la liste</h1>
+          <h1>Entreprise ([[ ${listeEntreprise.size} ]])</h1>
+        <ul>
+          <li th:each="lm : ${listeEntreprise}">
+            <div th:switch="${lm.type}">
+              <div th:case="reponseGenerique">
+                <span>Réponse générique</span>
+              </div>
+              <div th:case="demandeCollab">
+                <span>Demande collaboration</span>
+              </div>
+              <div th:case="demandeCatalogue">
+                <span>Demande de catalogue</span>
+              </div>
+              <div th:case="demandeStage">
+                <span>Demande de stage</span>
+              </div>
+              <div th:case="*">
+                <span>Erreur</span>
+              </div>
+          </div>
+          </li>
+        </ul>
+      </div>
+      <div th:if="${listeEcole.size > 0}">
+        <h1>Ecole ([[ ${listeEcole.size} ]])</h1>
+        <ul>
+          <li th:each="lm : ${listeEcole}">
+            <div th:switch="${lm.type}">
+              <div th:case="reponseGenerique">
+                <span>Réponse générique</span>
+              </div>
+              <div th:case="demandeCollab">
+                <span>Demande collaboration</span>
+              </div>
+              <div th:case="demandeCatalogue">
+                <span>Demande de catalogue</span>
+              </div>
+              <div th:case="demandeStage">
+                <span>Demande de stage</span>
+              </div>
+              <div th:case="*">
+                <span>Erreur</span>
+              </div>
+          </div>
+          </li>
+        </ul>
+      </div>
+      <div th:if="${listeMagasin.size > 0}">
+        <h1>Magasin ([[ ${listeMagasin.size} ]])</h1>
+        <ul>
+          <li th:each="lm : ${listeMagasin}">
+            <div th:switch="${lm.type}">
+              <div th:case="reponseGenerique">
+                <span>Réponse générique</span>
+              </div>
+              <div th:case="demandeCollab">
+                <span>Demande collaboration</span>
+              </div>
+              <div th:case="demandeCatalogue">
+                <span>Demande de catalogue</span>
+              </div>
+              <div th:case="demandeStage">
+                <span>Demande de stage</span>
+              </div>
+              <div th:case="*">
+                <span>Erreur</span>
+              </div>
+          </div>
+          </li>
+        </ul>
+      </div>
+      </div>
 
       <div id="container">
       </div>

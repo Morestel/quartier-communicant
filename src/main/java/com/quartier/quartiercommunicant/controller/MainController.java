@@ -110,13 +110,19 @@ public class MainController {
         model.addAttribute("form", new UploadForm());
         File repertoire = new File("repertoire/");
         List<File> listeFichier = new ArrayList<>();
+        int compteur = 0;
+        File vTemp = new File("");
         try{
             if (repertoire.listFiles().length > 0){
                 for (File f : repertoire.listFiles()){
                     if (f.isFile()){
-                        System.err.println(f.getName());
+                        compteur++;
                         listeFichier.add(f);
+                        vTemp = f;
                     }
+                }
+                if (compteur == 1){
+                    return "redirect:/lecture/" + vTemp.getName();
                 }
             }
         }catch(Exception e){
@@ -124,6 +130,7 @@ public class MainController {
         }
         
         model.addAttribute("listeFichier", listeFichier);
+        
         return "index";
     }
 
@@ -182,7 +189,7 @@ public class MainController {
         return "LectureFichier";
     }
 
-    public void deplacer_fichier(String source, String destination){
+    public void deplacerFichier(String source, String destination){
         try {
             Path tmp = Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -208,9 +215,8 @@ public class MainController {
                     break;
                 case "ERR-IDFICHIER": // Id de fichier déjà traité
                     System.err.println("Fichier déjà traité");
-                    System.out.println("Nom expéditeur " + tmpExpediteur);
                    
-                    deplacer_fichier(nom,"erreur/" + tmpExpediteur);
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
                     model.addAttribute("raison", "Fichier déjà traité - Déplacement dans le dossier erreur");
                     return "ErreurLecture";
                     
@@ -218,7 +224,7 @@ public class MainController {
                     System.err.println("Mauvais destinataire");
                     break;
                 case "ERR-EXPEDITEUR":
-                    System.err.println("Id fichier : " + idTmp);
+                    System.err.println("Expéditeur inconnu");
                     return "redirect:/fichier/"+idTmp;
                     
                 default:
@@ -238,7 +244,7 @@ public class MainController {
             }
 
             // Tout s'est bien passé on déplace le fichier dans les archives
-            deplacer_fichier(nom, "archive/" + tmpExpediteur);
+            deplacerFichier(nom, "archive/" + tmpExpediteur);
             
         }catch(ParserConfigurationException u){
            u.printStackTrace();
@@ -269,11 +275,6 @@ public class MainController {
             Document document = db.parse(fic.getFic());
             
             document.getDocumentElement().normalize();
-            String s = document.toString();
-            System.out.println(s);
-            System.err.println(document);
-            System.out.println("IDENTIFIANT = " + document.getDocumentElement().getAttribute("id"));
-            System.err.println("------------");
             int id = Integer.valueOf(document.getDocumentElement().getAttribute("id"));
             
             tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
@@ -312,7 +313,6 @@ public class MainController {
     public boolean formatIdMessage(String id){
         
         if (id.length() > 5){
-            System.err.println(id.substring(0, 4).equals("MAG-"));
             if (id.substring(0, 4).equals("MAG-") || id.substring(0, 4).equals("ENT-") || id.substring(0, 4).equals("ECO-")){
                 return false;
             }
@@ -345,15 +345,8 @@ public class MainController {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document document = db.parse(fic.getFic());
-            document.getDocumentElement().normalize();
-            System.out.println("Root Element :" + document.getDocumentElement().getNodeName());
-            
+            document.getDocumentElement().normalize();            
             NodeList listeMessage = document.getElementsByTagName("message");
-            /*
-            System.out.println(listeMessage.getLength());
-            System.out.println(document.getElementsByTagName("offreCollab").item(0).getTextContent());
-            System.out.println(document.getElementsByTagName("description").item(0).getTextContent());
-            */
             System.out.println("Taille liste message : " + listeMessage.getLength());
 
             /* 
@@ -416,7 +409,6 @@ public class MainController {
             NodeList nList = document.getElementsByTagName("message");
 
             if (fic.getChecksum() != nList.getLength()){
-                System.err.println(fic.getChecksum() + " " + nList.getLength());
                 return "ERR-CHECKSUM";
             }
 

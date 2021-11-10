@@ -32,6 +32,7 @@ import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -218,7 +219,10 @@ public class MessageController {
     }
 
     @RequestMapping("envoiMessage")
-    public String envoiMessage() {
+    public String envoiMessage(Model model) {
+        model.addAttribute("listeEcole", listeMessageEcole);
+        model.addAttribute("listeEntreprise", listeMessageEntreprise);
+        model.addAttribute("listeMagasin", listeMessageMagasin);
         return "EnvoiMessage";
     }
 

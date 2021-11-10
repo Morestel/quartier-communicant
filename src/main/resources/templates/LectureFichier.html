@@ -18,7 +18,7 @@
           <span>Réponse : </span>
           <div>Id message précédent : {{idMsgPrecedent}}</div>
           <input type="text" name="idMsgPrecedent" v-model="idMsgPrecedent" style="display:none" required />
-          <input type="text" name="destinataire" th:attr="value=${fichier.destinataire}" style="display: none;" />
+          <input type="text" name="destinataire" th:attr="value=${fichier.expediteur}" style="display: none;" />
           <textarea name="msg" placeholder="Votre Message"></textarea>
           <input type="submit" name="submit" />
         </div>
