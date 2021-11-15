@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.quartier.quartiercommunicant.model.CV;
 import com.quartier.quartiercommunicant.model.DemandeCatalogue;
+import com.quartier.quartiercommunicant.model.CatalogueDemande;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.EnvoiBonCommande;

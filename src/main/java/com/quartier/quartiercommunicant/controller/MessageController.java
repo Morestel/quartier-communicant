@@ -142,9 +142,45 @@ public class MessageController {
             @RequestParam String validite) {
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        DemandeCatalogue dCatalogue = new DemandeCatalogue(Integer.valueOf(id), Integer.valueOf(quantite));
+        /*DemandeCatalogue dCatalogue = new DemandeCatalogue(Integer.valueOf(id), Integer.valueOf(quantite));
         Message m = new Message("demandeCatalogue", dateFormat.format(new Date()), validite, dCatalogue);
-        listeMessageMagasin.add(m);
+        listeMessageMagasin.add(m);*/
+
+        // On cherche un ID qui est libre dans les demandes de catalogue
+        int i = 0;
+        boolean trouve = false;
+        while (i < 5000 && !trouve) {
+            i++;
+            if (aCatalogueDemandeRepository.findById(i).isEmpty()) { /* cette classe est TODO */
+                trouve = true;
+            }
+
+        }
+        List<DmStage> vListTemp = new ArrayList<>();
+        DmStage dmS = new DmStage(i, description, objet, lieu, Integer.valueOf(remuneration), dateDebut,
+                Integer.valueOf(duree));
+        aDmStageRepository.save(dmS);
+        vListTemp.add(dmS);
+        DemandeStage ds = new DemandeStage(vListTemp);
+
+        Message m = new Message("demandeStage", dateFormat.format(new Date()), validite, ds);
+        switch (destinataire) {
+        case "Magasin":
+            listeMessageMagasin.add(m);
+            break;
+        case "Entreprise":
+            listeMessageEntreprise.add(m);
+            break;
+        case "Ecole":
+            listeMessageEcole.add(m);
+            break;
+        default:
+            break;
+
+        }
+
+        return "redirect:/envoiMessage";
+    }
 
         return "redirect:/envoiMessage";
     }
