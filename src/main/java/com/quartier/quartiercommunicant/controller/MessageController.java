@@ -32,6 +32,7 @@ import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -89,11 +90,10 @@ public class MessageController {
     public String reponseGenerique(@RequestParam String textarea, @RequestParam String destinataire,
             @RequestParam String validite) {
 
-        System.out.println(destinataire);
-        System.out.println(textarea);
+        
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        System.out.println(validite);
+       
         Message m = new Message("reponseGenerique", dateFormat.format(new Date()), validite, textarea, "");
         switch (destinataire) {
         case "Magasin":
@@ -159,11 +159,10 @@ public class MessageController {
         // On cherche un ID qui est libre dans les demandes de stages
         int i = 0;
         boolean trouve = false;
-        while (i < 5000 && trouve == false) {
+        while (i < 5000 && !trouve) {
             i++;
             if (aDmStageRepository.findById(i).isEmpty()) {
                 trouve = true;
-                System.out.println(i);
             }
 
         }
@@ -198,7 +197,7 @@ public class MessageController {
 
         // On écrit tous les messages pour chaque destinataire, ce qui peut conduire à
         // plusieurs fichiers
-        if (listeMessageEcole.size() > 0) {
+        if (!listeMessageEcole.isEmpty()) {
             EcrireMessages("Ecole");
         }
 
@@ -220,7 +219,10 @@ public class MessageController {
     }
 
     @RequestMapping("envoiMessage")
-    public String envoiMessage() {
+    public String envoiMessage(Model model) {
+        model.addAttribute("listeEcole", listeMessageEcole);
+        model.addAttribute("listeEntreprise", listeMessageEntreprise);
+        model.addAttribute("listeMagasin", listeMessageMagasin);
         return "EnvoiMessage";
     }
 
@@ -240,7 +242,7 @@ public class MessageController {
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 
         int id_fichier = -1;
-        while (i < 5000 && trouve == false) {
+        while (i < 5000 && !trouve) {
             if (aFichierRepository.findById(i).isEmpty()) {
                 trouve = true;
                 id_fichier = i;
@@ -282,7 +284,7 @@ public class MessageController {
                 // On cherche un id de message libre
                 switch (m.getType()) {
                 case "reponseGenerique":
-                    while (i < 50000 && trouve == false) {
+                    while (i < 50000 && !trouve) {
                         if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                             m.setId("LAB-" + i);
                             trouve = true;
@@ -300,7 +302,7 @@ public class MessageController {
                     break;
 
                 case "demandeCollab":
-                    while (i < 50000 && trouve == false) {
+                    while (i < 50000 && !trouve) {
                         if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                             m.setId("LAB-" + i);
                             trouve = true;
@@ -319,7 +321,7 @@ public class MessageController {
                     break;
 
                 case "demandeCatalogue":
-                    while (i < 50000 && trouve == false) {
+                    while (i < 50000 && !trouve) {
                         if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                             m.setId("LAB-" + i);
                             trouve = true;
@@ -352,7 +354,7 @@ public class MessageController {
             if (listeDmStage.size() != 0) {
                 DemandeStage ds = new DemandeStage(listeDmStage);
                 aDemandeStageRepository.save(ds);
-                while (i < 50000 && trouve == false) {
+                while (i < 50000 && !trouve) {
                     if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                         id = "LAB-" + i;
                         trouve = true;
@@ -393,9 +395,13 @@ public class MessageController {
     @RequestMapping(value = "/reponseRapide", method = RequestMethod.POST)
     public String reponseRapide(
                                 @RequestParam String msg,
-                                @RequestParam(name = "idMsgPrecedent") String idMsgPrecedent
+                                @RequestParam(name = "idMsgPrecedent") String idMsgPrecedent,
+                                @RequestParam String destinataire
                                 ) {
-        
+        String vMessage = "\n";
+        Fichier fic = new Fichier();
+        fic.setDestinataire(destinataire);
+        fic.setExpediteur("Laboratoire");
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
         int i = 0;
@@ -410,6 +416,24 @@ public class MessageController {
             i++;
         }
         aMessageRepository.save(m);
+
+        try (FileWriter fw = new FileWriter(
+            "repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-" + m.getId() + ".xml", false);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw)) {
+                out.write(ajoutDTD());
+                out.write(EcrireEnTete(i, destinataire, 1));
+                out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                vMessage += "\t<reponseGenerique>" + 
+                            "\n\t\t<msg>" + m.getMsg() + "</msg>" + 
+                            "\n\t\t<idMsgPrecedent>" + m.getIdMsgPrecedent() + "</idMsgPrecedent>" + 
+                            "\n\t</reponseGenerique>" + 
+                            "\n</message>";
+                out.write(vMessage);
+                out.write(ajoutFin());
+            }catch(IOException e){
+                e.printStackTrace();
+            }
         return "redirect:/index ";
     }
 

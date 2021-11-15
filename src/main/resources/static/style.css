@@ -571,3 +571,27 @@ h1 {
 .miniMain{
   text-align: center;
 }
+
+.liste-envoi{
+  text-align: center;
+  background-color: #e0e5ec;
+  border-radius: 5px;
+  width: 400px;
+  list-style:circle;
+  margin: 0 auto 0 auto;
+}
+
+.liste-envoi li{
+  margin: 3% 0 3% 0;
+}
+
+.liste-envoi h1{
+  padding-bottom: 0;
+  padding-top: 15px;
+  color: #2e3d50;
+}
+
+.liste-envoi span{
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.6em;
+}

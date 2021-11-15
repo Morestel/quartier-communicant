@@ -9,24 +9,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import java.text.Format;
 import java.text.ParseException;
-import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
+import com.quartier.quartiercommunicant.model.CV;
+import com.quartier.quartiercommunicant.model.DemandeCatalogue;
+import com.quartier.quartiercommunicant.model.DemandeStage;
+import com.quartier.quartiercommunicant.model.DmStage;
+import com.quartier.quartiercommunicant.model.EnvoiBonCommande;
+import com.quartier.quartiercommunicant.model.EtatCivil;
+import com.quartier.quartiercommunicant.model.Experience;
+import com.quartier.quartiercommunicant.model.Fichier;
+import com.quartier.quartiercommunicant.model.FormationStage;
+import com.quartier.quartiercommunicant.model.Lettre;
+import com.quartier.quartiercommunicant.model.Message;
+import com.quartier.quartiercommunicant.model.Produit;
+import com.quartier.quartiercommunicant.model.ReponseStage;
+import com.quartier.quartiercommunicant.model.UploadForm;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
@@ -40,18 +45,18 @@ import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
-import com.quartier.quartiercommunicant.model.*;
 
-
-import org.springframework.web.multipart.MultipartFile;
-
-import org.springframework.data.spel.ExpressionDependencies.ExpressionDependency;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 
 @Controller
@@ -105,13 +110,19 @@ public class MainController {
         model.addAttribute("form", new UploadForm());
         File repertoire = new File("repertoire/");
         List<File> listeFichier = new ArrayList<>();
+        int compteur = 0;
+        File vTemp = new File("");
         try{
             if (repertoire.listFiles().length > 0){
                 for (File f : repertoire.listFiles()){
                     if (f.isFile()){
-                        System.err.println(f.getName());
+                        compteur++;
                         listeFichier.add(f);
+                        vTemp = f;
                     }
+                }
+                if (compteur == 1){
+                    return "redirect:/lecture/" + vTemp.getName();
                 }
             }
         }catch(Exception e){
@@ -119,6 +130,7 @@ public class MainController {
         }
         
         model.addAttribute("listeFichier", listeFichier);
+        
         return "index";
     }
 
@@ -137,8 +149,8 @@ public class MainController {
                 Files.createDirectory(path);
             } catch (NoSuchFileException ex) {
                 System.err.println(ex);
-            } catch (IOException ex) {
-                System.err.println(ex);
+            } catch (IOException e) {
+                System.err.println(e);
             }
         }
 
@@ -177,7 +189,7 @@ public class MainController {
         return "LectureFichier";
     }
 
-    public void deplacer_fichier(String source, String destination){
+    public void deplacerFichier(String source, String destination){
         try {
             Path tmp = Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -203,9 +215,8 @@ public class MainController {
                     break;
                 case "ERR-IDFICHIER": // Id de fichier déjà traité
                     System.err.println("Fichier déjà traité");
-                    System.out.println("Nom expéditeur " + tmpExpediteur);
                    
-                    deplacer_fichier(nom,"erreur/" + tmpExpediteur);
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
                     model.addAttribute("raison", "Fichier déjà traité - Déplacement dans le dossier erreur");
                     return "ErreurLecture";
                     
@@ -213,7 +224,7 @@ public class MainController {
                     System.err.println("Mauvais destinataire");
                     break;
                 case "ERR-EXPEDITEUR":
-                    System.err.println("Id fichier : " + idTmp);
+                    System.err.println("Expéditeur inconnu");
                     return "redirect:/fichier/"+idTmp;
                     
                 default:
@@ -233,7 +244,7 @@ public class MainController {
             }
 
             // Tout s'est bien passé on déplace le fichier dans les archives
-            deplacer_fichier(nom, "archive/" + tmpExpediteur);
+            deplacerFichier(nom, "archive/" + tmpExpediteur);
             
         }catch(ParserConfigurationException u){
            u.printStackTrace();
@@ -264,11 +275,6 @@ public class MainController {
             Document document = db.parse(fic.getFic());
             
             document.getDocumentElement().normalize();
-            String s = document.toString();
-            System.out.println(s);
-            System.err.println(document);
-            System.out.println("IDENTIFIANT = " + document.getDocumentElement().getAttribute("id"));
-            System.err.println("------------");
             int id = Integer.valueOf(document.getDocumentElement().getAttribute("id"));
             
             tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
@@ -307,7 +313,6 @@ public class MainController {
     public boolean formatIdMessage(String id){
         
         if (id.length() > 5){
-            System.err.println(id.substring(0, 4).equals("MAG-"));
             if (id.substring(0, 4).equals("MAG-") || id.substring(0, 4).equals("ENT-") || id.substring(0, 4).equals("ECO-")){
                 return false;
             }
@@ -340,14 +345,8 @@ public class MainController {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document document = db.parse(fic.getFic());
-            document.getDocumentElement().normalize();
-            System.out.println("Root Element :" + document.getDocumentElement().getNodeName());
-            
+            document.getDocumentElement().normalize();            
             NodeList listeMessage = document.getElementsByTagName("message");
-
-            System.out.println(document.getElementsByTagName("offreCollab").item(0).getTextContent());
-            System.out.println(document.getElementsByTagName("description").item(0).getTextContent());
-            
             System.out.println("Taille liste message : " + listeMessage.getLength());
 
             /* 
@@ -362,12 +361,12 @@ public class MainController {
             NodeList dCollab = document.getElementsByTagName("demandeCollab");
             NodeList rGenerique = document.getElementsByTagName("reponseGenerique");
             NodeList dStage = document.getElementsByTagName("demandeStage");
-
+            /*
             System.out.println("Nombre d'offre collab : " + oCollab.getLength());
             System.out.println("Nombre de demande collab : " + dCollab.getLength());
             System.out.println("Nombre de réponses génériques : " + rGenerique.getLength());
             System.out.println("Nombre de demande de stage : " + dStage.getLength());
-            
+            */
             String description;
             String dateDebut;
             String dateFin;
@@ -416,7 +415,6 @@ public class MainController {
             NodeList nList = document.getElementsByTagName("message");
 
             if (fic.getChecksum() != nList.getLength()){
-                System.err.println(fic.getChecksum() + " " + nList.getLength());
                 return "ERR-CHECKSUM";
             }
 

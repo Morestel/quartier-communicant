@@ -20,6 +20,8 @@ let app = Vue.createApp({
               <span>Sélectionné : {{ selected }}</span>
               <input type="button" name="Select" value="Type" @click="ajout(ComposerMessage)">
               <input type="button" @click="test">
+
+              <add-field></add-field>
           </form>
           `,
     methods:{
@@ -69,7 +71,7 @@ let app = Vue.createApp({
 
 
 app.component('add-field', {
-    template:'<input type="button" name="Select" value="Typeu" @click="ajout(ComposerMessage)">',
+    template:'<a th:href="${google.com}"><p>TEST</p></a>',
 })
 
 let vm = app.mount('#container')
