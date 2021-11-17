@@ -590,20 +590,6 @@ public class MainController {
 
                     
                     // Demande de catalogue
-                    /*if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
-                        id = elem.getElementsByTagName("identifiant").item(0).getTextContent();
-                        quantite = Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent());
-
-                        demandeCatalogue = new DemandeCatalogue(Integer.valueOf(id), quantite);
-                        aDemandeCatalogueRepository.save(demandeCatalogue);
-
-                        m = new Message("demandeCatalogue", dateEnvoi, dureeValidite, demandeCatalogue);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
-                    }*/
                     if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
                         demandeCatalogue = new DemandeCatalogue();
                         catalogueDemande = new CatalogueDemande();
