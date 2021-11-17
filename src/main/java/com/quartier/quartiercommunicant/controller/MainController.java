@@ -35,6 +35,7 @@ import com.quartier.quartiercommunicant.model.ReponseStage;
 import com.quartier.quartiercommunicant.model.UploadForm;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
+import com.quartier.quartiercommunicant.repository.CatalogueDemandeRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.DmStageRepository;
 import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
@@ -95,6 +96,9 @@ public class MainController {
 
     @Inject
     DemandeCatalogueRepository aDemandeCatalogueRepository;
+
+    @Inject
+    CatalogueDemandeRepository aCatalogueDemandeRepository;
 
     @Inject
     EnvoiBonCommandeRepository aBonCommandeRepository;
@@ -615,11 +619,11 @@ public class MainController {
                             catalogueDemande = new CatalogueDemande(Integer.valueOf(id), titreCatalogueDemande, quantite);
                             listCatalogueDemande.add(catalogueDemande);
                             System.err.println("Taille de la liste " + listCatalogueDemande.size());
-                            aDmStageRepository.save(dmStage); /* CatalogueDemandeRepository TODO */
+                            aCatalogueDemandeRepository.save(catalogueDemande);
                         }
-                        demandeStage = new DemandeStage(listDmStage);
-                        aDemandeStageRepository.save(demandeStage); // On sauve la demande de stage
-                        m = new Message("demandeStage", dateEnvoi, dureeValidite, demandeStage);
+                        demandeCatalogue = new DemandeCatalogue(listCatalogueDemande);
+                        aDemandeCatalogueRepository.save(demandeCatalogue); // On sauve la demande de catalogue
+                        m = new Message("demandeCatalogue", dateEnvoi, dureeValidite, demandeCatalogue);
                         m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
