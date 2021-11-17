@@ -1,201 +1,398 @@
 <!DOCTYPE html>
 <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" media="screen" href="style.css" />
+    <title>Envoyer un message</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" media="screen" href="style.css">
-  <title>Envoyer un message</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;400&display=swap" rel="stylesheet">
-</head>
-
-<body>
-  <div class="main">
-    <div class="main-content">
-      <h1 class="titre-message">Envoyer un message</h1>
-      <form class="middle" method="POST" th:action="@{/toutEnvoyer}">
-
-        <button type="submit" class="btn custom-btn">Tout envoyer</button>
-      </form>
-      <a th:href="@{/index}"><button class="bouton effect btm"><span>Back to Menu</span></button></a>
-      <div class="box-message">
-        <h1>Réponse générique</h1>
-        <form method="POST" th:action="@{/reponseGenerique}">
-
-          <h2>Destinataire</h2>
-          <input type="radio" id="Magasin" name="destinataire" value="Magasin" checked>
-          <label for="Magasin">Magasin</label>
-
-          <input type="radio" id="Ecole" name="destinataire" value="Ecole" checked>
-          <label for="Ecole">Ecole</label>
-
-          <input type="radio" id="Entreprise" name="destinataire" value="Entreprise" checked>
-          <label for="Entreprise">Entreprise</label>
-          <br>
-          <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" class="input-form"
-            required>
-          <br>
-          <textarea name="textarea" placeholder="Ecrivez votre message" class="input-form" required></textarea>
-          <br><br>
-          <button type="submit" class="btn custom-btn">Envoyer</button>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <h1 class="titre-message">Envoyer un message</h1>
+        <form class="middle" method="POST" th:action="@{/toutEnvoyer}">
+          <button type="submit" class="btn custom-btn">Tout envoyer</button>
         </form>
-      </div>
-      <div class="box-message">
-        <h1>Demande collaboration</h1>
-        <form method="POST" th:action="@{/demandeCollaboration}">
+        <a th:href="@{/index}"
+          ><button class="bouton effect btm">
+            <span>Back to Menu</span>
+          </button></a
+        >
+        <div id="geneOs" class="box-message">
+          <span
+            id="buttonGenerique"
+            class="ouvreFerme"
+            onclick="OuvreFermeGenerique();"
+            style="user-select: none;"
+            >+</span
+          >
+          <h1>Réponse générique</h1>
+          <form method="POST" th:action="@{/reponseGenerique}">
+            <h2>Destinataire</h2>
+            <input
+              type="radio"
+              id="Magasin"
+              name="destinataire"
+              value="Magasin"
+              checked
+            />
+            <label for="Magasin">Magasin</label>
 
-          <h2>Destinataire</h2>
-          <input type="radio" id="Magasin" name="destinataire" value="Magasin" checked>
-          <label for="Magasin">Magasin</label>
+            <input
+              type="radio"
+              id="Ecole"
+              name="destinataire"
+              value="Ecole"
+              checked
+            />
+            <label for="Ecole">Ecole</label>
 
-          <input type="radio" id="Ecole" name="destinataire" value="Ecole" checked>
-          <label for="Ecole">Ecole</label>
+            <input
+              type="radio"
+              id="Entreprise"
+              name="destinataire"
+              value="Entreprise"
+              checked
+            />
+            <label for="Entreprise">Entreprise</label>
+            <br />
+            <input
+              type="text"
+              id="DureeValidite"
+              placeholder="Durée validité"
+              name="validite"
+              class="input-form"
+              required
+            />
+            <br />
+            <textarea
+              name="textarea"
+              placeholder="Ecrivez votre message"
+              class="input-form"
+              required
+            ></textarea>
+            <br /><br />
+            <button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
+        <div id="collOs" class="box-message">
+          <span
+            id="buttonCollaboration"
+            class="ouvreFerme"
+            onclick="OuvreFermeCollaboration();"
+            style="user-select: none;"
+            >+</span>
+          <h1>Demande collaboration</h1>
+          <form method="POST" th:action="@{/demandeCollaboration}">
+            <h2>Destinataire</h2>
+            <input
+              type="radio"
+              id="Magasin"
+              name="destinataire"
+              value="Magasin"
+              checked
+            />
+            <label for="Magasin">Magasin</label>
 
-          <input type="radio" id="Entreprise" name="destinataire" value="Entreprise" checked>
-          <label for="Entreprise">Entreprise</label>
-          <br>
-          <textarea placeholder="Description" name="description" class="input-form" required></textarea>
-          <br>
-          <input type="date" name="dateDebut" class="input-form" required />
-          <input type="date" name="dateFin" class="input-form" required />
-          <br>
-          <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" class="input-form"
-            required>
-          <br>
-          <button type="submit" class="btn custom-btn">Envoyer</button>
-        </form>
-      </div>
+            <input
+              type="radio"
+              id="Ecole"
+              name="destinataire"
+              value="Ecole"
+              checked
+            />
+            <label for="Ecole">Ecole</label>
 
-      <div class="box-message">
-        <h1>Demande catalogue</h1>
-        <form method="POST" th:action="@{/demandeCatalogue}">
-          <input type="text" name="id" placeholder="Id" class="input-form" required />
-          <br>
-          <input type="text" name="quantite" placeholder="Quantité" class="input-form" required />
-          <br><input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" class="input-form"
-            required>
-          <br><button type="submit" class="btn custom-btn">Envoyer</button>
-        </form>
-      </div>
+            <input
+              type="radio"
+              id="Entreprise"
+              name="destinataire"
+              value="Entreprise"
+              checked
+            />
+            <label for="Entreprise">Entreprise</label>
+            <br />
+            <textarea
+              placeholder="Description"
+              name="description"
+              class="input-form"
+              required
+            ></textarea>
+            <br />
+            <input type="date" name="dateDebut" class="input-form" required />
+            <input type="date" name="dateFin" class="input-form" required />
+            <br />
+            <input
+              type="text"
+              id="DureeValidite"
+              placeholder="Durée validité"
+              name="validite"
+              class="input-form"
+              required
+            />
+            <br />
+            <button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
 
-      <div class="box-message">
-        <h1>Demande de stage</h1>
-        <form method="POST" th:action="@{/demandeStage}">
+        <div id="cataOs" class="box-message">
+          <span
+          id="buttonCatalogue"
+          class="ouvreFerme"
+          onclick="OuvreFermeCatalogue();"
+          style="user-select: none;"
+          >+</span>
+          <h1>Demande catalogue</h1>
+          <form method="POST" th:action="@{/demandeCatalogue}">
+            <input
+              type="text"
+              name="id"
+              placeholder="Id"
+              class="input-form"
+              required
+            />
+            <br />
+            <input
+              type="text"
+              name="quantite"
+              placeholder="Quantité"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="text"
+              id="DureeValidite"
+              placeholder="Durée validité"
+              name="validite"
+              class="input-form"
+              required
+            />
+            <br /><button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
 
-          <h2>Destinataire</h2>
+        <div id="stageOs" class="box-message">
+          <span
+          id="buttonStage"
+          class="ouvreFerme"
+          onclick="OuvreFermeStage();"
+          style="user-select: none;"
+          >+</span>
+          <h1>Demande de stage</h1>
+          <form method="POST" th:action="@{/demandeStage}">
+            <h2>Destinataire</h2>
 
-          <input type="radio" id="Ecole" name="destinataire" value="Ecole" checked>
-          <label for="Ecole">Ecole</label>
+            <input
+              type="radio"
+              id="Ecole"
+              name="destinataire"
+              value="Ecole"
+              checked
+            />
+            <label for="Ecole">Ecole</label>
 
-          <input type="radio" id="Entreprise" name="destinataire" value="Entreprise" checked>
-          <label for="Entreprise">Entreprise</label>
-          <br>
-          <input type="text" id="DureeValidite" placeholder="Durée validité" name="validite" class="input-form"
-            required>
-          <br><input type="text" name="objet" placeholder="Objet" class="input-form" required />
-          <br><textarea name="description" placeholder="Description" class="input-form" required></textarea>
-          <br><input type="text" name="lieu" placeholder="Lieu" class="input-form" required />
-          <br><input type="date" name="dateDebut" class="input-form" required />
-          <input type="date" name="dateFin" class="input-form" required />
-          <br><input type="text" name="remuneration" placeholder="Rémunération" class="input-form" required />
-          <br><input type="text" name="duree" placeholder="Durée" class="input-form" required />
-          <br><button type="submit" class="btn custom-btn">Envoyer</button>
-        </form>
-      </div>
+            <input
+              type="radio"
+              id="Entreprise"
+              name="destinataire"
+              value="Entreprise"
+              checked
+            />
+            <label for="Entreprise">Entreprise</label>
+            <br />
+            <input
+              type="text"
+              id="DureeValidite"
+              placeholder="Durée validité"
+              name="validite"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="text"
+              name="objet"
+              placeholder="Objet"
+              class="input-form"
+              required
+            />
+            <br /><textarea
+              name="description"
+              placeholder="Description"
+              class="input-form"
+              required
+            ></textarea>
+            <br /><input
+              type="text"
+              name="lieu"
+              placeholder="Lieu"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="date"
+              name="dateDebut"
+              class="input-form"
+              required
+            />
+            <input type="date" name="dateFin" class="input-form" required />
+            <br /><input
+              type="text"
+              name="remuneration"
+              placeholder="Rémunération"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="text"
+              name="duree"
+              placeholder="Durée"
+              class="input-form"
+              required
+            />
+            <br /><button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
 
-      <div class="liste-envoi">
-        <div th:if="${listeEntreprise.size > 0}">
-        <h1>Actuellement dans la liste</h1>
-          <h1>Entreprise ([[ ${listeEntreprise.size} ]])</h1>
-        <ul>
-          <li th:each="lm : ${listeEntreprise}">
-            <div th:switch="${lm.type}">
-              <div th:case="reponseGenerique">
-                <span>Réponse générique</span>
-              </div>
-              <div th:case="demandeCollab">
-                <span>Demande collaboration</span>
-              </div>
-              <div th:case="demandeCatalogue">
-                <span>Demande de catalogue</span>
-              </div>
-              <div th:case="demandeStage">
-                <span>Demande de stage</span>
-              </div>
-              <div th:case="*">
-                <span>Erreur</span>
-              </div>
+        <div class="liste-envoi">
+          <div th:if="${listeEntreprise.size > 0}">
+            <h1>Actuellement dans la liste</h1>
+            <h1>Entreprise ([[ ${listeEntreprise.size} ]])</h1>
+            <ul>
+              <li th:each="lm : ${listeEntreprise}">
+                <div th:switch="${lm.type}">
+                  <div th:case="reponseGenerique">
+                    <span>Réponse générique</span>
+                  </div>
+                  <div th:case="demandeCollab">
+                    <span>Demande collaboration</span>
+                  </div>
+                  <div th:case="demandeCatalogue">
+                    <span>Demande de catalogue</span>
+                  </div>
+                  <div th:case="demandeStage">
+                    <span>Demande de stage</span>
+                  </div>
+                  <div th:case="*">
+                    <span>Erreur</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </div>
-          </li>
-        </ul>
-      </div>
-      <div th:if="${listeEcole.size > 0}">
-        <h1>Ecole ([[ ${listeEcole.size} ]])</h1>
-        <ul>
-          <li th:each="lm : ${listeEcole}">
-            <div th:switch="${lm.type}">
-              <div th:case="reponseGenerique">
-                <span>Réponse générique</span>
-              </div>
-              <div th:case="demandeCollab">
-                <span>Demande collaboration</span>
-              </div>
-              <div th:case="demandeCatalogue">
-                <span>Demande de catalogue</span>
-              </div>
-              <div th:case="demandeStage">
-                <span>Demande de stage</span>
-              </div>
-              <div th:case="*">
-                <span>Erreur</span>
-              </div>
+          <div th:if="${listeEcole.size > 0}">
+            <h1>Ecole ([[ ${listeEcole.size} ]])</h1>
+            <ul>
+              <li th:each="lm : ${listeEcole}">
+                <div th:switch="${lm.type}">
+                  <div th:case="reponseGenerique">
+                    <span>Réponse générique</span>
+                  </div>
+                  <div th:case="demandeCollab">
+                    <span>Demande collaboration</span>
+                  </div>
+                  <div th:case="demandeCatalogue">
+                    <span>Demande de catalogue</span>
+                  </div>
+                  <div th:case="demandeStage">
+                    <span>Demande de stage</span>
+                  </div>
+                  <div th:case="*">
+                    <span>Erreur</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </div>
-          </li>
-        </ul>
-      </div>
-      <div th:if="${listeMagasin.size > 0}">
-        <h1>Magasin ([[ ${listeMagasin.size} ]])</h1>
-        <ul>
-          <li th:each="lm : ${listeMagasin}">
-            <div th:switch="${lm.type}">
-              <div th:case="reponseGenerique">
-                <span>Réponse générique</span>
-              </div>
-              <div th:case="demandeCollab">
-                <span>Demande collaboration</span>
-              </div>
-              <div th:case="demandeCatalogue">
-                <span>Demande de catalogue</span>
-              </div>
-              <div th:case="demandeStage">
-                <span>Demande de stage</span>
-              </div>
-              <div th:case="*">
-                <span>Erreur</span>
-              </div>
+          <div th:if="${listeMagasin.size > 0}">
+            <h1>Magasin ([[ ${listeMagasin.size} ]])</h1>
+            <ul>
+              <li th:each="lm : ${listeMagasin}">
+                <div th:switch="${lm.type}">
+                  <div th:case="reponseGenerique">
+                    <span>Réponse générique</span>
+                  </div>
+                  <div th:case="demandeCollab">
+                    <span>Demande collaboration</span>
+                  </div>
+                  <div th:case="demandeCatalogue">
+                    <span>Demande de catalogue</span>
+                  </div>
+                  <div th:case="demandeStage">
+                    <span>Demande de stage</span>
+                  </div>
+                  <div th:case="*">
+                    <span>Erreur</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </div>
-          </li>
-        </ul>
-      </div>
-      </div>
+        </div>
 
-      <div id="container">
+        <div id="container"></div>
       </div>
-
-
+      <!-- particles.js container -->
+      <div id="particles-js"></div>
     </div>
-    <!-- particles.js container -->
-    <div id="particles-js"></div>
-  </div>
-  <!-- scripts -->
-  <script src="particles.js"></script>
-  <script src="app.js"></script>
-  <script src="vue.js"></script>
-  <script src="message.js"></script>
-</body>
-
+    <!-- scripts -->
+    <script>
+      function OuvreFermeGenerique() {
+        var buttonx = document.getElementById("buttonGenerique");
+        var box = document.getElementById("geneOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+      function OuvreFermeCollaboration() {
+        var buttonx = document.getElementById("buttonCollaboration");
+        var box = document.getElementById("collOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+      function OuvreFermeCatalogue() {
+        var buttonx = document.getElementById("buttonCatalogue");
+        var box = document.getElementById("cataOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+      function OuvreFermeStage() {
+        var buttonx = document.getElementById("buttonStage");
+        var box = document.getElementById("stageOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+    </script>
+    <script src="particles.js"></script>
+    <script src="app.js"></script>
+    <script src="vue.js"></script>
+    <script src="message.js"></script>
+  </body>
 </html>

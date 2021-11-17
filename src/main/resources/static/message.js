@@ -62,7 +62,7 @@ let app = Vue.createApp({
             var field = document.createElement("");
             container.appendChild(field);
             
-        }    
+        },
     },
     data: () => ({
         selected :''
