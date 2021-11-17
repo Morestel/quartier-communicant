@@ -45,10 +45,10 @@ public class NavigationController {
     public String magasin(Model model, @PathVariable String source, @PathVariable String expediteur){
 
         File repertoire;
-        if (expediteur.equals("Magasin")){
+        if (expediteur.equalsIgnoreCase("magasin")){
             repertoire = new File("repertoire/" + source + "/Magasin");
-        }else if (expediteur.equals("entreprise")){
-            repertoire = new File("repertoire/" + source + "/Entreprise");
+        }else if (expediteur.equalsIgnoreCase("entreprise")){
+            repertoire = new File("repertoire/" + source + "/entreprise");
         }else{
             repertoire = new File("repertoire/" + source + "/Ecole");
         }
@@ -69,6 +69,7 @@ public class NavigationController {
 
         List<Fichier> listeFichier = aFichierRepository.findFichierByExped(expediteur);
         model.addAttribute("titre", source + " - " + expediteur);
+        model.addAttribute("expediteur", expediteur);
         if (source.equals("archive")){
             model.addAttribute("listeFichier", listeFichier);
             return "Archive";

@@ -12,11 +12,10 @@
     <div class="main">
         <div class="main-content">
     <h1>Liste des fichiers</h1>
-
     <ul>
 
         <li th:each="f : ${listeFichier}">
-            <a th:href="@{/fichier/{id} (id = ${f.Name})}">
+            <a th:href="@{/lecture/{nom}?source={source} (nom = ${f.Name}, source = ${expediteur})}">
               <img src = "../fichier.png" class="fichier" alt = "fichier" />
             <br>
             [[ ${f.Name }]]

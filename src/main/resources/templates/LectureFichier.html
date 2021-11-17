@@ -85,6 +85,22 @@
                       <span class="data">Durée:</span>[[ ${message.demandeStage.duree} ]] <br> <br>
                   </div>
                 </div>
+
+                <div th:case="'reponseStage'">
+                  <div class="card">
+                    <h1>Demande de stage/h1> <br>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Objet :</span>[[ ${message.rpStage.objet} ]] <br>
+                      <span class="data">Description:</span>[[ ${message.demandeStage.description} ]] <br>
+                      <span class="data">Lieu:</span>[[ ${message.demandeStage.lieu} ]] <br>
+                      <span class="data">Rémunération:</span>[[ ${message.demandeStage.remuneration} ]] <br>
+                      <span class="data">Date de début:</span>[[ ${message.demandeStage.dateDebut} ]] <br>
+                      <span class="data">Durée:</span>[[ ${message.demandeStage.duree} ]] <br> <br>
+                  </div>
+                </div>
+
                 <div th:case="*">
                   <div class="card">
                     <p>Unknown type of message</p>

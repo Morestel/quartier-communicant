@@ -51,6 +51,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -198,11 +199,18 @@ public class MainController {
         }
     }
 
-
     @RequestMapping("/lecture/{nom}")
-    public String lecture(Model model, @PathVariable String nom){
+    public String lecture(Model model, @PathVariable String nom, @RequestParam(required = false) String source){
+        Fichier fic;
+        System.err.println("Not null");
+        if (source != null){
+            System.err.println("Not null");
+            fic = new Fichier("repertoire/erreur/" + source + "/" + nom);
+        }
+        else{
+            fic = new Fichier("repertoire/" + nom);
+        }
         
-        Fichier fic = new Fichier("repertoire/" + nom);
         if (fic.getFic().length() > 10000){
             System.err.println("Trop de caractères");
         }
@@ -222,10 +230,15 @@ public class MainController {
                     
                 case "ERR-DESTINATAIRE": // Mauvais destinataire = Pas nous
                     System.err.println("Mauvais destinataire");
-                    break;
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
+                    model.addAttribute("raison", "Mauvais destinataire - Déplacement dans le dossier erreur");
+                    return "ErreurLecture";
                 case "ERR-EXPEDITEUR":
                     System.err.println("Expéditeur inconnu");
-                    return "redirect:/fichier/"+idTmp;
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
+                    model.addAttribute("raison", "Expéditeur inconnu - Déplacement dans le dossier erreur");
+                    return "ErreurLecture";
+                    // return "redirect:/fichier/"+idTmp;
                     
                 default:
                     System.err.println("Uncaught");
@@ -239,6 +252,7 @@ public class MainController {
                     break;
                 case "ERR-CHECKSUM":
                     model.addAttribute("raison", "Checksum non conforme - Rejet du fichier");
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
                     return "ErreurLecture";
                     
             }
