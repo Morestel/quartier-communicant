@@ -101,6 +101,22 @@
                   </div>
                 </div>
 
+                <div th:case="'envoiBonCommande'">
+                  <div class="card">
+                    <h1>Envoi bon de commande</h1> <br>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Date de commande :</span>[[ ${message.envoiBonCommande.dateCommande} ]] <br>
+                      <span th:each="produit: ${message.envoiBonCommande.listeProduit}">
+                        <span class="data">Id:</span>[[ ${produit.id} ]] <br>
+                        <span class="data">Nom:</span>[[ ${produit.nom} ]] <br>
+                        <span class="data">Prix:</span>[[ ${produit.prix} ]] <br>
+                        <span class="data">Quantite:</span>[[ ${produit.quantite} ]] <br>
+                      </span><br>
+                  </div>
+                </div>
+
                 <div th:case="*">
                   <div class="card">
                     <p>Unknown type of message</p>
