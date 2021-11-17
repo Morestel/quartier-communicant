@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.quartier.quartiercommunicant.model.CV;
 import com.quartier.quartiercommunicant.model.DemandeCatalogue;
+import com.quartier.quartiercommunicant.model.CatalogueDemande;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.EnvoiBonCommande;
@@ -34,6 +35,7 @@ import com.quartier.quartiercommunicant.model.ReponseStage;
 import com.quartier.quartiercommunicant.model.UploadForm;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
+import com.quartier.quartiercommunicant.repository.CatalogueDemandeRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.DmStageRepository;
 import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
@@ -51,7 +53,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -95,6 +96,9 @@ public class MainController {
 
     @Inject
     DemandeCatalogueRepository aDemandeCatalogueRepository;
+
+    @Inject
+    CatalogueDemandeRepository aCatalogueDemandeRepository;
 
     @Inject
     EnvoiBonCommandeRepository aBonCommandeRepository;
@@ -199,18 +203,11 @@ public class MainController {
         }
     }
 
+
     @RequestMapping("/lecture/{nom}")
-    public String lecture(Model model, @PathVariable String nom, @RequestParam(required = false) String source){
-        Fichier fic;
-        System.err.println("Not null");
-        if (source != null){
-            System.err.println("Not null");
-            fic = new Fichier("repertoire/erreur/" + source + "/" + nom);
-        }
-        else{
-            fic = new Fichier("repertoire/" + nom);
-        }
+    public String lecture(Model model, @PathVariable String nom){
         
+        Fichier fic = new Fichier("repertoire/" + nom);
         if (fic.getFic().length() > 10000){
             System.err.println("Trop de caractères");
         }
@@ -230,15 +227,10 @@ public class MainController {
                     
                 case "ERR-DESTINATAIRE": // Mauvais destinataire = Pas nous
                     System.err.println("Mauvais destinataire");
-                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
-                    model.addAttribute("raison", "Mauvais destinataire - Déplacement dans le dossier erreur");
-                    return "ErreurLecture";
+                    break;
                 case "ERR-EXPEDITEUR":
                     System.err.println("Expéditeur inconnu");
-                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
-                    model.addAttribute("raison", "Expéditeur inconnu - Déplacement dans le dossier erreur");
-                    return "ErreurLecture";
-                    // return "redirect:/fichier/"+idTmp;
+                    return "redirect:/fichier/"+idTmp;
                     
                 default:
                     System.err.println("Uncaught");
@@ -252,7 +244,6 @@ public class MainController {
                     break;
                 case "ERR-CHECKSUM":
                     model.addAttribute("raison", "Checksum non conforme - Rejet du fichier");
-                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
                     return "ErreurLecture";
                     
             }
@@ -415,7 +406,13 @@ public class MainController {
             FormationStage formationStage = new FormationStage();
             Experience experience = new Experience();
             Lettre lettre = new Lettre();
+
+            int nbCatalogueDemande = 0;
+            List<CatalogueDemande> listCatalogueDemande = new ArrayList<>();
             DemandeCatalogue demandeCatalogue = new DemandeCatalogue();
+            CatalogueDemande catalogueDemande= new CatalogueDemande();
+            String titreCatalogueDemande;
+
             EnvoiBonCommande envoiBonCommande = new EnvoiBonCommande();
 
             int nbDmStage = 0;
@@ -590,15 +587,28 @@ public class MainController {
                         aMessageRepository.save(m);
                     }
                     */
-                    /*
+
+                    
                     // Demande de catalogue
                     if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
-                        id = elem.getElementsByTagName("identifiant").item(0).getTextContent();
-                        quantite = Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent());
+                        demandeCatalogue = new DemandeCatalogue();
+                        catalogueDemande = new CatalogueDemande();
+                        listCatalogueDemande = new ArrayList<>();
+                        nbCatalogueDemande = elem.getElementsByTagName("catalogueDemande").getLength();
+                        System.err.println("Nombre de demandes de catalogue: " + nbCatalogueDemande);
+                        for (int nbCatalogueDemandeTemp = 0; nbCatalogueDemandeTemp < nbCatalogueDemande; nbCatalogueDemandeTemp++){
 
-                        demandeCatalogue = new DemandeCatalogue(Integer.valueOf(id), quantite);
-                        aDemandeCatalogueRepository.save(demandeCatalogue);
+                            id = elem.getElementsByTagName("id").item(nbCatalogueDemandeTemp).getTextContent();
+                            titreCatalogueDemande = elem.getElementsByTagName("titreCatalogueDemande").item(nbCatalogueDemandeTemp).getTextContent();
+                            quantite = Integer.parseInt(elem.getElementsByTagName("quantite").item(nbCatalogueDemandeTemp).getTextContent());
 
+                            catalogueDemande = new CatalogueDemande(Integer.valueOf(id), titreCatalogueDemande, quantite);
+                            listCatalogueDemande.add(catalogueDemande);
+                            System.err.println("Taille de la liste " + listCatalogueDemande.size());
+                            aCatalogueDemandeRepository.save(catalogueDemande);
+                        }
+                        demandeCatalogue = new DemandeCatalogue(listCatalogueDemande);
+                        aDemandeCatalogueRepository.save(demandeCatalogue); // On sauve la demande de catalogue
                         m = new Message("demandeCatalogue", dateEnvoi, dureeValidite, demandeCatalogue);
                         m.setId(id_message);
                         lMessage = fic.getListMess();
@@ -606,7 +616,7 @@ public class MainController {
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
                     }
-                    */
+                    
                     
                     // Envoi de bon de commande
                     if (elem.getElementsByTagName("envoiBonCommande").getLength() > 0){

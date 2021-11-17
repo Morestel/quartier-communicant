@@ -13,6 +13,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.quartier.quartiercommunicant.model.DemandeCatalogue;
+import com.quartier.quartiercommunicant.model.CatalogueDemande;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.Fichier;
@@ -30,6 +31,7 @@ import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
+import com.quartier.quartiercommunicant.repository.CatalogueDemandeRepository;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -79,8 +81,12 @@ public class MessageController {
     @Inject
     ProduitRepository aProduitRepository;
 
+    @Inject
+    CatalogueDemandeRepository aCatalogueDemandeRepository;
+
     List<Message> listeMessage = new ArrayList<>();
     List<DmStage> listeDmStage = new ArrayList<>();
+    List<CatalogueDemande> listeCatalogueDemande = new ArrayList<>();
 
     List<Message> listeMessageEcole = new ArrayList<>();
     List<Message> listeMessageMagasin = new ArrayList<>();
@@ -138,16 +144,38 @@ public class MessageController {
     }
 
     @RequestMapping(value = "/demandeCatalogue", method = RequestMethod.POST)
-    public String demandeCatalogue(@RequestParam String id, @RequestParam String quantite,
+    public String demandeCatalogue(@RequestParam String id, @RequestParam String titreCatalogueDemande, @RequestParam String quantite,
             @RequestParam String validite) {
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        DemandeCatalogue dCatalogue = new DemandeCatalogue(Integer.valueOf(id), Integer.valueOf(quantite));
+        /*DemandeCatalogue dCatalogue = new DemandeCatalogue(Integer.valueOf(id), Integer.valueOf(quantite));
         Message m = new Message("demandeCatalogue", dateFormat.format(new Date()), validite, dCatalogue);
+        listeMessageMagasin.add(m);*/
+
+        // On cherche un ID qui est libre dans les demandes de catalogue
+        int i = 0;
+        boolean trouve = false;
+        while (i < 5000 && !trouve) {
+            i++;
+            if (aCatalogueDemandeRepository.findById(i).isEmpty()) {
+                trouve = true;
+            }
+
+        }
+        List<CatalogueDemande> vListTemp = new ArrayList<>();
+        CatalogueDemande cdm = new CatalogueDemande(i, titreCatalogueDemande, Integer.valueOf(quantite));
+        aCatalogueDemandeRepository.save(cdm);
+        vListTemp.add(cdm);
+        DemandeCatalogue dmC = new DemandeCatalogue(vListTemp);
+
+        Message m = new Message("demandeCatalogue", dateFormat.format(new Date()), validite, dmC);
         listeMessageMagasin.add(m);
+
 
         return "redirect:/envoiMessage";
     }
+
+
 
     @RequestMapping(value = "/demandeStage", method = RequestMethod.POST)
     public String demandeStage(@RequestParam String objet, @RequestParam String description, @RequestParam String lieu,
@@ -215,6 +243,7 @@ public class MessageController {
         listeMessageMagasin = new ArrayList<>();
         listeMessage = new ArrayList<>();
         listeDmStage = new ArrayList<>();
+        listeCatalogueDemande = new ArrayList<>();
         return "redirect:/envoiMessage";
     }
 
@@ -321,7 +350,7 @@ public class MessageController {
                     break;
 
                 case "demandeCatalogue":
-                    while (i < 50000 && !trouve) {
+                    /*while (i < 50000 && !trouve) {
                         if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                             m.setId("LAB-" + i);
                             trouve = true;
@@ -339,6 +368,9 @@ public class MessageController {
                             + "\n\t\t\t</catalogueDemande>" + "\n\t\t</demandeCatalogue>" + "\n\t</message>";
                     out.write(vMessage);
                     trouve = false;
+                    break;*/
+                    listeCatalogueDemande.add(m.getDemandeCatalogue().getListCatalogueDemande().get(0));
+                    dureeValidite= m.getDureeValidite();
                     break;
 
                 case "demandeStage":
@@ -348,6 +380,33 @@ public class MessageController {
                     break;
                 }
                 i++;
+            }
+
+            // on écrit les messages de demande de catalogue
+            if (listeCatalogueDemande.size() != 0) {
+                DemandeCatalogue dc = new DemandeCatalogue(listeCatalogueDemande);
+                aDemandeCatalogueRepository.save(dc);
+                while (i < 50000 && !trouve) {
+                    if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                        id = "LAB-" + i;
+                        trouve = true;
+                    }
+                    i++;
+                }
+                trouve = false;
+                Message ms = new Message("demandeCatalogue", dateFormat.format(new Date()), dureeValidite, dc);
+                ms.setId(id);
+                out.write(ajoutHeaderMessage(ms.getId(), ms.getDateEnvoi(), ms.getDureeValidite()));
+                aMessageRepository.save(ms);
+                vMessage = "\n\t<demandeCatalogue>";
+                for (CatalogueDemande vDmTemp : dc.getListCatalogueDemande()) {
+                    vMessage += "\n\t\t<CatalogueDemande>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<titreCatalogueDemande>"
+                            + vDmTemp.getTitreCatalogueDemande() + "</titreCatalogueDemande>" + "\n\t\t\t<quantite>" + vDmTemp.getQuantite()
+                            + "</quantite>"
+                            + "\n\t\t</CatalogueDemande>";
+                }
+                vMessage += "\n\t</demandeCatalogue>" + "\n</message>";
+                out.write(vMessage);
             }
 
             // On écrit le message à la fin pour tout ce qui concerne demande de stage
