@@ -1,8 +1,14 @@
 package com.quartier.quartiercommunicant.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToMany;
 
 import lombok.Data;
 
@@ -10,26 +16,18 @@ import lombok.Data;
 @Entity
 public class ReponseStage {
     
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private int id;
-    private String objet;
-    
-    @OneToOne
-    private CV cv;
-    @OneToOne
-    private Lettre lettre;
 
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    private List<RpStage> listRpStage = new ArrayList<>();
 
     public ReponseStage(){
         /* */
     }
 
-
-    public ReponseStage(String objet, CV cv, Lettre lettre) {
-        this.objet = objet;
-        this.cv = cv;
-        this.lettre = lettre;
+    public ReponseStage(List<RpStage> listRpStage){
+        setListRpStage(listRpStage);
     }
-
-    
 }
