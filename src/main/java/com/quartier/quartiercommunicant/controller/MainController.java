@@ -201,7 +201,7 @@ public class MainController {
 
     public void deplacerFichier(String source, String destination){
         try {
-            Path tmp = Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
+            /*Path tmp = */Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             System.err.println("Impossible de déplacer le fichier");
             e.printStackTrace();
@@ -367,10 +367,10 @@ public class MainController {
             */
 
             // Stock les types de messages dans une liste de noeud
-            NodeList oCollab = document.getElementsByTagName("offreCollab");
+            /*NodeList oCollab = document.getElementsByTagName("offreCollab");
             NodeList dCollab = document.getElementsByTagName("demandeCollab");
             NodeList rGenerique = document.getElementsByTagName("reponseGenerique");
-            NodeList dStage = document.getElementsByTagName("demandeStage");
+            NodeList dStage = document.getElementsByTagName("demandeStage");*/
             /*
             System.out.println("Nombre d'offre collab : " + oCollab.getLength());
             System.out.println("Nombre de demande collab : " + dCollab.getLength());
