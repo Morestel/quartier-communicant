@@ -141,7 +141,8 @@
             <label for="Entreprise">Entreprise</label>
             <br />
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               id="DureeValidite"
               placeholder="Durée validité"
               name="validite"
@@ -208,7 +209,8 @@
             <input type="date" name="dateFin" class="input-form" required />
             <br />
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               id="DureeValidite"
               placeholder="Durée validité"
               name="validite"
@@ -231,7 +233,8 @@
           <h1>Demande catalogue</h1>
           <form method="POST" th:action="@{/demandeCatalogue}">
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               name="id"
               placeholder="Id"
               class="input-form"
@@ -241,14 +244,16 @@
 
             <input type="text" name="titreCatalogueDemande" placeholder="Titre du catalogue" class="input-form" required /> <br/>
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               name="quantite"
               placeholder="Quantité"
               class="input-form"
               required
             />
             <br /><input
-              type="text"
+              type="number"
+              min="0" max="1000"
               id="DureeValidite"
               placeholder="Durée validité"
               name="validite"
@@ -290,7 +295,8 @@
             <label for="Entreprise">Entreprise</label>
             <br />
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               id="DureeValidite"
               placeholder="Durée validité"
               name="validite"
@@ -325,14 +331,16 @@
             />
             <input type="date" name="dateFin" class="input-form" required />
             <br /><input
-              type="text"
+              type="number"
+              min="0" max="100000"
               name="remuneration"
               placeholder="Rémunération"
               class="input-form"
               required
             />
             <br /><input
-              type="text"
+              type="number"
+              min="0" max="1000"
               name="duree"
               placeholder="Durée"
               class="input-form"

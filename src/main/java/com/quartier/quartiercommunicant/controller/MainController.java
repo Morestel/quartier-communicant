@@ -33,6 +33,7 @@ import com.quartier.quartiercommunicant.model.Lettre;
 import com.quartier.quartiercommunicant.model.Message;
 import com.quartier.quartiercommunicant.model.Produit;
 import com.quartier.quartiercommunicant.model.ReponseStage;
+import com.quartier.quartiercommunicant.model.RpStage;
 import com.quartier.quartiercommunicant.model.UploadForm;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
@@ -49,6 +50,7 @@ import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 import com.quartier.quartiercommunicant.repository.ProduitRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
+import com.quartier.quartiercommunicant.repository.RpStageRepository;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -80,6 +82,9 @@ public class MainController {
 
     @Inject
     ReponseStageRepository aReponseStageRepository;
+
+    @Inject
+    RpStageRepository aRpStageRepository;
 
     @Inject
     CVRepository aCvRepository;
@@ -201,7 +206,7 @@ public class MainController {
 
     public void deplacerFichier(String source, String destination){
         try {
-            Path tmp = Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
+            /*Path tmp = */Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             System.err.println("Impossible de déplacer le fichier");
             e.printStackTrace();
@@ -367,10 +372,10 @@ public class MainController {
             */
 
             // Stock les types de messages dans une liste de noeud
-            NodeList oCollab = document.getElementsByTagName("offreCollab");
+            /*NodeList oCollab = document.getElementsByTagName("offreCollab");
             NodeList dCollab = document.getElementsByTagName("demandeCollab");
             NodeList rGenerique = document.getElementsByTagName("reponseGenerique");
-            NodeList dStage = document.getElementsByTagName("demandeStage");
+            NodeList dStage = document.getElementsByTagName("demandeStage");*/
             /*
             System.out.println("Nombre d'offre collab : " + oCollab.getLength());
             System.out.println("Nombre de demande collab : " + dCollab.getLength());
@@ -405,7 +410,11 @@ public class MainController {
 
             DemandeStage demandeStage = new DemandeStage();
             DmStage dmStage = new DmStage();
-            ReponseStage rpStage = new ReponseStage();
+
+            ReponseStage reponseStage = new ReponseStage();
+            List<RpStage> listRpStage = new ArrayList<>();
+            int nbRpStage = 0;
+            RpStage rpStage = new RpStage();
             CV cv = new CV();
             EtatCivil etatCivil = new EtatCivil();
             FormationStage formationStage = new FormationStage();
@@ -537,61 +546,75 @@ public class MainController {
                     }
 
                     
-                    /*
+                    
                     // Réponse de stage
                     if (elem.getElementsByTagName("reponseStage").getLength() > 0){
+
+                        reponseStage = new ReponseStage();
+                        rpStage = new RpStage();
+                        listRpStage = new ArrayList<>();
+                        nbRpStage = elem.getElementsByTagName("rpStage").getLength();
+                        System.err.println("Nombre de réponses de stage: " + nbRpStage);
+
+                        for (int rpStageTmp = 0; rpStageTmp < nbRpStage; rpStageTmp++) {
+
+                            id = elem.getElementsByTagName("id").item(rpStageTmp).getTextContent();
+                            objet = elem.getElementsByTagName("objet").item(rpStageTmp).getTextContent();
                         
-                        id = elem.getElementsByTagName("id").item(0).getTextContent();
-                        objet = elem.getElementsByTagName("objet").item(0).getTextContent();
+                            // Remplissage de l'état civil
+                            etatCivil = new EtatCivil(elem.getElementsByTagName("nom").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("prenom").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("dateNaissance").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("lieuResidence").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("photo").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("email").item(rpStageTmp).getTextContent()
+                                                    , Integer.valueOf(elem.getElementsByTagName("tel").item(rpStageTmp).getTextContent()));
+                            aEtatCivilRepository.save(etatCivil);
+
+                            // Remplissage de la formation
+                            formationStage = new FormationStage(elem.getElementsByTagName("titre").item(rpStageTmp).getTextContent()
+                                                            , elem.getElementsByTagName("dateDebut").item(rpStageTmp).getTextContent()
+                                                            , Integer.valueOf(elem.getElementsByTagName("duree").item(rpStageTmp).getTextContent())
+                                                            , elem.getElementsByTagName("lieu").item(rpStageTmp).getTextContent()
+                                                            , elem.getElementsByTagName("mention").item(rpStageTmp).getTextContent()
+                                                            , elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
+                            
+                            aFormationStageRepository.save(formationStage);
+                                        
+                            // Remplissage de l'expérience
+                            experience = new Experience(elem.getElementsByTagName("titre").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("dateDebut").item(rpStageTmp).getTextContent()
+                                                    , Integer.valueOf(elem.getElementsByTagName("duree").item(rpStageTmp).getTextContent())
+                                                    , elem.getElementsByTagName("lieu").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("fonction").item(rpStageTmp).getTextContent()
+                                                    , elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
+
+                            aExperienceRepository.save(experience);
+
+                            cv = new CV(etatCivil, formationStage, experience);
+                            aCvRepository.save(cv);
+
+                            lettre = new Lettre(etatCivil,
+                                                elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
+                            aLettreRepository.save(lettre);
+
+                            rpStage = new RpStage(Integer.valueOf(id), objet, cv, lettre);
+                            listRpStage.add(rpStage);
+                            aRpStageRepository.save(rpStage);
+
+                        }
+
+                        reponseStage = new ReponseStage(listRpStage);
+                        aReponseStageRepository.save(reponseStage);
                         
-                        // Remplissage de l'état civil
-                        etatCivil = new EtatCivil(elem.getElementsByTagName("nom").item(0).getTextContent()
-                                                , elem.getElementsByTagName("prenom").item(0).getTextContent()
-                                                , elem.getElementsByTagName("dateNaissance").item(0).getTextContent()
-                                                , elem.getElementsByTagName("lieuResidence").item(0).getTextContent()
-                                                , elem.getElementsByTagName("photo").item(0).getTextContent()
-                                                , elem.getElementsByTagName("email").item(0).getTextContent()
-                                                , Integer.valueOf(elem.getElementsByTagName("tel").item(0).getTextContent()));
-                        aEtatCivilRepository.save(etatCivil);
-
-                        // Remplissage de la formation
-                        formationStage = new FormationStage(elem.getElementsByTagName("titre").item(0).getTextContent()
-                                                          , elem.getElementsByTagName("dateDebut").item(0).getTextContent()
-                                                          , Integer.valueOf(elem.getElementsByTagName("duree").item(0).getTextContent())
-                                                          , elem.getElementsByTagName("lieu").item(0).getTextContent()
-                                                          , elem.getElementsByTagName("mention").item(0).getTextContent()
-                                                          , elem.getElementsByTagName("description").item(0).getTextContent());
-                        
-                        aFormationStageRepository.save(formationStage);
-                                    
-                        // Remplissage de l'expérience
-                        experience = new Experience(elem.getElementsByTagName("titre").item(0).getTextContent()
-                                                  , elem.getElementsByTagName("dateDebut").item(0).getTextContent()
-                                                  , Integer.valueOf(elem.getElementsByTagName("duree").item(0).getTextContent())
-                                                  , elem.getElementsByTagName("lieu").item(0).getTextContent()
-                                                  , elem.getElementsByTagName("fonction").item(0).getTextContent()
-                                                  , elem.getElementsByTagName("description").item(0).getTextContent());
-
-                        aExperienceRepository.save(experience);
-
-                        cv = new CV(etatCivil, formationStage, experience);
-                        aCvRepository.save(cv);
-
-                        lettre = new Lettre(etatCivil,
-                                            elem.getElementsByTagName("description").item(0).getTextContent());
-                        aLettreRepository.save(lettre);
-
-                        rpStage = new ReponseStage(objet, cv, lettre);
-                        aReponseStageRepository.save(rpStage);
-                        
-                        m = new Message("reponseStage", dateEnvoi, dureeValidite, rpStage);
+                        m = new Message("reponseStage", dateEnvoi, dureeValidite, reponseStage);
                         m.setId(id_message);
                         lMessage = fic.getListMess();
                         lMessage.add(m);
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
                     }
-                    */
+                    
 
                     
                     // Demande de catalogue
