@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.quartier.quartiercommunicant.model.CV;
 import com.quartier.quartiercommunicant.model.DemandeCatalogue;
+import com.quartier.quartiercommunicant.model.DemandeConference;
 import com.quartier.quartiercommunicant.model.CatalogueDemande;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
@@ -35,6 +36,7 @@ import com.quartier.quartiercommunicant.model.ReponseStage;
 import com.quartier.quartiercommunicant.model.UploadForm;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
+import com.quartier.quartiercommunicant.repository.DemandeConferenceRepository;
 import com.quartier.quartiercommunicant.repository.CatalogueDemandeRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.DmStageRepository;
@@ -105,6 +107,9 @@ public class MainController {
 
     @Inject
     ProduitRepository aProduitRepository;
+
+    @Inject
+    DemandeConferenceRepository aDemandeConferenceRepository;
 
     String tmpExpediteur = "";
     int idTmp = -1;
@@ -414,7 +419,7 @@ public class MainController {
             String titreCatalogueDemande;
 
             EnvoiBonCommande envoiBonCommande = new EnvoiBonCommande();
-
+            DemandeConference demandeConference = new DemandeConference();
             int nbDmStage = 0;
             List<DmStage> listDmStage = new ArrayList<>(); 
             NodeList nList = document.getElementsByTagName("message");

@@ -23,7 +23,7 @@ public class Fichier {
     private int checksum;
     private File fic;
 
-    @ManyToMany(cascade = CascadeType.MERGE)
+    @ManyToMany(cascade = CascadeType.REMOVE)
     private List<Message> listMess = new ArrayList<>();
 
     

@@ -3,6 +3,7 @@ package com.quartier.quartiercommunicant.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import lombok.Data;
 
@@ -59,10 +60,20 @@ public class Message {
 
     // Message demande de stage
     public Message(String type, String dateEnvoi, String dureeValidite, DemandeStage demandeStage){
+        //setId("1");
         setType(type);
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setDemandeStage(demandeStage);
+        setReponseStage(null);
+        setDemandeCatalogue(null);
+        setEnvoiBonCommande(null);
+        setContenu("");
+        setDescription("");
+        setDateDebut("");
+        setDateFin("");
+        setMsg("");
+        setIdMsgPrecedent("");
     }
 
     // Message réponse de stage

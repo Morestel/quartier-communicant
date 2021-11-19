@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" media="screen" href="../style.css">
+  <title>Labo</title>
+</head>
+
+<body>
+  <div class="main">
+    <div id="fenetre">
+      <div class="main-content">
+        
+        <form class="middle" method="POST" th:action="@{/toutEnvoyer}">
+            <button type="submit" class="btn custom-btn">Confirmer</button>
+          </form>
+
+        <ul>
+          <div class="messages-list">
+            <li th:each="message : ${listeMessage}">
+              <div th:switch="${message.type}">
+                <div th:case="'offreCollab'">
+                  <div class="card">
+                    <h1>Offre de collaboration</h1> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <span class="data">Durée de validité :</span> [[ ${message.dureeValidite} ]] <br>
+                    <span class="data">Description :</span> <br>[[ ${message.description}]] <br>
+                    <span class="data">Date début :</span> [[ ${message.dateDebut}]] <br>
+                    <span class="data">Date fin :</span> [[ ${message.dateFin}]] <br> <br>
+                  </div>
+                </div>
+                <div th:case="'demandeCollab'">
+                  <div class="card">
+                    <h1>Demande de collaboration</h1> <br> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                    <span class="data">Description</span> [[ ${message.description}]] <br>
+                    <span class="data">Date de début : </span> [[ ${message.dateDebut}]] <br>
+                    <span class="data">Date de fin : </span> [[ ${message.dateFin}]] <br> <br>
+                  </div>
+                </div>
+                <div th:case="'reponseGenerique'">
+                  <div class="card">
+                    <h1>Réponse générique</h1> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <span class="data">Durée de validité:</span>[[ ${message.dureeValidite} ]] <br>
+                    <span class="data">Message ; </span>[[ ${message.msg}]] <br>
+                    <span class="data">Id message précédent:</span>[[ ${message.idMsgPrecedent}]] <br> <br>
+                  </div>
+                </div>
+                <div th:case="'demandesStage'">
+                  <div class="card">
+                    <h1>Demande de stage/h1> <br>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Objet :</span>[[ ${message.demandeStage.objet} ]] <br>
+                      <span class="data">Description:</span>[[ ${message.demandeStage.description} ]] <br>
+                      <span class="data">Lieu:</span>[[ ${message.demandeStage.lieu} ]] <br>
+                      <span class="data">Rémunération:</span>[[ ${message.demandeStage.remuneration} ]] <br>
+                      <span class="data">Date de début:</span>[[ ${message.demandeStage.dateDebut} ]] <br>
+                      <span class="data">Durée:</span>[[ ${message.demandeStage.duree} ]] <br> <br>
+                  </div>
+                </div>
+
+                <div th:case="'reponseStage'">
+                  <div class="card">
+                    <h1>Demande de stage/h1> <br>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Objet :</span>[[ ${message.rpStage.objet} ]] <br>
+                      <span class="data">Description:</span>[[ ${message.demandeStage.description} ]] <br>
+                      <span class="data">Lieu:</span>[[ ${message.demandeStage.lieu} ]] <br>
+                      <span class="data">Rémunération:</span>[[ ${message.demandeStage.remuneration} ]] <br>
+                      <span class="data">Date de début:</span>[[ ${message.demandeStage.dateDebut} ]] <br>
+                      <span class="data">Durée:</span>[[ ${message.demandeStage.duree} ]] <br> <br>
+                  </div>
+                </div>
+
+                <div th:case="'envoiBonCommande'">
+                  <div class="card">
+                    <h1>Envoi bon de commande</h1> <br>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Date de commande :</span>[[ ${message.envoiBonCommande.dateCommande} ]] <br>
+                      <span th:each="produit: ${message.envoiBonCommande.listeProduit}">
+                        <span class="data">Id:</span>[[ ${produit.id} ]] <br>
+                        <span class="data">Nom:</span>[[ ${produit.nom} ]] <br>
+                        <span class="data">Prix:</span>[[ ${produit.prix} ]] <br>
+                        <span class="data">Quantite:</span>[[ ${produit.quantite} ]] <br>
+                      </span><br>
+                  </div>
+                </div>
+
+                <div th:case="*">
+                  <div class="card">
+                    <p>Unknown type of message</p>
+                  </div>
+                </div>
+              </div>
+            </li>
+        </ul>
+        <a th:href="@{/index}"><button class="bouton effect btm"><span>Back to Menu</span></button></a>
+      </div>
+    </div>
+  </div>
+  <!-- particles.js container -->
+  <div id="particles-js"></div>
+  </div>
+  <!-- scripts -->
+  <script src="../particles.js"></script>
+  <script src="../app.js"></script>
+  <script src="../vue.js"></script>
+  <script src="../fenetre.js"></script>
+
+  <script>
+    function remplacer(v) {
+      console.log(v);
+      document.getElementById("dirty").innerHTML = v;
+    }
+
+  </script>
+</body>
+
+</html>

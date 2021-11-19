@@ -20,6 +20,7 @@ import com.quartier.quartiercommunicant.model.Fichier;
 import com.quartier.quartiercommunicant.model.Message;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
+import com.quartier.quartiercommunicant.repository.DemandeConferenceRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.DmStageRepository;
 import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
@@ -86,6 +87,8 @@ public class MessageController {
 
     List<Message> listeMessage = new ArrayList<>();
     List<DmStage> listeDmStage = new ArrayList<>();
+    int totalDmStageEcole = 0;
+    int totalDmStageEntreprise = 0;
     List<CatalogueDemande> listeCatalogueDemande = new ArrayList<>();
 
     List<Message> listeMessageEcole = new ArrayList<>();
@@ -171,9 +174,9 @@ public class MessageController {
         Message m = new Message("demandeCatalogue", dateFormat.format(new Date()), validite, dmC);
         listeMessageMagasin.add(m);
 
-
         return "redirect:/envoiMessage";
     }
+
 
 
 
@@ -200,22 +203,43 @@ public class MessageController {
         aDmStageRepository.save(dmS);
         vListTemp.add(dmS);
         DemandeStage ds = new DemandeStage(vListTemp);
-
+        aDemandeStageRepository.save(ds);
         Message m = new Message("demandeStage", dateFormat.format(new Date()), validite, ds);
         switch (destinataire) {
         case "Magasin":
             listeMessageMagasin.add(m);
             break;
         case "Entreprise":
+            totalDmStageEntreprise++;
             listeMessageEntreprise.add(m);
             break;
         case "Ecole":
+            totalDmStageEcole++;
             listeMessageEcole.add(m);
             break;
         default:
             break;
 
         }
+
+        return "redirect:/envoiMessage";
+    }
+
+    @RequestMapping(value = "/waitingRoom")
+    public String waitingRoom(Model model){
+        ArrayList<Message> listeMessageP = new ArrayList<>();
+        listeMessageP.addAll(listeMessageEcole);
+        listeMessageP.addAll(listeMessageEntreprise);
+        listeMessageP.addAll(listeMessageMagasin);
+        model.addAttribute("listeEcole", listeMessageEcole);
+        model.addAttribute("listeEntreprise", listeMessageEntreprise);
+        model.addAttribute("listeMagasin", listeMessageMagasin);
+        model.addAttribute("listeMessage", listeMessageP);
+        return "WaitingRoom";
+    }
+
+    @RequestMapping(value = "/toutEnvoyerBis", method = RequestMethod.POST)
+    public String toutEnvoyerBis(){
 
         return "redirect:/envoiMessage";
     }
@@ -229,11 +253,11 @@ public class MessageController {
             EcrireMessages("Ecole");
         }
 
-        if (listeMessageEntreprise.size() > 0) {
+        if (!listeMessageEntreprise.isEmpty()) {
             EcrireMessages("Entreprise");
         }
 
-        if (listeMessageMagasin.size() > 0) {
+        if (!listeMessageMagasin.isEmpty()) {
             EcrireMessages("Magasin");
         }
 
@@ -243,7 +267,10 @@ public class MessageController {
         listeMessageMagasin = new ArrayList<>();
         listeMessage = new ArrayList<>();
         listeDmStage = new ArrayList<>();
-        listeCatalogueDemande = new ArrayList<>();
+        totalDmStageEcole = 0;
+        totalDmStageEntreprise = 0;
+        
+       listeCatalogueDemande = new ArrayList<>();
         return "redirect:/envoiMessage";
     }
 
@@ -369,16 +396,68 @@ public class MessageController {
                     out.write(vMessage);
                     trouve = false;
                     break;*/
+                    m.setId("Temp");
                     listeCatalogueDemande.add(m.getDemandeCatalogue().getListCatalogueDemande().get(0));
                     dureeValidite= m.getDureeValidite();
+                    aDemandeCatalogueRepository.save(m.getDemandeCatalogue());
+                    aMessageRepository.save(m);
                     break;
 
                 case "demandeStage":
                     // On regroupe toutes les demandes dans la liste
-                    listeDmStage.add(m.getDemandeStage().getListDmStage().get(0));
+                    listeDmStage.add(m.getDemandeStage().getListDmStage().get(0));  
                     dureeValidite = m.getDureeValidite();
+                    m.setId("Temp");
+                    aDemandeStageRepository.save(m.getDemandeStage());
+                    aMessageRepository.save(m);
+                    // On attend d'être arrivé au nombre total de messages contenant des demandes de stages avant de passer à l'enregistrement
+                    int totalDmStage = 0;
+                    switch(destinataire){
+                        case "Entreprise":
+                            totalDmStage = totalDmStageEntreprise; 
+                            break;
+                        case "Ecole":
+                            totalDmStage = totalDmStageEcole;
+                            break;
+                        default:
+                            totalDmStage = 0;
+                    }
+                    if (totalDmStage == listeDmStage.size()){
+                        DemandeStage ds = new DemandeStage(listeDmStage);
+                        aDemandeStageRepository.save(ds);
+                        while (i < 50000 && !trouve) {
+                            if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                id = "LAB-" + i;
+                                trouve = true;
+                            }
+                            i++;
+                        }
+                        
+                        m.setDemandeStage(ds);
+                        m.setId(id);
+                        out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                        aDemandeStageRepository.save(ds);
+                        aMessageRepository.save(m);
+                        vMessage = "\n\t<demandeStage>";
+                        for (DmStage vDmTemp : ds.getListDmStage()) {
+                            vMessage += "\n\t\t<dmStage>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<objet>"
+                                    + vDmTemp.getObjet() + "</objet>" + "\n\t\t\t<description>" + vDmTemp.getDescription()
+                                    + "</description>" + "\n\t\t\t<lieu>" + vDmTemp.getLieu() + "</lieu>"
+                                    + "\n\t\t\t<remuneration>" + vDmTemp.getRemuneration() + "</remuneration>"
+                                    + "\n\t\t\t<date>" + "\n\t\t\t\t<dateDebut>" + vDmTemp.getDateDebut() + "</dateDebut>"
+                                    + "\n\t\t\t\t<duree>" + vDmTemp.getDuree() + "</duree>" + "\n\t\t\t</date>"
+                                    + "\n\t\t</dmStage>";
+                        }
+                        vMessage += "\n\t</demandeStage>" + "\n</message>";
+                        out.write(vMessage);
+                        trouve = false;
+                        listeDmStage = new ArrayList<>();
+                    }
+                    break;
+                default : 
                     break;
                 }
+                
                 i++;
             }
 
@@ -396,8 +475,9 @@ public class MessageController {
                 trouve = false;
                 Message ms = new Message("demandeCatalogue", dateFormat.format(new Date()), dureeValidite, dc);
                 ms.setId(id);
-                out.write(ajoutHeaderMessage(ms.getId(), ms.getDateEnvoi(), ms.getDureeValidite()));
                 aMessageRepository.save(ms);
+                out.write(ajoutHeaderMessage(ms.getId(), ms.getDateEnvoi(), ms.getDureeValidite()));
+                
                 vMessage = "\n\t<demandeCatalogue>";
                 for (CatalogueDemande vDmTemp : dc.getListCatalogueDemande()) {
                     vMessage += "\n\t\t<CatalogueDemande>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<titreCatalogueDemande>"
@@ -409,35 +489,7 @@ public class MessageController {
                 out.write(vMessage);
             }
 
-            // On écrit le message à la fin pour tout ce qui concerne demande de stage
-            if (listeDmStage.size() != 0) {
-                DemandeStage ds = new DemandeStage(listeDmStage);
-                aDemandeStageRepository.save(ds);
-                while (i < 50000 && !trouve) {
-                    if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
-                        id = "LAB-" + i;
-                        trouve = true;
-                    }
-                    i++;
-                }
-                trouve = false;
-                Message ms = new Message("demandeStage", dateFormat.format(new Date()), dureeValidite, ds);
-                ms.setId(id);
-                out.write(ajoutHeaderMessage(ms.getId(), ms.getDateEnvoi(), ms.getDureeValidite()));
-                aMessageRepository.save(ms);
-                vMessage = "\n\t<demandeStage>";
-                for (DmStage vDmTemp : ds.getListDmStage()) {
-                    vMessage += "\n\t\t<dmStage>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<objet>"
-                            + vDmTemp.getObjet() + "</objet>" + "\n\t\t\t<description>" + vDmTemp.getDescription()
-                            + "</description>" + "\n\t\t\t<lieu>" + vDmTemp.getLieu() + "</lieu>"
-                            + "\n\t\t\t<remuneration>" + vDmTemp.getRemuneration() + "</remuneration>"
-                            + "\n\t\t\t<date>" + "\n\t\t\t\t<dateDebut>" + vDmTemp.getDateDebut() + "</dateDebut>"
-                            + "\n\t\t\t\t<duree>" + vDmTemp.getDuree() + "</duree>" + "\n\t\t\t</date>"
-                            + "\n\t\t</dmStage>";
-                }
-                vMessage += "\n\t</demandeStage>" + "\n</message>";
-                out.write(vMessage);
-            }
+            
             out.write(ajoutFin());
         } catch (IOException e) {
             e.printStackTrace();
@@ -445,10 +497,13 @@ public class MessageController {
         // On a fini on sauvegarde le fichier
         fic.setFic(new File("repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-" + id_fichier + ".xml"));
         fic.setListMess(listeMessage);
+        System.err.println("Problème ?");
         aFichierRepository.save(fic);
+        System.err.println("Problème ?");
         // On clear la liste de message aussi sinon si on envoie plusieurs fichiers on
         // ne fait que ajouter d'autres msg
         listeMessage = new ArrayList<>();
+        listeDmStage = new ArrayList<>();
     }
 
     @RequestMapping(value = "/reponseRapide", method = RequestMethod.POST)
