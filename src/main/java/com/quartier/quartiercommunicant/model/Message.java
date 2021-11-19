@@ -34,6 +34,10 @@ public class Message {
     private DemandeCatalogue demandeCatalogue;
     @OneToOne
     private EnvoiBonCommande envoiBonCommande;
+    @OneToOne
+    private DemandeConference demandeConference;
+    @OneToOne
+    private DemandeCommerciale demandeCommerciale;
     
     public Message(){
         
@@ -60,20 +64,10 @@ public class Message {
 
     // Message demande de stage
     public Message(String type, String dateEnvoi, String dureeValidite, DemandeStage demandeStage){
-        //setId("1");
         setType(type);
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setDemandeStage(demandeStage);
-        setReponseStage(null);
-        setDemandeCatalogue(null);
-        setEnvoiBonCommande(null);
-        setContenu("");
-        setDescription("");
-        setDateDebut("");
-        setDateFin("");
-        setMsg("");
-        setIdMsgPrecedent("");
     }
 
     // Message réponse de stage
@@ -98,6 +92,22 @@ public class Message {
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setEnvoiBonCommande(envoiBonCommande);
+    }
+
+    // Message demande de conférence
+    public Message(String type, String dateEnvoi, String dureeValidite, DemandeConference demandeConference){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setDemandeConference(demandeConference);
+    }
+
+    // Message demande commerciale
+    public Message(String type, String dateEnvoi, String dureeValidite, DemandeCommerciale demandeCommerciale){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setDemandeCommerciale(demandeCommerciale);
     }
 }
 

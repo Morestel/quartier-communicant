@@ -22,6 +22,7 @@ import com.quartier.quartiercommunicant.model.CV;
 import com.quartier.quartiercommunicant.model.DemandeCatalogue;
 import com.quartier.quartiercommunicant.model.DemandeConference;
 import com.quartier.quartiercommunicant.model.CatalogueDemande;
+import com.quartier.quartiercommunicant.model.Conference;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.EnvoiBonCommande;
@@ -39,6 +40,7 @@ import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.DemandeConferenceRepository;
 import com.quartier.quartiercommunicant.repository.CatalogueDemandeRepository;
+import com.quartier.quartiercommunicant.repository.ConferenceRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.DmStageRepository;
 import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
@@ -115,6 +117,9 @@ public class MainController {
 
     @Inject
     DemandeConferenceRepository aDemandeConferenceRepository;
+
+    @Inject
+    ConferenceRepository aConferenceRepository;
 
     String tmpExpediteur = "";
     int idTmp = -1;
@@ -393,6 +398,7 @@ public class MainController {
             String objet;
             String duree;
             int quantite;
+            String sujet;
             
             String msg;
             String idMsgPrecedent;
@@ -429,6 +435,10 @@ public class MainController {
 
             EnvoiBonCommande envoiBonCommande = new EnvoiBonCommande();
             DemandeConference demandeConference = new DemandeConference();
+            Conference conference = new Conference();
+            List<Conference> listeConference = new ArrayList<>();
+            int nbConference = 0;
+
             int nbDmStage = 0;
             List<DmStage> listDmStage = new ArrayList<>(); 
             NodeList nList = document.getElementsByTagName("message");
@@ -670,6 +680,32 @@ public class MainController {
                         fic.setListMess(lMessage);
                         aMessageRepository.save(m);
 
+                    }
+
+                    if (elem.getElementsByTagName("demandeConference").getLength() > 0){
+                       
+                        demandeConference = new DemandeConference();
+                        conference = new Conference();
+                        nbConference= elem.getElementsByTagName("conf").getLength();
+                        for (int nbConferenceTemp = 0; nbConferenceTemp < nbConference; nbConferenceTemp++){
+                            id = elem.getElementsByTagName("id").item(nbConferenceTemp).getTextContent();
+                            sujet = elem.getElementsByTagName("sujet").item(nbConferenceTemp).getTextContent();
+                            lieu = elem.getElementsByTagName("lieu").item(nbConferenceTemp).getTextContent();
+                            dateDebut = elem.getElementsByTagName("dateDebut").item(nbConferenceTemp).getTextContent();
+                            duree = elem.getElementsByTagName("dureeConference").item(nbConferenceTemp).getTextContent();
+                            conference = new Conference(id, sujet, lieu, dateDebut, Integer.valueOf(duree));
+                            listeConference.add(conference);
+                            aConferenceRepository.save(conference);
+                        }
+
+                        demandeConference = new DemandeConference(listeConference);
+                        aDemandeConferenceRepository.save(demandeConference);
+                        m = new Message("demandeConference", dateEnvoi, dureeValidite, demandeConference);
+                        m.setId(id_message);
+                        lMessage = fic.getListMess();
+                        lMessage.add(m);
+                        fic.setListMess(lMessage);
+                        aMessageRepository.save(m);
                     }
                 }
             }
