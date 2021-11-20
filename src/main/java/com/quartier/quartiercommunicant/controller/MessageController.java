@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import lombok.val;
 
 @Controller
 public class MessageController {
@@ -102,6 +104,9 @@ public class MessageController {
     List<Message> listeMessageMagasin = new ArrayList<>();
     List<Message> listeMessageEntreprise = new ArrayList<>();
 
+    String pattern = "HH:mm:ss dd-MM-YYYY";
+    SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+
     @RequestMapping(value = "/reponseGenerique", method = RequestMethod.POST)
     public String reponseGenerique(@RequestParam String textarea, @RequestParam String destinataire,
             @RequestParam String validite) {
@@ -133,8 +138,19 @@ public class MessageController {
             @RequestParam String dateDebut, @RequestParam String dateFin, @RequestParam String validite) {
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        Message m = new Message("demandeCollab", dateFormat.format(new Date()), validite, description, dateDebut,
-                dateFin);
+        
+        Date d = new Date();
+        Date dF = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+            dF = df.parse(dateFin);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Message m = new Message("demandeCollab", dateFormat.format(new Date()), validite, description, dateFormat.format(d),
+                dateFormat.format(dF));
         switch (destinataire) {
         case "Magasin":
             listeMessageMagasin.add(m);
@@ -187,9 +203,19 @@ public class MessageController {
 
     @RequestMapping(value = "/demandeCommerciale", method = RequestMethod.POST)
     public String demandeCommerciale(@RequestParam int prixProposition, @RequestParam String description, @RequestParam String validite, @RequestParam String dateDebut, @RequestParam String dateFin, @RequestParam String duree){
-        String pattern = "dd-MM-YYYY";
+        String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        DemandeCommerciale dc = new DemandeCommerciale(prixProposition, description, dateDebut, dateFin);
+        Date d = new Date();
+        Date dF = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+            dF = df.parse(dateFin);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DemandeCommerciale dc = new DemandeCommerciale(prixProposition, description, dateFormat.format(d), dateFormat.format(dF));
         Message m = new Message("demandeCommerciale", dateFormat.format(new Date()), validite, dc);
         aDemandeCommercialeRepository.save(dc);
         listeMessageMagasin.add(m);
@@ -202,7 +228,7 @@ public class MessageController {
     public String demandeStage(@RequestParam String objet, @RequestParam String description, @RequestParam String lieu,
             @RequestParam String remuneration, @RequestParam String dateDebut, @RequestParam String dateFin,
             @RequestParam String duree, @RequestParam String destinataire, @RequestParam String validite) {
-        String pattern = "dd-MM-YYYY";
+        String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 
         // On cherche un ID qui est libre dans les demandes de stages
@@ -216,7 +242,15 @@ public class MessageController {
 
         }
         List<DmStage> vListTemp = new ArrayList<>();
-        DmStage dmS = new DmStage(i, description, objet, lieu, Integer.valueOf(remuneration), dateDebut,
+        Date d = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DmStage dmS = new DmStage(i, description, objet, lieu, Integer.valueOf(remuneration), dateFormat.format(d),
                 Integer.valueOf(duree));
         aDmStageRepository.save(dmS);
         vListTemp.add(dmS);
@@ -336,7 +370,7 @@ public class MessageController {
         Fichier fic = new Fichier();
         fic.setDestinataire(destinataire);
         fic.setExpediteur("Laboratoire");
-        String pattern = "dd-MM-YYYY";
+        String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 
         int id_fichier = -1;
@@ -570,7 +604,7 @@ public class MessageController {
         int i = 0;
         boolean trouve = false;
         
-        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "90", msg, idMsgPrecedent);
+        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "2160", msg, idMsgPrecedent);
         while (i < 50000 && !trouve) {
             if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                 m.setId("LAB-" + i);
@@ -579,7 +613,6 @@ public class MessageController {
             i++;
         }
         aMessageRepository.save(m);
-
         try (FileWriter fw = new FileWriter(
             "repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-" + m.getId() + ".xml", false);
             BufferedWriter bw = new BufferedWriter(fw);

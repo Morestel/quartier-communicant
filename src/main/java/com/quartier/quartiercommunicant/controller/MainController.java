@@ -296,8 +296,8 @@ public class MainController {
             
             document.getDocumentElement().normalize();
             String id = document.getDocumentElement().getAttribute("id");
-            String 
-            tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
+            System.err.println(id);
+            String tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
             switch(tmpExpediteur.toLowerCase()){
                 case "magasins":
                     tmpExpediteur = "Magasin";
@@ -322,7 +322,7 @@ public class MainController {
                 return "ERR-DESTINATAIRE";
             }
             fic.setDestinataire(destinataire);
-            
+           
             System.out.println("Vérification si le fichier a déjà été traité ...");
             for (Fichier f : aFichierRepository.findAll()){
                 if (f.getId().equals(id)){ // Fichier déjà traité
