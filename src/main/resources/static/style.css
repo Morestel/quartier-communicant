@@ -608,3 +608,31 @@ h1 {
   left : 20px;
   top : 20px;
 }
+
+#lectureFichierInfo{
+  text-align: center;
+}
+
+#lectureFichierInfo table{
+  font-size: 150%;
+  border-collapse: collapse;
+  color: rgb(255,255,255);
+  margin: 10% auto 10% auto;
+  width : 80%;
+  background-color: #191c29;
+  text-align: justify;
+}
+
+#lectureFichierInfo th {
+  background-color: rgba(46, 48, 146, 0.9);
+  color: rgb(239, 239, 239);
+}
+
+#lectureFichierInfo td, #lectureFichierInfo th {
+  border: 1px solid rgba(248, 147, 30, 1);
+  padding: 20px;
+}
+
+#lectureFichierInfo tr:hover {
+  background-color: rgba(248, 147, 30, 0.1);
+}

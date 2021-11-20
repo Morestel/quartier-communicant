@@ -29,11 +29,29 @@
 
 
 
-
-        <span class="data">Expéditeur: </span>[[ ${fichier.expediteur} ]]
-        [[ ${fichier.destinataire} ]]
-        <span class="data">Nombre de messages: </span>[[ ${fichier.checksum} ]]
-        <span class="data">ID du fichier: </span>[[ ${fichier.id } ]]
+      <div id="lectureFichierInfo">
+          <table>
+              <thead>
+                  <tr>
+                      <th colspan="2">Détail des messages :</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td class="data">Expéditeur :</td>
+                      <td>[[ ${fichier.expediteur} ]]</td>
+                  </tr>
+                  <tr>
+                        <td class="data">Nombre de messages :</td>
+                        <td>[[ ${fichier.checksum} ]]</td>
+                  </tr>
+                  <tr>
+                        <td class="data">ID du fichier :</td>
+                        <td>[[ ${fichier.id } ]]</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
         <div id="dirty" style="display:none">Temp</div>
         <ul>
           <div class="messages-list">
