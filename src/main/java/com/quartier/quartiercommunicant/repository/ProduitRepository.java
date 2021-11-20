@@ -4,6 +4,6 @@ import com.quartier.quartiercommunicant.model.Produit;
 
 import org.springframework.data.repository.CrudRepository;
 
-public interface ProduitRepository extends CrudRepository<Produit, Integer>{
+public interface ProduitRepository extends CrudRepository<Produit, String>{
     
 }

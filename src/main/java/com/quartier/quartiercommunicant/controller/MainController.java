@@ -122,7 +122,7 @@ public class MainController {
     ConferenceRepository aConferenceRepository;
 
     String tmpExpediteur = "";
-    int idTmp = -1;
+    String idTmp = "-1";
     
     @RequestMapping(value = {"index", "" }, method = RequestMethod.GET)
     public String index(Model model){
@@ -201,7 +201,7 @@ public class MainController {
 
     @RequestMapping("/fichier/{id}")
     public String lectureFichier(Model model, @PathVariable String id){
-        Fichier fic = aFichierRepository.findFichierById(Integer.valueOf(id));
+        Fichier fic = aFichierRepository.findFichierById(id);
         
         model.addAttribute("listeMessage", fic.getListMess());
         model.addAttribute("fichier", fic);
@@ -211,7 +211,7 @@ public class MainController {
 
     public void deplacerFichier(String source, String destination){
         try {
-            /*Path tmp = */Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
+            Files.move(Paths.get("repertoire/" + source), Paths.get("repertoire/" + destination + "/" + source),  StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             System.err.println("Impossible de déplacer le fichier");
             e.printStackTrace();
@@ -295,23 +295,37 @@ public class MainController {
             Document document = db.parse(fic.getFic());
             
             document.getDocumentElement().normalize();
-            int id = Integer.valueOf(document.getDocumentElement().getAttribute("id"));
-            
+            String id = document.getDocumentElement().getAttribute("id");
+            String 
             tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
+            switch(tmpExpediteur.toLowerCase()){
+                case "magasins":
+                    tmpExpediteur = "Magasin";
+                    break;
+                case "ecoles":
+                    tmpExpediteur = "Ecole";
+                    break;
+                case "entreprises":
+                    tmpExpediteur = "Entreprise";
+                    break;
+                default:
+                    break;
+            }
             fic.setExpediteur(tmpExpediteur);
+           
             if (!aFichierRepository.findById(id).isEmpty() && tmpExpediteur.equals("Laboratoire")){ // Si il existe déjà et qu'on est l'expéditeur
                 idTmp = id;
                 return "ERR-EXPEDITEUR";
             }
             String destinataire = document.getElementsByTagName("destinataire").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
-            if (!destinataire.equals("Laboratoire")){
+            if (!destinataire.equalsIgnoreCase("Laboratoire") && !destinataire.equalsIgnoreCase("Laboratoires")){
                 return "ERR-DESTINATAIRE";
             }
             fic.setDestinataire(destinataire);
             
             System.out.println("Vérification si le fichier a déjà été traité ...");
             for (Fichier f : aFichierRepository.findAll()){
-                if (f.getId() == id){ // Fichier déjà traité
+                if (f.getId().equals(id)){ // Fichier déjà traité
                     return "ERR-IDFICHIER";
                 }
             }
@@ -344,13 +358,13 @@ public class MainController {
     // Rajoute un préfixe pour indiquer de qui est le message (Afin d'éviter un remplacement des messages dans la base de données au cas où un message de deux entités différentes aient le même id)
     public String ajoutPrefixe(String id, String expediteur){
         String finalId;
-        if (expediteur.toLowerCase().matches("ecole")){
+        if (expediteur.toLowerCase().matches("ecole") || expediteur.toLowerCase().matches("ecoles")){
             finalId = "ECO-";
         }
-        else if (expediteur.toLowerCase().matches("entreprise")){
+        else if (expediteur.toLowerCase().matches("entreprise") || expediteur.toLowerCase().matches("entreprises")){
             finalId = "ENT-";
         }
-        else if (expediteur.toLowerCase().matches("magasin")){
+        else if (expediteur.toLowerCase().matches("magasin") || expediteur.toLowerCase().matches("magasins")){
             finalId = "MAG-";
         }
         else{
@@ -662,15 +676,15 @@ public class MainController {
                         id = elem.getElementsByTagName("numCommande").item(0).getTextContent();
                         dateCommande = elem.getElementsByTagName("dateCommande").item(0).getTextContent(); 
                 
-                        produit = new Produit(Integer.valueOf(elem.getElementsByTagName("produit").item(0).getAttributes().item(0).getTextContent())
+                        produit = new Produit(elem.getElementsByTagName("produit").item(0).getAttributes().item(0).getTextContent()
                                             , elem.getElementsByTagName("nom").item(0).getTextContent()
-                                            , Integer.valueOf(elem.getElementsByTagName("prix").item(0).getTextContent())
-                                            , Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent())); 
+                                            , Float.valueOf(elem.getElementsByTagName("prix").item(0).getTextContent().replaceAll("\\s", ""))
+                                            , Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent().replaceAll("\\s", ""))); 
                         
                                             
                         aProduitRepository.save(produit);                
                         listeProduit.add(produit);
-                        envoiBonCommande = new EnvoiBonCommande(Integer.valueOf(id), dateCommande, listeProduit, Integer.valueOf(elem.getElementsByTagName("prixCommande").item(0).getTextContent()));
+                        envoiBonCommande = new EnvoiBonCommande(id, dateCommande, listeProduit, Float.valueOf(elem.getElementsByTagName("prixCommande").item(0).getTextContent().replaceAll("\\s", "")));
                         aBonCommandeRepository.save(envoiBonCommande);
 
                         m = new Message("envoiBonCommande", dateEnvoi, dureeValidite, envoiBonCommande);

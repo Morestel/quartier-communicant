@@ -13,17 +13,17 @@ import lombok.Data;
 public class EnvoiBonCommande {
     
     @Id
-    private int id;
+    private String id;
     private String dateCommande;
     @OneToMany
     private List<Produit> listeProduit; 
-    private int prixCommande;
+    private float prixCommande;
 
     public EnvoiBonCommande(){
         /* */
     }
 
-    public EnvoiBonCommande(int id, String dateCommande, List<Produit> listeProduit, int prixCommande) {
+    public EnvoiBonCommande(String id, String dateCommande, List<Produit> listeProduit, float prixCommande) {
         this.id = id;
         this.dateCommande = dateCommande;
         this.listeProduit = listeProduit;

@@ -42,7 +42,7 @@
                 <div th:case="'offreCollab'">
                   <div class="card">
                     <h1>Offre de collaboration</h1> <br>
-                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité :</span> [[ ${message.dureeValidite} ]] <br>
                     <span class="data">Description :</span> <br>[[ ${message.description}]] <br>
@@ -53,7 +53,7 @@
                 <div th:case="'demandeCollab'">
                   <div class="card">
                     <h1>Demande de collaboration</h1> <br> <br>
-                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                     <span class="data">Description</span> [[ ${message.description}]] <br>
@@ -64,7 +64,7 @@
                 <div th:case="'reponseGenerique'">
                   <div class="card">
                     <h1>Réponse générique</h1> <br>
-                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité:</span>[[ ${message.dureeValidite} ]] <br>
                     <span class="data">Message ; </span>[[ ${message.msg}]] <br>
@@ -74,7 +74,7 @@
                 <div th:case="'demandesStage'">
                   <div class="card">
                     <h1>Demande de stage/h1> <br>
-                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Objet :</span>[[ ${message.demandeStage.objet} ]] <br>
@@ -89,7 +89,7 @@
                 <div th:case="'reponseStage'">
                   <div class="card">
                     <h1>Demande de stage/h1> <br>
-                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Objet :</span>[[ ${message.rpStage.objet} ]] <br>
@@ -104,7 +104,7 @@
                 <div th:case="'envoiBonCommande'">
                   <div class="card">
                     <h1>Envoi bon de commande</h1> <br>
-                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Date de commande :</span>[[ ${message.envoiBonCommande.dateCommande} ]] <br>

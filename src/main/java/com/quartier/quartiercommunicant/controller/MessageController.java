@@ -341,10 +341,10 @@ public class MessageController {
 
         int id_fichier = -1;
         while (i < 5000 && !trouve) {
-            if (aFichierRepository.findById(i).isEmpty()) {
+            if (aFichierRepository.findById("LAB-" + i).isEmpty()) {
                 trouve = true;
                 id_fichier = i;
-                fic.setId(i);
+                fic.setId("LAB-" + i);
             }
             i++;
         }

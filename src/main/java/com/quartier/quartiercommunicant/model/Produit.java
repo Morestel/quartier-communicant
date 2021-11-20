@@ -10,16 +10,16 @@ import lombok.Data;
 public class Produit {
     
     @Id
-    private int id;
+    private String id;
     private String nom;
-    private int prix;
+    private float prix;
     private int quantite;
     
     public Produit(){
         /* */
     }
 
-    public Produit(int id, String nom, int prix, int quantite) {
+    public Produit(String id, String nom, float prix, int quantite) {
         this.id = id;
         this.nom = nom;
         this.prix = prix;
