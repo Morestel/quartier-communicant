@@ -10,7 +10,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,6 +62,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.thymeleaf.util.DateUtils;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -495,239 +499,256 @@ public class MainController {
                     System.out.println("Durée validité : " + elem.getElementsByTagName("dureeValidite").item(0).getTextContent());
                     dateEnvoi = elem.getElementsByTagName("dateEnvoi").item(0).getTextContent();
                     dureeValidite = elem.getElementsByTagName("dureeValidite").item(0).getTextContent();
-
-                    // Offre de collaborations
-                    if (elem.getElementsByTagName("offreCollab").getLength() > 0){
-
-                        description = elem.getElementsByTagName("description").item(0).getTextContent();
-                        dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
-                        dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();
-
-                        m = new Message("offreCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
-                        System.err.println("Sauvegarde effectuée");
+                   
+                    // On récupère la date d'envoi, on ajoute la durée de validité et on compare à la date d'aujourd'hui
+                    String pattern = "HH:mm:ss dd-MM-yyyy";
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+                    Date debut = new Date();
+                    Calendar cal = Calendar.getInstance();
+                    
+                    try {
+                        debut = dateFormat.parse(dateEnvoi);
+                        cal.setTime(debut);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
+                    cal.add(Calendar.HOUR_OF_DAY, Integer.parseInt(dureeValidite));
                     
-                    // Demande de collaboration
-                    
-                    if (elem.getElementsByTagName("demandeCollab").getLength() > 0){
+                    if (elem.getTextContent().matches("\\A\\p{ASCII}*\\z") && cal.getTime().after(new Date())){ // Vérification du message en ASCII ET si la date n'est pas dépassée
 
-                        description = elem.getElementsByTagName("description").item(0).getTextContent();
-                        dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
-                        dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();   
-                        
-                        m = new Message("demandeCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
-                    }
+                        // Offre de collaborations
+                        if (elem.getElementsByTagName("offreCollab").getLength() > 0){
 
-                    // Réponse générique
-                    if (elem.getElementsByTagName("reponseGenerique").getLength() > 0){
+                            description = elem.getElementsByTagName("description").item(0).getTextContent();
+                            dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
+                            dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();
 
-                        msg = elem.getElementsByTagName("msg").item(0).getTextContent();
-                        idMsgPrecedent = elem.getElementsByTagName("idMsgPrécédent").item(0).getTextContent();
-
-                        m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
-                    }
-                    
-                    
-                    // Demande de stage                    
-                    if (elem.getElementsByTagName("demandeStage").getLength() > 0){
-                        demandeStage = new DemandeStage();
-                        dmStage = new DmStage();
-                        listDmStage = new ArrayList<>();
-                        nbDmStage = elem.getElementsByTagName("dmStage").getLength();
-                        System.err.println("Nombre de demandes de stage: " + nbDmStage);
-                        for (int dmStageTemp = 0; dmStageTemp < nbDmStage; dmStageTemp++){
-
-                            id = elem.getElementsByTagName("id").item(dmStageTemp).getTextContent();
-                            objet = elem.getElementsByTagName("objet").item(dmStageTemp).getTextContent();
-                            description = elem.getElementsByTagName("description").item(dmStageTemp).getTextContent();
-                            lieu = elem.getElementsByTagName("lieu").item(dmStageTemp).getTextContent();
-                            dateDebut = elem.getElementsByTagName("dateDebut").item(dmStageTemp).getTextContent();
-                            remuneration = elem.getElementsByTagName("remuneration").item(dmStageTemp).getTextContent();
-                            duree = elem.getElementsByTagName("duree").item(dmStageTemp).getTextContent();
-                            System.err.println("DUREE " + duree);
-                            System.err.println("INFORMATION DEMANDE DE STAGE : " + id + " " + objet + " " + description + " " + lieu + " " + dateDebut + " " + remuneration + " " + duree);
-
-                            dmStage = new DmStage(Integer.valueOf(id), description, objet, lieu, Integer.valueOf(remuneration), dateDebut, Integer.valueOf(duree));
-                            listDmStage.add(dmStage);
-                            System.err.println("Taille de la liste " + listDmStage.size());
-                            aDmStageRepository.save(dmStage);
+                            m = new Message("offreCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+                            System.err.println("Sauvegarde effectuée");
                         }
-                        demandeStage = new DemandeStage(listDmStage);
-                        aDemandeStageRepository.save(demandeStage); // On sauve la demande de stage
-                        m = new Message("demandeStage", dateEnvoi, dureeValidite, demandeStage);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
-                    }
-
-                    
-                    
-                    // Réponse de stage
-                    if (elem.getElementsByTagName("reponseStage").getLength() > 0){
-
-                        reponseStage = new ReponseStage();
-                        rpStage = new RpStage();
-                        listRpStage = new ArrayList<>();
-                        nbRpStage = elem.getElementsByTagName("rpStage").getLength();
-                        System.err.println("Nombre de réponses de stage: " + nbRpStage);
-
-                        for (int rpStageTmp = 0; rpStageTmp < nbRpStage; rpStageTmp++) {
-
-                            id = elem.getElementsByTagName("id").item(rpStageTmp).getTextContent();
-                            objet = elem.getElementsByTagName("objet").item(rpStageTmp).getTextContent();
                         
-                            // Remplissage de l'état civil
-                            etatCivil = new EtatCivil(elem.getElementsByTagName("nom").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("prenom").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("dateNaissance").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("lieuResidence").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("photo").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("email").item(rpStageTmp).getTextContent()
-                                                    , Integer.valueOf(elem.getElementsByTagName("tel").item(rpStageTmp).getTextContent()));
-                            aEtatCivilRepository.save(etatCivil);
+                        // Demande de collaboration
+                        
+                        if (elem.getElementsByTagName("demandeCollab").getLength() > 0){
 
-                            // Remplissage de la formation
-                            formationStage = new FormationStage(elem.getElementsByTagName("titre").item(rpStageTmp).getTextContent()
-                                                            , elem.getElementsByTagName("dateDebut").item(rpStageTmp).getTextContent()
-                                                            , Integer.valueOf(elem.getElementsByTagName("duree").item(rpStageTmp).getTextContent())
-                                                            , elem.getElementsByTagName("lieu").item(rpStageTmp).getTextContent()
-                                                            , elem.getElementsByTagName("mention").item(rpStageTmp).getTextContent()
-                                                            , elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
+                            description = elem.getElementsByTagName("description").item(0).getTextContent();
+                            dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
+                            dateFin = elem.getElementsByTagName("dateFin").item(0).getTextContent();   
                             
-                            aFormationStageRepository.save(formationStage);
-                                        
-                            // Remplissage de l'expérience
-                            experience = new Experience(elem.getElementsByTagName("titre").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("dateDebut").item(rpStageTmp).getTextContent()
-                                                    , Integer.valueOf(elem.getElementsByTagName("duree").item(rpStageTmp).getTextContent())
-                                                    , elem.getElementsByTagName("lieu").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("fonction").item(rpStageTmp).getTextContent()
-                                                    , elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
-
-                            aExperienceRepository.save(experience);
-
-                            cv = new CV(etatCivil, formationStage, experience);
-                            aCvRepository.save(cv);
-
-                            lettre = new Lettre(etatCivil,
-                                                elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
-                            aLettreRepository.save(lettre);
-
-                            rpStage = new RpStage(Integer.valueOf(id), objet, cv, lettre);
-                            listRpStage.add(rpStage);
-                            aRpStageRepository.save(rpStage);
-
+                            m = new Message("demandeCollab", dateEnvoi, dureeValidite, description, dateDebut, dateFin);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
                         }
 
-                        reponseStage = new ReponseStage(listRpStage);
-                        aReponseStageRepository.save(reponseStage);
-                        
-                        m = new Message("reponseStage", dateEnvoi, dureeValidite, reponseStage);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
-                    }
-                    
+                        // Réponse générique
+                        if (elem.getElementsByTagName("reponseGenerique").getLength() > 0){
 
-                    
-                    // Demande de catalogue
-                    if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
-                        demandeCatalogue = new DemandeCatalogue();
-                        catalogueDemande = new CatalogueDemande();
-                        listCatalogueDemande = new ArrayList<>();
-                        nbCatalogueDemande = elem.getElementsByTagName("catalogueDemande").getLength();
-                        System.err.println("Nombre de demandes de catalogue: " + nbCatalogueDemande);
-                        for (int nbCatalogueDemandeTemp = 0; nbCatalogueDemandeTemp < nbCatalogueDemande; nbCatalogueDemandeTemp++){
+                            msg = elem.getElementsByTagName("msg").item(0).getTextContent();
+                            idMsgPrecedent = elem.getElementsByTagName("idMsgPrécédent").item(0).getTextContent();
 
-                            id = elem.getElementsByTagName("id").item(nbCatalogueDemandeTemp).getTextContent();
-                            titreCatalogueDemande = elem.getElementsByTagName("titreCatalogueDemande").item(nbCatalogueDemandeTemp).getTextContent();
-                            quantite = Integer.parseInt(elem.getElementsByTagName("quantite").item(nbCatalogueDemandeTemp).getTextContent());
-
-                            catalogueDemande = new CatalogueDemande(Integer.valueOf(id), titreCatalogueDemande, quantite);
-                            listCatalogueDemande.add(catalogueDemande);
-                            System.err.println("Taille de la liste " + listCatalogueDemande.size());
-                            aCatalogueDemandeRepository.save(catalogueDemande);
+                            m = new Message("reponseGenerique", dateEnvoi, dureeValidite, msg, idMsgPrecedent);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
                         }
-                        demandeCatalogue = new DemandeCatalogue(listCatalogueDemande);
-                        aDemandeCatalogueRepository.save(demandeCatalogue); // On sauve la demande de catalogue
-                        m = new Message("demandeCatalogue", dateEnvoi, dureeValidite, demandeCatalogue);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
-                    }
-                    
-                    
-                    // Envoi de bon de commande
-                    if (elem.getElementsByTagName("envoiBonCommande").getLength() > 0){
-
-                        id = elem.getElementsByTagName("numCommande").item(0).getTextContent();
-                        dateCommande = elem.getElementsByTagName("dateCommande").item(0).getTextContent(); 
-                
-                        produit = new Produit(elem.getElementsByTagName("produit").item(0).getAttributes().item(0).getTextContent()
-                                            , elem.getElementsByTagName("nom").item(0).getTextContent()
-                                            , Float.valueOf(elem.getElementsByTagName("prix").item(0).getTextContent().replaceAll("\\s", ""))
-                                            , Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent().replaceAll("\\s", ""))); 
                         
+                        
+                        // Demande de stage                    
+                        if (elem.getElementsByTagName("demandeStage").getLength() > 0){
+                            demandeStage = new DemandeStage();
+                            dmStage = new DmStage();
+                            listDmStage = new ArrayList<>();
+                            nbDmStage = elem.getElementsByTagName("dmStage").getLength();
+                            System.err.println("Nombre de demandes de stage: " + nbDmStage);
+                            for (int dmStageTemp = 0; dmStageTemp < nbDmStage; dmStageTemp++){
+
+                                id = elem.getElementsByTagName("id").item(dmStageTemp).getTextContent();
+                                objet = elem.getElementsByTagName("objet").item(dmStageTemp).getTextContent();
+                                description = elem.getElementsByTagName("description").item(dmStageTemp).getTextContent();
+                                lieu = elem.getElementsByTagName("lieu").item(dmStageTemp).getTextContent();
+                                dateDebut = elem.getElementsByTagName("dateDebut").item(dmStageTemp).getTextContent();
+                                remuneration = elem.getElementsByTagName("remuneration").item(dmStageTemp).getTextContent();
+                                duree = elem.getElementsByTagName("duree").item(dmStageTemp).getTextContent();
+                                System.err.println("DUREE " + duree);
+                                System.err.println("INFORMATION DEMANDE DE STAGE : " + id + " " + objet + " " + description + " " + lieu + " " + dateDebut + " " + remuneration + " " + duree);
+
+                                dmStage = new DmStage(Integer.valueOf(id), description, objet, lieu, Integer.valueOf(remuneration), dateDebut, Integer.valueOf(duree));
+                                listDmStage.add(dmStage);
+                                System.err.println("Taille de la liste " + listDmStage.size());
+                                aDmStageRepository.save(dmStage);
+                            }
+                            demandeStage = new DemandeStage(listDmStage);
+                            aDemandeStageRepository.save(demandeStage); // On sauve la demande de stage
+                            m = new Message("demandeStage", dateEnvoi, dureeValidite, demandeStage);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+                        }
+
+                        
+                        
+                        // Réponse de stage
+                        if (elem.getElementsByTagName("reponseStage").getLength() > 0){
+
+                            reponseStage = new ReponseStage();
+                            rpStage = new RpStage();
+                            listRpStage = new ArrayList<>();
+                            nbRpStage = elem.getElementsByTagName("rpStage").getLength();
+                            System.err.println("Nombre de réponses de stage: " + nbRpStage);
+
+                            for (int rpStageTmp = 0; rpStageTmp < nbRpStage; rpStageTmp++) {
+
+                                id = elem.getElementsByTagName("id").item(rpStageTmp).getTextContent();
+                                objet = elem.getElementsByTagName("objet").item(rpStageTmp).getTextContent();
+                            
+                                // Remplissage de l'état civil
+                                etatCivil = new EtatCivil(elem.getElementsByTagName("nom").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("prenom").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("dateNaissance").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("lieuResidence").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("photo").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("email").item(rpStageTmp).getTextContent()
+                                                        , Integer.valueOf(elem.getElementsByTagName("tel").item(rpStageTmp).getTextContent()));
+                                aEtatCivilRepository.save(etatCivil);
+
+                                // Remplissage de la formation
+                                formationStage = new FormationStage(elem.getElementsByTagName("titre").item(rpStageTmp).getTextContent()
+                                                                , elem.getElementsByTagName("dateDebut").item(rpStageTmp).getTextContent()
+                                                                , Integer.valueOf(elem.getElementsByTagName("duree").item(rpStageTmp).getTextContent())
+                                                                , elem.getElementsByTagName("lieu").item(rpStageTmp).getTextContent()
+                                                                , elem.getElementsByTagName("mention").item(rpStageTmp).getTextContent()
+                                                                , elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
+                                
+                                aFormationStageRepository.save(formationStage);
                                             
-                        aProduitRepository.save(produit);                
-                        listeProduit.add(produit);
-                        envoiBonCommande = new EnvoiBonCommande(id, dateCommande, listeProduit, Float.valueOf(elem.getElementsByTagName("prixCommande").item(0).getTextContent().replaceAll("\\s", "")));
-                        aBonCommandeRepository.save(envoiBonCommande);
+                                // Remplissage de l'expérience
+                                experience = new Experience(elem.getElementsByTagName("titre").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("dateDebut").item(rpStageTmp).getTextContent()
+                                                        , Integer.valueOf(elem.getElementsByTagName("duree").item(rpStageTmp).getTextContent())
+                                                        , elem.getElementsByTagName("lieu").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("fonction").item(rpStageTmp).getTextContent()
+                                                        , elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
 
-                        m = new Message("envoiBonCommande", dateEnvoi, dureeValidite, envoiBonCommande);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
+                                aExperienceRepository.save(experience);
 
-                    }
+                                cv = new CV(etatCivil, formationStage, experience);
+                                aCvRepository.save(cv);
 
-                    if (elem.getElementsByTagName("demandeConference").getLength() > 0){
-                       
-                        demandeConference = new DemandeConference();
-                        conference = new Conference();
-                        nbConference= elem.getElementsByTagName("conf").getLength();
-                        for (int nbConferenceTemp = 0; nbConferenceTemp < nbConference; nbConferenceTemp++){
-                            id = elem.getElementsByTagName("id").item(nbConferenceTemp).getTextContent();
-                            sujet = elem.getElementsByTagName("sujet").item(nbConferenceTemp).getTextContent();
-                            lieu = elem.getElementsByTagName("lieu").item(nbConferenceTemp).getTextContent();
-                            dateDebut = elem.getElementsByTagName("dateDebut").item(nbConferenceTemp).getTextContent();
-                            duree = elem.getElementsByTagName("dureeConference").item(nbConferenceTemp).getTextContent();
-                            conference = new Conference(id, sujet, lieu, dateDebut, Integer.valueOf(duree));
-                            listeConference.add(conference);
-                            aConferenceRepository.save(conference);
+                                lettre = new Lettre(etatCivil,
+                                                    elem.getElementsByTagName("description").item(rpStageTmp).getTextContent());
+                                aLettreRepository.save(lettre);
+
+                                rpStage = new RpStage(Integer.valueOf(id), objet, cv, lettre);
+                                listRpStage.add(rpStage);
+                                aRpStageRepository.save(rpStage);
+
+                            }
+
+                            reponseStage = new ReponseStage(listRpStage);
+                            aReponseStageRepository.save(reponseStage);
+                            
+                            m = new Message("reponseStage", dateEnvoi, dureeValidite, reponseStage);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+                        }
+                        
+
+                        
+                        // Demande de catalogue
+                        if (elem.getElementsByTagName("demandeCatalogue").getLength() > 0){
+                            demandeCatalogue = new DemandeCatalogue();
+                            catalogueDemande = new CatalogueDemande();
+                            listCatalogueDemande = new ArrayList<>();
+                            nbCatalogueDemande = elem.getElementsByTagName("catalogueDemande").getLength();
+                            System.err.println("Nombre de demandes de catalogue: " + nbCatalogueDemande);
+                            for (int nbCatalogueDemandeTemp = 0; nbCatalogueDemandeTemp < nbCatalogueDemande; nbCatalogueDemandeTemp++){
+
+                                id = elem.getElementsByTagName("id").item(nbCatalogueDemandeTemp).getTextContent();
+                                titreCatalogueDemande = elem.getElementsByTagName("titreCatalogueDemande").item(nbCatalogueDemandeTemp).getTextContent();
+                                quantite = Integer.parseInt(elem.getElementsByTagName("quantite").item(nbCatalogueDemandeTemp).getTextContent());
+
+                                catalogueDemande = new CatalogueDemande(Integer.valueOf(id), titreCatalogueDemande, quantite);
+                                listCatalogueDemande.add(catalogueDemande);
+                                System.err.println("Taille de la liste " + listCatalogueDemande.size());
+                                aCatalogueDemandeRepository.save(catalogueDemande);
+                            }
+                            demandeCatalogue = new DemandeCatalogue(listCatalogueDemande);
+                            aDemandeCatalogueRepository.save(demandeCatalogue); // On sauve la demande de catalogue
+                            m = new Message("demandeCatalogue", dateEnvoi, dureeValidite, demandeCatalogue);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+                        }
+                        
+                        
+                        // Envoi de bon de commande
+                        if (elem.getElementsByTagName("envoiBonCommande").getLength() > 0){
+
+                            id = elem.getElementsByTagName("numCommande").item(0).getTextContent();
+                            dateCommande = elem.getElementsByTagName("dateCommande").item(0).getTextContent(); 
+                    
+                            produit = new Produit(elem.getElementsByTagName("produit").item(0).getAttributes().item(0).getTextContent()
+                                                , elem.getElementsByTagName("nom").item(0).getTextContent()
+                                                , Float.valueOf(elem.getElementsByTagName("prix").item(0).getTextContent().replaceAll("\\s", ""))
+                                                , Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent().replaceAll("\\s", ""))); 
+                            
+                                                
+                            aProduitRepository.save(produit);                
+                            listeProduit.add(produit);
+                            envoiBonCommande = new EnvoiBonCommande(id, dateCommande, listeProduit, Float.valueOf(elem.getElementsByTagName("prixCommande").item(0).getTextContent().replaceAll("\\s", "")));
+                            aBonCommandeRepository.save(envoiBonCommande);
+
+                            m = new Message("envoiBonCommande", dateEnvoi, dureeValidite, envoiBonCommande);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+
                         }
 
-                        demandeConference = new DemandeConference(listeConference);
-                        aDemandeConferenceRepository.save(demandeConference);
-                        m = new Message("demandeConference", dateEnvoi, dureeValidite, demandeConference);
-                        m.setId(id_message);
-                        lMessage = fic.getListMess();
-                        lMessage.add(m);
-                        fic.setListMess(lMessage);
-                        aMessageRepository.save(m);
+                        if (elem.getElementsByTagName("demandeConference").getLength() > 0){
+                        
+                            demandeConference = new DemandeConference();
+                            conference = new Conference();
+                            nbConference= elem.getElementsByTagName("conf").getLength();
+                            for (int nbConferenceTemp = 0; nbConferenceTemp < nbConference; nbConferenceTemp++){
+                                id = elem.getElementsByTagName("id").item(nbConferenceTemp).getTextContent();
+                                sujet = elem.getElementsByTagName("sujet").item(nbConferenceTemp).getTextContent();
+                                lieu = elem.getElementsByTagName("lieu").item(nbConferenceTemp).getTextContent();
+                                dateDebut = elem.getElementsByTagName("dateDebut").item(nbConferenceTemp).getTextContent();
+                                duree = elem.getElementsByTagName("dureeConference").item(nbConferenceTemp).getTextContent();
+                                conference = new Conference(id, sujet, lieu, dateDebut, Integer.valueOf(duree));
+                                listeConference.add(conference);
+                                aConferenceRepository.save(conference);
+                            }
+
+                            demandeConference = new DemandeConference(listeConference);
+                            aDemandeConferenceRepository.save(demandeConference);
+                            m = new Message("demandeConference", dateEnvoi, dureeValidite, demandeConference);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+                        }
                     }
                 }
             }
