@@ -17,11 +17,14 @@ import javax.inject.Inject;
 
 import com.quartier.quartiercommunicant.model.DemandeCatalogue;
 import com.quartier.quartiercommunicant.model.DemandeCommerciale;
+import com.quartier.quartiercommunicant.model.AccuseReception;
 import com.quartier.quartiercommunicant.model.CatalogueDemande;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.Fichier;
 import com.quartier.quartiercommunicant.model.Message;
+import com.quartier.quartiercommunicant.model.Produit;
+import com.quartier.quartiercommunicant.repository.AccuseReceptionRepository;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCommercialeRepository;
@@ -95,6 +98,9 @@ public class MessageController {
     @Inject
     DemandeCommercialeRepository aDemandeCommercialeRepository;
 
+    @Inject
+    AccuseReceptionRepository aAccuseReceptionRepository;
+
     List<Message> listeMessage = new ArrayList<>();
     List<DmStage> listeDmStage = new ArrayList<>();
     int totalDmStageEcole = 0;
@@ -109,14 +115,23 @@ public class MessageController {
     SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 
     @RequestMapping(value = "/reponseGenerique", method = RequestMethod.POST)
-    public String reponseGenerique(@RequestParam String textarea, @RequestParam String destinataire,
-            @RequestParam String validite) {
+    public String reponseGenerique(@RequestParam String textarea, @RequestParam String idMsgPrecedent) {
 
         
         String pattern = "HH:mm:ss dd-MM-YYYY";
-        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-                
-        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), validite, textarea, "");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);  
+        
+        // On recherche le destinataire à partir du idMsgPrecedent
+        String destinataire = "";
+        for (Fichier f : aFichierRepository.findAll()){
+            for (Message mes : f.getListMess()){
+                if (mes.getId().equals(idMsgPrecedent)){
+                    destinataire = f.getExpediteur();
+                }
+            }
+        }
+
+        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "2160", textarea, idMsgPrecedent);
         m.setId(""+idTemporaire);
         idTemporaire++;
         switch (destinataire) {
@@ -288,6 +303,68 @@ public class MessageController {
         return "redirect:/envoiMessage";
     }
 
+    @RequestMapping(value = "/accuseReception", method = RequestMethod.POST)
+    public String accuseReception(@RequestParam String identifiantMessage, @RequestParam String dateReceptionAccuseDeReception){
+        String pattern = "HH:mm:ss dd-MM-YYYY";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+        String dateCommande = "";
+        List<Produit> listeProduit = new ArrayList<>();
+        float prixCommande = 0;
+        String destinataire = "";
+        String identifiantCommande = "";
+        // On retrouve les données via l'identifiant de commande
+    
+        for (Fichier f: aFichierRepository.findAll()){
+            for (Message m: f.getListMess()){
+                if (m.getId().equals(identifiantMessage)){
+                    if (m.getType().equals("envoiBonCommande")){ // On l'a, on récupère les données
+                        identifiantCommande = m.getEnvoiBonCommande().getId();
+                        dateCommande = m.getEnvoiBonCommande().getDateCommande();
+                        listeProduit.addAll(m.getEnvoiBonCommande().getListeProduit());
+                        prixCommande = m.getEnvoiBonCommande().getPrixCommande();
+                        destinataire = f.getExpediteur();
+                    }
+                }
+               
+            }
+        }
+
+        int i = 0;
+        boolean trouve = false;
+        while (i < 5000 && !trouve) {
+            i++;
+            if (aAccuseReceptionRepository.findById("LAB-"+i).isEmpty()) {
+                trouve = true;
+            }
+
+        }
+        System.err.println(i + " " + identifiantCommande + " " + dateCommande + " " + dateReceptionAccuseDeReception);  
+        AccuseReception ar = new AccuseReception("LAB-"+i, identifiantCommande, dateCommande, dateReceptionAccuseDeReception, listeProduit, prixCommande);
+        aAccuseReceptionRepository.save(ar);
+
+        Message mes = new  Message("accuseReception", dateFormat.format(new Date()), "2160", ar);
+
+        mes.setId(""+idTemporaire);
+        idTemporaire++;
+        switch (destinataire) {
+        case "Magasin":
+            listeMessageMagasin.add(mes);
+            break;
+        case "Entreprise":
+            totalDmStageEntreprise++;
+            listeMessageEntreprise.add(mes);
+            break;
+        case "Ecole":
+            totalDmStageEcole++;
+            listeMessageEcole.add(mes);
+            break;
+        default:
+            break;
+
+        }
+        return "redirect:/envoiMessage";
+    }
+
     @RequestMapping(value = "/waitingRoom")
     public String waitingRoom(Model model){
         ArrayList<Message> listeMessageP = new ArrayList<>();
@@ -408,9 +485,22 @@ public class MessageController {
 
     @RequestMapping("envoiMessage")
     public String envoiMessage(Model model) {
+        List<String> listeIdMessage = new ArrayList<>();
+        for (Message m : aMessageRepository.findAll()){
+            listeIdMessage.add(m.getId());
+        }
+
+        List<String> listeIdCommande = new ArrayList<>();
+        for (Message m : aMessageRepository.findAll()){
+            if (m.getType().equals("envoiCatalogue") || m.getType().equals("envoiBonCommande")){
+                listeIdCommande.add(m.getId());
+            }
+        }
         model.addAttribute("listeEcole", listeMessageEcole);
         model.addAttribute("listeEntreprise", listeMessageEntreprise);
         model.addAttribute("listeMagasin", listeMessageMagasin);
+        model.addAttribute("listeIdMessage", listeIdMessage);
+        model.addAttribute("listeIdCommande", listeIdCommande);
         return "EnvoiMessage";
     }
 
@@ -625,6 +715,39 @@ public class MessageController {
                             listeDmStage = new ArrayList<>();
                         }
                         break;
+
+                        case "accuseReception":
+                            while (i < 50000 && !trouve) {
+                                if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                    m.setId("LAB-" + i);
+                                    trouve = true;
+                                }
+                                i++;
+                            }
+                            out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                            aMessageRepository.save(m);
+                            // On écrit le message
+                            vMessage = "\n\t<typeMessage>" + 
+                                       "\n\t\t<accuseReception>" + 
+                                       "\n\t\t\t<numCommande identifiantCommande=\"" + m.getAccuseReception().getIdentifiantCommande() + "\">" + m.getAccuseReception().getNumCommande() + "</numCommande>" +
+                                       "\n\t\t\t<dateCommande>" + m.getAccuseReception().getDateCommande() + "</dateCommande>" +
+                                       "\n\t\t\t<listeProduit>\n";
+                            for (Produit p: m.getAccuseReception().getListeProduit()){
+                                vMessage += "\n\t\t\t\t<produit identifiant=\"" + p.getId() + "\">" + 
+                                            "\n\t\t\t\t\t<nom>" + p.getNom() + "</nom>" + 
+                                            "\n\t\t\t\t\t<prix>" + p.getPrix() + "</prix>" + 
+                                            "\n\t\t\t\t\t<quantite>" + p.getQuantite() + "</quantite>" + 
+                                            "\n\t\t\t\t</produit>"
+                                            ;
+                            }
+                            vMessage += "\n\t\t\t</listeProduit>" +
+                                        "\n\t\t\t<prixCommande>" + m.getAccuseReception().getPrixCommande() + "</prixCommande>" +
+                                        "\n\t\t</accuseReception>" + 
+                                        "\n\t</typeMessage>" + 
+                                        "\n</message>";
+                            out.write(vMessage);
+                            trouve = false;
+                            break;
                     default : 
                         break;
                     }

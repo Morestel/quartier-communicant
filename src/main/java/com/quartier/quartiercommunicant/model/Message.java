@@ -38,6 +38,8 @@ public class Message {
     private DemandeConference demandeConference;
     @OneToOne
     private DemandeCommerciale demandeCommerciale;
+    @OneToOne
+    private AccuseReception accuseReception;
     
     public Message(){
         
@@ -108,6 +110,14 @@ public class Message {
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setDemandeCommerciale(demandeCommerciale);
+    }
+
+    // Message accusé de réception
+    public Message(String type, String dateEnvoi, String dureeValidite, AccuseReception accuseReception){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setAccuseReception(accuseReception);
     }
 }
 

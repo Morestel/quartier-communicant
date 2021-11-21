@@ -101,6 +101,26 @@
                   </div>
                 </div>
 
+              
+                <div th:case="'accuseReception'">
+                  <div class="card">
+                    <h1>Accusé de réception</h1> <br>
+                      <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Numéro de commande :</span>[[ ${message.accuseReception.numCommande} ]] <br>
+                      <span class="data">Date de la commande :</span>[[ ${message.accuseReception.dateCommande} ]] <br>
+                      <span class="data">Date de réception :</span>[[ ${message.accuseReception.dateReceptionAccuseDeReception} ]] <br>
+                      <span th:each="produit: ${message.accuseReception.listeProduit}">
+                        <span class="data">Id:</span>[[ ${produit.id} ]] <br>
+                        <span class="data">Nom:</span>[[ ${produit.nom} ]] <br>
+                        <span class="data">Prix:</span>[[ ${produit.prix} ]] <br>
+                        <span class="data">Quantite:</span>[[ ${produit.quantite} ]] <br>
+                        <span class="data">Prix de la commande :</span>[[ ${message.accuseReception.prixCommande} ]] <br>
+                      </span><br>
+                  </div>
+                </div>
+
                 <div th:case="'demandeCommerciale'">
                   <div class="card">
                     <h1>Demande commerciale</h1> <br>

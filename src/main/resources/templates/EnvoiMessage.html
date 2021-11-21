@@ -40,6 +40,9 @@
                   <div th:case="demandeCommerciale">
                     <span>Demande commerciale</span>
                   </div>
+                  <div th:case="accuseReception">
+                    <span>Accusé de réception</span>
+                  </div>
                   <div th:case="*">
                     <span>Erreur</span>
                   </div>
@@ -66,6 +69,9 @@
                   </div>
                   <div th:case="demandeCommerciale">
                     <span>Demande commerciale</span>
+                  </div>
+                  <div th:case="accuseReception">
+                    <span>Accusé de réception</span>
                   </div>
                   <div th:case="*">
                     <span>Erreur</span>
@@ -94,6 +100,9 @@
                   <div th:case="demandeCommerciale">
                     <span>Demande commerciale</span>
                   </div>
+                  <div th:case="accuseReception">
+                    <span>Accusé de réception</span>
+                  </div>
                   <div th:case="*">
                     <span>Erreur</span>
                   </div>
@@ -121,43 +130,10 @@
           >
           <h1>Réponse générique</h1>
           <form method="POST" th:action="@{/reponseGenerique}">
-            <h2>Destinataire</h2>
-            <input
-              type="radio"
-              id="Magasin"
-              name="destinataire"
-              value="Magasin"
-              checked
-            />
-            <label for="Magasin">Magasin</label>
-
-            <input
-              type="radio"
-              id="Ecole"
-              name="destinataire"
-              value="Ecole"
-              checked
-            />
-            <label for="Ecole">Ecole</label>
-
-            <input
-              type="radio"
-              id="Entreprise"
-              name="destinataire"
-              value="Entreprise"
-              checked
-            />
-            <label for="Entreprise">Entreprise</label>
-            <br />
-            <input
-              type="number"
-              min="0" max="1000"
-              id="DureeValidite"
-              placeholder="Durée validité"
-              name="validite"
-              class="input-form"
-              required
-            />
+            <h2>Id du message précédent</h2>
+            <select name="idMsgPrecedent">
+              <option th:each="id : ${listeIdMessage}" th:value="${id}" th:text="${id}"></option>
+            </select>
             <br />
             <textarea
               name="textarea"
@@ -420,6 +396,28 @@
             <br /><button type="submit" class="btn custom-btn">Envoyer</button>
           </form>
         </div>
+        
+        <div id="recOs" class="box-message">
+          <span
+            id="buttonReception"
+            class="ouvreFerme"
+            onclick="OuvreFermeReception();"
+            style="user-select: none"
+            >+</span
+          >
+        <h1>Accusé de réception</h1>
+          <form method="POST" th:action="@{/accuseReception}">
+            <h2>Id du message précédent</h2>
+            <select name="identifiantMessage">
+              <option th:each="id : ${listeIdCommande}" th:value="${id}" th:text="${id}"></option>
+            </select>
+            <br>
+            <input type="date" name="dateReceptionAccuseDeReception" class="input-form" />
+            <br /><br />
+            <button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
+
       </div>
       <!-- particles.js container -->
       <div id="particles-js"></div>
@@ -473,6 +471,18 @@
       function OuvreFermeCommerce() {
         var buttonx = document.getElementById("buttonCommerce");
         var box = document.getElementById("comOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+
+      function OuvreFermeReception() {
+        var buttonx = document.getElementById("buttonReception");
+        var box = document.getElementById("recOs");
         if (buttonx.textContent == "+") {
           buttonx.textContent = "-";
           box.classList.add("ouvrir");
