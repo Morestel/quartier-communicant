@@ -317,11 +317,19 @@ public class MainController {
                 idTmp = id;
                 return "ERR-EXPEDITEUR";
             }
-            String destinataire = document.getElementsByTagName("destinataire").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
-            if (!destinataire.equalsIgnoreCase("Laboratoire") && !destinataire.equalsIgnoreCase("Laboratoires")){
+            
+            String destinataire = "";
+            boolean trouveDest = false;
+            for (int i = 0; i < document.getElementsByTagName("destinataire").getLength(); i++){
+                destinataire = document.getElementsByTagName("destinataire").item(i).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
+                if (destinataire.equalsIgnoreCase("Laboratoire") || destinataire.equalsIgnoreCase("Laboratoires")){
+                    trouveDest = true;
+                    fic.setDestinataire(destinataire);
+                }
+            }
+            if (!trouveDest){
                 return "ERR-DESTINATAIRE";
             }
-            fic.setDestinataire(destinataire);
            
             System.out.println("Vérification si le fichier a déjà été traité ...");
             for (Fichier f : aFichierRepository.findAll()){
