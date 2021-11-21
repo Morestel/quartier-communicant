@@ -126,11 +126,30 @@
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Date de commande :</span>[[ ${message.envoiBonCommande.dateCommande} ]] <br>
+                      <span class="data">Identifiant de commande :</span>[[ ${message.envoiBonCommande.identifiantCommande} ]] <br>
                       <span th:each="produit: ${message.envoiBonCommande.listeProduit}">
                         <span class="data">Id:</span>[[ ${produit.id} ]] <br>
                         <span class="data">Nom:</span>[[ ${produit.nom} ]] <br>
                         <span class="data">Prix:</span>[[ ${produit.prix} ]] <br>
                         <span class="data">Quantite:</span>[[ ${produit.quantite} ]] <br>
+                      </span><br>
+                  </div>
+                </div>
+                
+                <div th:case="'envoiCatalogue'">
+                  <div class="card">
+                    <h1>Envoi de catalogue</h1> <br>
+                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Titre du catalogue :</span>[[ ${message.envoiCatalogue.titreCatalogue} ]] <br>
+                      <span th:each="produit: ${message.envoiCatalogue.listeProduit}">
+                        <span class="data">Produit : </span> <br>
+                        <span class="data">Id:</span>[[ ${produit.id} ]] <br>
+                        <span class="data">Nom:</span>[[ ${produit.nom} ]] <br>
+                        <span class="data">Prix:</span>[[ ${produit.prix} ]] <br>
+                        <span class="data">Quantite:</span>[[ ${produit.quantite} ]] <br>
+                        <span class="data">-----------------------------</span><br>
                       </span><br>
                   </div>
                 </div>

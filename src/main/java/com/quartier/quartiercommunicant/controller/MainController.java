@@ -29,6 +29,7 @@ import com.quartier.quartiercommunicant.model.Conference;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.EnvoiBonCommande;
+import com.quartier.quartiercommunicant.model.EnvoiCatalogue;
 import com.quartier.quartiercommunicant.model.EtatCivil;
 import com.quartier.quartiercommunicant.model.Experience;
 import com.quartier.quartiercommunicant.model.Fichier;
@@ -47,6 +48,7 @@ import com.quartier.quartiercommunicant.repository.ConferenceRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.DmStageRepository;
 import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
+import com.quartier.quartiercommunicant.repository.EnvoiCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.EtatCivilRepository;
 import com.quartier.quartiercommunicant.repository.ExperienceRepository;
 import com.quartier.quartiercommunicant.repository.FichierRepository;
@@ -124,6 +126,9 @@ public class MainController {
 
     @Inject
     ConferenceRepository aConferenceRepository;
+
+    @Inject
+    EnvoiCatalogueRepository aEnvoiCatalogueRepository;
 
     String tmpExpediteur = "";
     String idTmp = "-1";
@@ -434,6 +439,8 @@ public class MainController {
 
             String dateCommande;
 
+            String identifiantCommande;
+
             Message m;
             List<Message> lMessage = new ArrayList<>();
 
@@ -465,6 +472,7 @@ public class MainController {
             List<Conference> listeConference = new ArrayList<>();
             int nbConference = 0;
 
+            EnvoiCatalogue envoiCatalogue = new EnvoiCatalogue();
             int nbDmStage = 0;
             List<DmStage> listDmStage = new ArrayList<>(); 
             NodeList nList = document.getElementsByTagName("message");
@@ -497,9 +505,10 @@ public class MainController {
                     System.err.println(id_message);
                     System.out.println("Date d'envoi : " + elem.getElementsByTagName("dateEnvoi").item(0).getTextContent());
                     System.out.println("Durée validité : " + elem.getElementsByTagName("dureeValidite").item(0).getTextContent());
-                    dateEnvoi = elem.getElementsByTagName("dateEnvoi").item(0).getTextContent();
-                    dureeValidite = elem.getElementsByTagName("dureeValidite").item(0).getTextContent();
-                   
+                    dateEnvoi = elem.getElementsByTagName("dateEnvoi").item(0).getTextContent().replaceAll("\\s", "");
+                    dureeValidite = elem.getElementsByTagName("dureeValidite").item(0).getTextContent().replaceAll("\\s", "");
+                    dateEnvoi = dateEnvoi.substring(0, 8) + " " + dateEnvoi.substring(8);
+                    System.err.println(dateEnvoi + " " + dureeValidite);
                     // On récupère la date d'envoi, on ajoute la durée de validité et on compare à la date d'aujourd'hui
                     String pattern = "HH:mm:ss dd-MM-yyyy";
                     SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
@@ -514,7 +523,8 @@ public class MainController {
                     }
                     cal.add(Calendar.HOUR_OF_DAY, Integer.parseInt(dureeValidite));
                     
-                    if (elem.getTextContent().matches("\\A\\p{ASCII}*\\z") && cal.getTime().after(new Date())){ // Vérification du message en ASCII ET si la date n'est pas dépassée
+                    // ASCII elem.getTextContent().matches("\\A\\p{ASCII}*\\z") && 
+                    if (cal.getTime().after(new Date())){ // Vérification du message en ASCII ET si la date n'est pas dépassée
 
                         // Offre de collaborations
                         if (elem.getElementsByTagName("offreCollab").getLength() > 0){
@@ -703,16 +713,22 @@ public class MainController {
 
                             id = elem.getElementsByTagName("numCommande").item(0).getTextContent();
                             dateCommande = elem.getElementsByTagName("dateCommande").item(0).getTextContent(); 
-                    
-                            produit = new Produit(elem.getElementsByTagName("produit").item(0).getAttributes().item(0).getTextContent()
-                                                , elem.getElementsByTagName("nom").item(0).getTextContent()
-                                                , Float.valueOf(elem.getElementsByTagName("prix").item(0).getTextContent().replaceAll("\\s", ""))
-                                                , Integer.valueOf(elem.getElementsByTagName("quantite").item(0).getTextContent().replaceAll("\\s", ""))); 
+                            identifiantCommande = elem.getElementsByTagName("numCommande").item(0).getAttributes().item(0).getTextContent();
                             
-                                                
-                            aProduitRepository.save(produit);                
+                            int nbProduit = elem.getElementsByTagName("produit").getLength();
+                            listeProduit = new ArrayList<>();
+                            for (int nbTempProd = 0; nbTempProd < nbProduit; nbTempProd++){
+                                produit = new Produit(elem.getElementsByTagName("produit").item(nbTempProd).getAttributes().item(0).getTextContent()
+                                                    , elem.getElementsByTagName("nom").item(nbTempProd).getTextContent()
+                                                    , Float.valueOf(elem.getElementsByTagName("prix").item(nbTempProd).getTextContent().replaceAll("\\s", ""))
+                                                    , Integer.valueOf(elem.getElementsByTagName("quantite").item(nbTempProd).getTextContent().replaceAll("\\s", ""))); 
+                            
                             listeProduit.add(produit);
-                            envoiBonCommande = new EnvoiBonCommande(id, dateCommande, listeProduit, Float.valueOf(elem.getElementsByTagName("prixCommande").item(0).getTextContent().replaceAll("\\s", "")));
+                            aProduitRepository.save(produit); 
+                            
+                            }               
+                            
+                            envoiBonCommande = new EnvoiBonCommande(id, identifiantCommande, dateCommande, listeProduit, Float.valueOf(elem.getElementsByTagName("prixCommande").item(0).getTextContent().replaceAll("\\s", "")));
                             aBonCommandeRepository.save(envoiBonCommande);
 
                             m = new Message("envoiBonCommande", dateEnvoi, dureeValidite, envoiBonCommande);
@@ -748,6 +764,30 @@ public class MainController {
                             lMessage.add(m);
                             fic.setListMess(lMessage);
                             aMessageRepository.save(m);
+                        }
+
+                        if (elem.getElementsByTagName("envoiCatalogue").getLength() > 0){
+                            
+                            titreCatalogueDemande = elem.getElementsByTagName("titreCatalogue").item(0).getTextContent();
+                            int nbProduit = elem.getElementsByTagName("produit").getLength();
+                            listeProduit = new ArrayList<>();
+                            for (int nbTempProd = 0; nbTempProd < nbProduit; nbTempProd++){
+                                produit = new Produit(elem.getElementsByTagName("produit").item(nbTempProd).getAttributes().item(0).getTextContent(),
+                                                      elem.getElementsByTagName("nom").item(nbTempProd).getTextContent(),
+                                                      Float.parseFloat(elem.getElementsByTagName("prix").item(nbTempProd).getTextContent().replaceAll("\\s", "")),
+                                                      Integer.parseInt(elem.getElementsByTagName("quantite").item(nbTempProd).getTextContent().replaceAll("\\s", "")));
+                                listeProduit.add(produit);
+                                aProduitRepository.save(produit);
+                            }
+                            envoiCatalogue = new EnvoiCatalogue(titreCatalogueDemande, listeProduit);
+                            aEnvoiCatalogueRepository.save(envoiCatalogue);
+                            m = new  Message("envoiCatalogue", dateEnvoi,dureeValidite, envoiCatalogue);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+                            listeProduit = new ArrayList<>();
                         }
                     }
                 }

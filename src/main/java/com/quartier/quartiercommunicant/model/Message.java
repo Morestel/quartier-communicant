@@ -40,6 +40,8 @@ public class Message {
     private DemandeCommerciale demandeCommerciale;
     @OneToOne
     private AccuseReception accuseReception;
+    @OneToOne
+    private EnvoiCatalogue envoiCatalogue;
     
     public Message(){
         
@@ -118,6 +120,14 @@ public class Message {
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setAccuseReception(accuseReception);
+    }
+
+    // Message envoi de catalogue
+    public Message(String type, String dateEnvoi, String dureeValidite, EnvoiCatalogue envoiCatalogue){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setEnvoiCatalogue(envoiCatalogue);
     }
 }
 
