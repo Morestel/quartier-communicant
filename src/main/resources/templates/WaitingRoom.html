@@ -13,7 +13,7 @@
   <div class="main">
     <div id="fenetre">
       <div class="main-content">
-        
+        <br><br><br>
         <form class="middle" method="POST" th:action="@{/toutEnvoyer}">
             <button type="submit" class="btn custom-btn">Confirmer</button>
           </form>
@@ -25,7 +25,7 @@
                 <div th:case="'offreCollab'">
                   <div class="card">
                     <h1>Offre de collaboration</h1> <br>
-                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité :</span> [[ ${message.dureeValidite} ]] <br>
                     <span class="data">Description :</span> <br>[[ ${message.description}]] <br>
@@ -36,8 +36,8 @@
                 <div th:case="'demandeCollab'">
                   <div class="card">
                     <h1>Demande de collaboration</h1> <br> <br>
-                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
-                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
+                    <span class="data">Date d'envoi: </span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                     <span class="data">Description</span> [[ ${message.description}]] <br>
                     <span class="data">Date de début : </span> [[ ${message.dateDebut}]] <br>
@@ -47,7 +47,7 @@
                 <div th:case="'reponseGenerique'">
                   <div class="card">
                     <h1>Réponse générique</h1> <br>
-                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                    <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
                     <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                     <span class="data">Durée de validité:</span>[[ ${message.dureeValidite} ]] <br>
                     <span class="data">Message ; </span>[[ ${message.msg}]] <br>
@@ -57,7 +57,7 @@
                 <div th:case="'demandesStage'">
                   <div class="card">
                     <h1>Demande de stage/h1> <br>
-                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Objet :</span>[[ ${message.demandeStage.objet} ]] <br>
@@ -72,7 +72,7 @@
                 <div th:case="'reponseStage'">
                   <div class="card">
                     <h1>Demande de stage/h1> <br>
-                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Objet :</span>[[ ${message.rpStage.objet} ]] <br>
@@ -87,7 +87,7 @@
                 <div th:case="'envoiBonCommande'">
                   <div class="card">
                     <h1>Envoi bon de commande</h1> <br>
-                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()">a</div>
+                      <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
                       <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span class="data">Date de commande :</span>[[ ${message.envoiBonCommande.dateCommande} ]] <br>
@@ -100,8 +100,28 @@
                   </div>
                 </div>
 
+                <div th:case="'demandeCommerciale'">
+                  <div class="card">
+                    <h1>Demande commerciale</h1> <br>
+                      <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Prix proposition:</span>[[ ${message.demandeCommerciale.prixProposition} ]] <br>
+                      <span class="data">Description:</span>[[ ${message.demandeCommerciale.description} ]] <br>
+                      <span class="data">Date début:</span>[[ ${message.demandeCommerciale.dateDebut} ]] <br>
+                      <span th:if="${message.demandeCommerciale.duree} == 0">
+                        <span class="data">Date fin:</span>[[ ${message.demandeCommerciale.dateFin} ]] <br>
+                      </span>
+                      <span th:if="${message.demandeCommerciale.duree} != 0">
+                        <span class="data">Durée:</span>[[ ${message.demandeCommerciale.duree} ]] <br>
+                      </span>
+                      <br>
+                  </div>
+                </div>
+
                 <div th:case="*">
                   <div class="card">
+                    <span class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></span>
                     <p>Unknown type of message</p>
                   </div>
                 </div>
