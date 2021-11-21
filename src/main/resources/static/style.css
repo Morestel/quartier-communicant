@@ -262,8 +262,7 @@ canvas {
 }
 
 .main-content .messages-list li {
-  display: flex;
-  justify-content: center;
+  display: block;
 }
 
 .card {
