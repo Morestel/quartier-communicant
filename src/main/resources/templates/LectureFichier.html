@@ -108,7 +108,6 @@
                         <span class="data">----------------------------------</span><br>
                       </div>
                     </div>
-                  
                 </div>
 
                 <div th:case="'reponseStage'">
@@ -123,6 +122,44 @@
                       <span class="data">Rémunération:</span>[[ ${message.demandeStage.remuneration} ]] <br>
                       <span class="data">Date de début:</span>[[ ${message.demandeStage.dateDebut} ]] <br>
                       <span class="data">Durée:</span>[[ ${message.demandeStage.duree} ]] <br> <br>
+                  </div>
+                </div>
+
+                <div th:case="'accuseReception'">
+                  <div class="card">
+                    <h1>Accusé de réception</h1> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Numéro de commande :</span>[[ ${message.accuseReception.numCommande} ]] <br>
+                      <span class="data">Date de la commande :</span>[[ ${message.accuseReception.dateCommande} ]] <br>
+                      <span class="data">Date de réception :</span>[[ ${message.accuseReception.dateReceptionAccuseDeReception} ]] <br>
+                      <span th:each="produit: ${message.accuseReception.listeProduit}">
+                        <span class="data">Id:</span>[[ ${produit.id} ]] <br>
+                        <span class="data">Nom:</span>[[ ${produit.nom} ]] <br>
+                        <span class="data">Prix:</span>[[ ${produit.prix} ]] <br>
+                        <span class="data">Quantite:</span>[[ ${produit.quantite} ]] <br>
+                        <span class="data">Prix de la commande :</span>[[ ${message.accuseReception.prixCommande} ]] <br>
+                      </span><br>
+                  </div>
+                </div>
+
+                <div th:case="'demandeCommerciale'">
+                  <div class="card">
+                    <h1>Demande commerciale</h1> <br>
+                    <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
+                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
+                      <span class="data">Prix proposition:</span>[[ ${message.demandeCommerciale.prixProposition} ]] <br>
+                      <span class="data">Description:</span>[[ ${message.demandeCommerciale.description} ]] <br>
+                      <span class="data">Date début:</span>[[ ${message.demandeCommerciale.dateDebut} ]] <br>
+                      <span th:if="${message.demandeCommerciale.duree} == 0">
+                        <span class="data">Date fin:</span>[[ ${message.demandeCommerciale.dateFin} ]] <br>
+                      </span>
+                      <span th:if="${message.demandeCommerciale.duree} != 0">
+                        <span class="data">Durée:</span>[[ ${message.demandeCommerciale.duree} ]] <br>
+                      </span>
+                      <br>
                   </div>
                 </div>
 

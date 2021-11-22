@@ -516,7 +516,14 @@ public class MainController {
                     cal.add(Calendar.HOUR_OF_DAY, Integer.parseInt(dureeValidite));
                     
                     // ASCII elem.getTextContent().matches("\\A\\p{ASCII}*\\z") && 
-                    if (cal.getTime().after(new Date())){ // Vérification du message en ASCII ET si la date n'est pas dépassée
+                    if (cal.getTime().after(new Date()) && 
+                        elem.getTextContent().length() < 1001 &&
+                        Integer.parseInt(dureeValidite) < 2160 &&
+                        elem.getTextContent().length() != 0){// Vérification du message en ASCII 
+                                                            // ET si la date n'est pas dépassée
+                                                            // ET si le message fait moins de 1000 caractères 
+                                                            // ET Date de validité valide (2160 = 3 mois)
+                                                            // ET Message non vide
 
                         // Offre de collaborations
                         if (elem.getElementsByTagName("offreCollab").getLength() > 0){

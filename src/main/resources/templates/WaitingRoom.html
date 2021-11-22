@@ -139,6 +139,7 @@
                       <br>
                   </div>
                 </div>
+                
                 <div th:case="'demandeCatalogue'">
                   <div class="card">
                     <h1>Demande de catalogue</h1> <br>
@@ -170,7 +171,7 @@
                       <div  th:if="${message.propositionCommerciale.duree  != 0}"><span class="data">Durée : </span> [[ ${message.propositionCommerciale.duree } ]] </div>
                   </div>
                 </div>
-                
+
                 <div th:case="*">
                   <div class="card">
                     <span class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></span>
