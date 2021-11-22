@@ -42,6 +42,8 @@ public class Message {
     private AccuseReception accuseReception;
     @OneToOne
     private EnvoiCatalogue envoiCatalogue;
+    @OneToOne
+    private PropositionCommerciale propositionCommerciale;
     
     public Message(){
         
@@ -112,6 +114,14 @@ public class Message {
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setDemandeCommerciale(demandeCommerciale);
+    }
+
+    // Message proposition commerciale
+    public Message(String type, String dateEnvoi, String dureeValidite, PropositionCommerciale propositionCommerciale){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setPropositionCommerciale(propositionCommerciale);
     }
 
     // Message accusé de réception

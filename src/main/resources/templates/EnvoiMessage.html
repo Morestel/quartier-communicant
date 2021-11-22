@@ -43,6 +43,9 @@
                   <div th:case="accuseReception">
                     <span>Accusé de réception</span>
                   </div>
+                  <div th:case="propositionCommerciale">
+                    <span>Proposition commerciale</span>
+                  </div>
                   <div th:case="*">
                     <span>Erreur</span>
                   </div>
@@ -73,6 +76,9 @@
                   <div th:case="accuseReception">
                     <span>Accusé de réception</span>
                   </div>
+                  <div th:case="propositionCommerciale">
+                    <span>Proposition commerciale</span>
+                  </div>
                   <div th:case="*">
                     <span>Erreur</span>
                   </div>
@@ -102,6 +108,9 @@
                   </div>
                   <div th:case="accuseReception">
                     <span>Accusé de réception</span>
+                  </div>
+                  <div th:case="propositionCommerciale">
+                    <span>Proposition commerciale</span>
                   </div>
                   <div th:case="*">
                     <span>Erreur</span>
@@ -335,6 +344,61 @@
             <br /><button type="submit" class="btn custom-btn">Envoyer</button>
           </form>
         </div>
+        <!ELEMENT propositionCommerciale (prixProposition,description,contrat)>
+        <!ELEMENT prixProposition (forfait+)> 
+        <!ELEMENT forfait (#PCDATA)>
+        <!ELEMENT contrat (date)>
+        <div id="proOs" class="box-message">
+          <span
+            id="buttonProposition"
+            class="ouvreFerme"
+            onclick="OuvreFermeProposition();"
+            style="user-select: none"
+            >+</span
+          >
+          <h1>Proposition commerciale</h1>
+          <form method="POST" th:action="@{/propositionCommerciale}">
+            <input
+              type="number"
+              min="0" max="1000"
+              name="prixProposition"
+              placeholder="Montant"
+              class="input-form"
+              required
+            />
+            <br />
+            <textarea
+            name="description"
+            placeholder="Description"
+            class="input-form"
+            required
+            ></textarea>
+            <br /><input
+              type="number"
+              min="0" max="1000"
+              id="DureeValidite"
+              placeholder="Durée validité"
+              name="validite"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="date"
+              name="dateDebut"
+              class="input-form"
+              required
+            />
+
+            <br /><input
+              type="date"
+              name="dateFin"
+              class="input-form"
+              required
+            />
+            
+            <br /><button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
 
         <div id="comOs" class="box-message">
           <span
@@ -471,6 +535,18 @@
       function OuvreFermeCommerce() {
         var buttonx = document.getElementById("buttonCommerce");
         var box = document.getElementById("comOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+
+      function OuvreFermeProposition() {
+        var buttonx = document.getElementById("buttonProposition");
+        var box = document.getElementById("proOs");
         if (buttonx.textContent == "+") {
           buttonx.textContent = "-";
           box.classList.add("ouvrir");

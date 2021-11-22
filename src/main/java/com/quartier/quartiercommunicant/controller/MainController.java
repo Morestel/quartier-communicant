@@ -33,10 +33,12 @@ import com.quartier.quartiercommunicant.model.EnvoiCatalogue;
 import com.quartier.quartiercommunicant.model.EtatCivil;
 import com.quartier.quartiercommunicant.model.Experience;
 import com.quartier.quartiercommunicant.model.Fichier;
+import com.quartier.quartiercommunicant.model.Forfait;
 import com.quartier.quartiercommunicant.model.FormationStage;
 import com.quartier.quartiercommunicant.model.Lettre;
 import com.quartier.quartiercommunicant.model.Message;
 import com.quartier.quartiercommunicant.model.Produit;
+import com.quartier.quartiercommunicant.model.PropositionCommerciale;
 import com.quartier.quartiercommunicant.model.ReponseStage;
 import com.quartier.quartiercommunicant.model.RpStage;
 import com.quartier.quartiercommunicant.model.UploadForm;
@@ -52,10 +54,12 @@ import com.quartier.quartiercommunicant.repository.EnvoiCatalogueRepository;
 import com.quartier.quartiercommunicant.repository.EtatCivilRepository;
 import com.quartier.quartiercommunicant.repository.ExperienceRepository;
 import com.quartier.quartiercommunicant.repository.FichierRepository;
+import com.quartier.quartiercommunicant.repository.ForfaitRepository;
 import com.quartier.quartiercommunicant.repository.FormationStageRepository;
 import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 import com.quartier.quartiercommunicant.repository.ProduitRepository;
+import com.quartier.quartiercommunicant.repository.PropositionCommercialeRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
 import com.quartier.quartiercommunicant.repository.RpStageRepository;
 
@@ -129,6 +133,12 @@ public class MainController {
 
     @Inject
     EnvoiCatalogueRepository aEnvoiCatalogueRepository;
+
+    @Inject
+    ForfaitRepository aForfaitRepository;
+
+    @Inject
+    PropositionCommercialeRepository aPropositionCommercialeRepository;
 
     String tmpExpediteur = "";
     String idTmp = "-1";
@@ -251,10 +261,14 @@ public class MainController {
                     
                 case "ERR-DESTINATAIRE": // Mauvais destinataire = Pas nous
                     System.err.println("Mauvais destinataire");
-                    break;
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
+                    model.addAttribute("raison", "Mauvais destinataire - Déplacement dans le dossier erreur/" + tmpExpediteur);
+                    return "ErreurLecture";
                 case "ERR-EXPEDITEUR":
-                    System.err.println("Expéditeur inconnu");
-                    return "redirect:/fichier/"+idTmp;
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
+                    System.err.println("Expéditeur inconnu ");
+                    model.addAttribute("raison", "Mauvais expéditeur - Déplacement dans le dossier erreur/" + tmpExpediteur);
+                    return "ErreurLecture";
                     
                 default:
                     System.err.println("Uncaught");
@@ -317,8 +331,19 @@ public class MainController {
                 case "entreprises":
                     tmpExpediteur = "Entreprise";
                     break;
-                default:
+                case "magasin":
+                    tmpExpediteur = "Magasin";
                     break;
+                case "ecole":
+                    tmpExpediteur = "Ecole";
+                    break;
+                case "entreprise":
+                    tmpExpediteur = "Entreprise";
+                    break;
+                default:
+                    this.tmpExpediteur = "Autre";
+                    System.out.println(this.tmpExpediteur);
+                    return "ERR-EXPEDITEUR";
             }
             fic.setExpediteur(tmpExpediteur);
            
@@ -475,8 +500,14 @@ public class MainController {
             EnvoiCatalogue envoiCatalogue = new EnvoiCatalogue();
             int nbDmStage = 0;
             List<DmStage> listDmStage = new ArrayList<>(); 
+
+            Forfait forfait = new Forfait();
+            PropositionCommerciale propositionCommerciale = new PropositionCommerciale();
+            List<Forfait> listeForfait = new ArrayList<>();
+
             NodeList nList = document.getElementsByTagName("message");
 
+            
             if (fic.getChecksum() != nList.getLength()){
                 return "ERR-CHECKSUM";
             }
@@ -788,6 +819,41 @@ public class MainController {
                             fic.setListMess(lMessage);
                             aMessageRepository.save(m);
                             listeProduit = new ArrayList<>();
+                        }
+
+                        if (elem.getElementsByTagName("propositionCommerciale").getLength() > 0){
+                            
+                            float prixProposition = 0;
+                            int nbForfait = elem.getElementsByTagName("forfait").getLength();
+                            for (int nbForfaitTmp = 0; nbForfaitTmp < nbForfait; nbForfaitTmp++){
+                                prixProposition = Float.parseFloat(elem.getElementsByTagName("forfait").item(nbForfaitTmp).getTextContent());
+                                forfait = new Forfait(prixProposition);
+                                aForfaitRepository.save(forfait);
+                                listeForfait.add(forfait);
+                            }
+                            description = elem.getElementsByTagName("description").item(0).getTextContent();
+                            dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
+                            propositionCommerciale = new PropositionCommerciale(listeForfait, description, dateDebut);
+                            if (elem.getElementsByTagName("dateFin").getLength() != 0){
+                                propositionCommerciale.setDateFin(elem.getElementsByTagName("dateFin").item(0).getTextContent());
+                            }
+                            else{
+                                propositionCommerciale.setDateFin(null);
+                            }
+                            if (elem.getElementsByTagName("duree").getLength() != 0){
+                                propositionCommerciale.setDuree(Integer.parseInt(elem.getElementsByTagName("duree").item(0).getTextContent()));
+                            }
+                            else{
+                                propositionCommerciale.setDuree(0);
+                            }
+                            aPropositionCommercialeRepository.save(propositionCommerciale);
+                            m = new  Message("propositionCommerciale", dateEnvoi,dureeValidite, propositionCommerciale);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
+                            listeForfait = new ArrayList<>();
                         }
                     }
                 }

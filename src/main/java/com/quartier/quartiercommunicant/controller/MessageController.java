@@ -22,8 +22,10 @@ import com.quartier.quartiercommunicant.model.CatalogueDemande;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.Fichier;
+import com.quartier.quartiercommunicant.model.Forfait;
 import com.quartier.quartiercommunicant.model.Message;
 import com.quartier.quartiercommunicant.model.Produit;
+import com.quartier.quartiercommunicant.model.PropositionCommerciale;
 import com.quartier.quartiercommunicant.repository.AccuseReceptionRepository;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
@@ -35,10 +37,12 @@ import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
 import com.quartier.quartiercommunicant.repository.EtatCivilRepository;
 import com.quartier.quartiercommunicant.repository.ExperienceRepository;
 import com.quartier.quartiercommunicant.repository.FichierRepository;
+import com.quartier.quartiercommunicant.repository.ForfaitRepository;
 import com.quartier.quartiercommunicant.repository.FormationStageRepository;
 import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 import com.quartier.quartiercommunicant.repository.ProduitRepository;
+import com.quartier.quartiercommunicant.repository.PropositionCommercialeRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
 import com.quartier.quartiercommunicant.repository.CatalogueDemandeRepository;
 
@@ -100,6 +104,12 @@ public class MessageController {
 
     @Inject
     AccuseReceptionRepository aAccuseReceptionRepository;
+
+    @Inject
+    ForfaitRepository aForfaitRepository;
+
+    @Inject
+    PropositionCommercialeRepository aPropositionCommercialeRepository;
 
     List<Message> listeMessage = new ArrayList<>();
     List<DmStage> listeDmStage = new ArrayList<>();
@@ -222,6 +232,35 @@ public class MessageController {
         return "redirect:/envoiMessage";
     }
 
+    @RequestMapping(value = "/propositionCommerciale", method = RequestMethod.POST)
+    public String propositionCommerciale(@RequestParam float prixProposition, @RequestParam String description, @RequestParam String validite, @RequestParam String dateDebut, @RequestParam String dateFin){
+        String pattern = "HH:mm:ss dd-MM-YYYY";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+        Date d = new Date();
+        Date dF = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+            dF = df.parse(dateFin);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Forfait forfait = new Forfait(prixProposition);
+        List<Forfait> listeForfait = new ArrayList<>();
+        listeForfait.add(forfait);
+        aForfaitRepository.save(forfait);
+        PropositionCommerciale propositionCommerciale = new PropositionCommerciale(listeForfait, description, dateFormat.format(d));
+        propositionCommerciale.setDateFin(dateFormat.format(dF));
+        propositionCommerciale.setDuree(0);
+        aPropositionCommercialeRepository.save(propositionCommerciale);
+        Message m = new Message("propositionCommerciale", dateFormat.format(new Date()), validite, propositionCommerciale);
+        m.setId(""+idTemporaire);
+        idTemporaire++;
+        listeMessageMagasin.add(m);
+
+        return "redirect:/envoiMessage";
+    }
 
     @RequestMapping(value = "/demandeCommerciale", method = RequestMethod.POST)
     public String demandeCommerciale(@RequestParam int prixProposition, @RequestParam String description, @RequestParam String validite, @RequestParam String dateDebut, @RequestParam String dateFin, @RequestParam String duree){
@@ -553,7 +592,7 @@ public class MessageController {
             if (aFichierRepository.findById("LAB-" + i).isEmpty()) {
                 trouve = true;
                 id_fichier = i;
-                fic.setId("LAB-" + i);
+                fic.setId("LAB-" + id_fichier);
             }
             i++;
         }
@@ -649,6 +688,33 @@ public class MessageController {
                                        "\n\t\t\t\t<dateFin>" + m.getDemandeCommerciale().getDateFin() + "</dateFin>" + 
                                        "\n\t\t\t</contrat>" + 
                                        "\n\t\t</demandeCommerciale>" + 
+                                       "\n\t</typeMessage>" + 
+                                       "\n\t</message>";
+                            out.write(vMessage);
+                            trouve = false;
+                            break;
+
+                        case "propositionCommerciale":
+                            while (i < 50000 && !trouve) {
+                                if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                    m.setId("LAB-" + i);
+                                    trouve = true;
+                                }
+                                i++;
+                            }
+                            out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                            aMessageRepository.save(m);
+                            // Ecriture du message
+                            
+
+                            vMessage = "\n\t<typeMessage>" + "\n\t\t<propositionCommerciale>" + 
+                                       "\n\t\t\t<prixProposition>" + "\n\t\t\t\t<forfait>" + m.getPropositionCommerciale().getListeForfait().get(0).getPrix() +"</forfait>"+ "\n\t\t\t</prixProposition>" +
+                                       "\n\t\t\t<description>" + m.getPropositionCommerciale().getDescription() + "</description>" + 
+                                       "\n\t\t\t<contrat>" +
+                                       "\n\t\t\t\t<dateDebut>" + m.getPropositionCommerciale().getDateDebut() + "</dateDebut>" + 
+                                       "\n\t\t\t\t<dateFin>" + m.getPropositionCommerciale().getDateFin() + "</dateFin>" + 
+                                       "\n\t\t\t</contrat>" + 
+                                       "\n\t\t</propositionCommerciale>" + 
                                        "\n\t</typeMessage>" + 
                                        "\n\t</message>";
                             out.write(vMessage);
@@ -943,7 +1009,7 @@ public class MessageController {
 
     public String EcrireEnTete(int id, String destinataire, int nbMessage) {
 
-        return "\n" + "\n<fichierGlobal id =\"" + id + "\">" + "\n" + "\n\t<destinataire>" + destinataire
+        return "\n" + "\n<fichierGlobal id =\"LAB-" + id + "\">" + "\n" + "\n\t<destinataire>" + destinataire
                 + "</destinataire>" + "\n\t<expediteur>Laboratoire</expediteur>" + "\n\t<nbMessages>" + nbMessage
                 + "</nbMessages>";
 
