@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,31 +16,43 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.quartier.quartiercommunicant.model.DemandeCatalogue;
+import com.quartier.quartiercommunicant.model.DemandeCommerciale;
+import com.quartier.quartiercommunicant.model.AccuseReception;
 import com.quartier.quartiercommunicant.model.CatalogueDemande;
 import com.quartier.quartiercommunicant.model.DemandeStage;
 import com.quartier.quartiercommunicant.model.DmStage;
 import com.quartier.quartiercommunicant.model.Fichier;
+import com.quartier.quartiercommunicant.model.Forfait;
 import com.quartier.quartiercommunicant.model.Message;
+import com.quartier.quartiercommunicant.model.Produit;
+import com.quartier.quartiercommunicant.model.PropositionCommerciale;
+import com.quartier.quartiercommunicant.repository.AccuseReceptionRepository;
 import com.quartier.quartiercommunicant.repository.CVRepository;
 import com.quartier.quartiercommunicant.repository.DemandeCatalogueRepository;
+import com.quartier.quartiercommunicant.repository.DemandeCommercialeRepository;
+import com.quartier.quartiercommunicant.repository.DemandeConferenceRepository;
 import com.quartier.quartiercommunicant.repository.DemandeStageRepository;
 import com.quartier.quartiercommunicant.repository.DmStageRepository;
 import com.quartier.quartiercommunicant.repository.EnvoiBonCommandeRepository;
 import com.quartier.quartiercommunicant.repository.EtatCivilRepository;
 import com.quartier.quartiercommunicant.repository.ExperienceRepository;
 import com.quartier.quartiercommunicant.repository.FichierRepository;
+import com.quartier.quartiercommunicant.repository.ForfaitRepository;
 import com.quartier.quartiercommunicant.repository.FormationStageRepository;
 import com.quartier.quartiercommunicant.repository.LettreRepository;
 import com.quartier.quartiercommunicant.repository.MessageRepository;
 import com.quartier.quartiercommunicant.repository.ProduitRepository;
+import com.quartier.quartiercommunicant.repository.PropositionCommercialeRepository;
 import com.quartier.quartiercommunicant.repository.ReponseStageRepository;
 import com.quartier.quartiercommunicant.repository.CatalogueDemandeRepository;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 public class MessageController {
@@ -84,23 +99,51 @@ public class MessageController {
     @Inject
     CatalogueDemandeRepository aCatalogueDemandeRepository;
 
+    @Inject
+    DemandeCommercialeRepository aDemandeCommercialeRepository;
+
+    @Inject
+    AccuseReceptionRepository aAccuseReceptionRepository;
+
+    @Inject
+    ForfaitRepository aForfaitRepository;
+
+    @Inject
+    PropositionCommercialeRepository aPropositionCommercialeRepository;
+
     List<Message> listeMessage = new ArrayList<>();
     List<DmStage> listeDmStage = new ArrayList<>();
+    int totalDmStageEcole = 0;
+    int totalDmStageEntreprise = 0;
     List<CatalogueDemande> listeCatalogueDemande = new ArrayList<>();
 
     List<Message> listeMessageEcole = new ArrayList<>();
     List<Message> listeMessageMagasin = new ArrayList<>();
     List<Message> listeMessageEntreprise = new ArrayList<>();
+    int idTemporaire = 0;
+    String pattern = "HH:mm:ss dd-MM-YYYY";
+    SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 
     @RequestMapping(value = "/reponseGenerique", method = RequestMethod.POST)
-    public String reponseGenerique(@RequestParam String textarea, @RequestParam String destinataire,
-            @RequestParam String validite) {
+    public String reponseGenerique(@RequestParam String textarea, @RequestParam String idMsgPrecedent) {
 
         
         String pattern = "HH:mm:ss dd-MM-YYYY";
-        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-       
-        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), validite, textarea, "");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);  
+        
+        // On recherche le destinataire à partir du idMsgPrecedent
+        String destinataire = "";
+        for (Fichier f : aFichierRepository.findAll()){
+            for (Message mes : f.getListMess()){
+                if (mes.getId().equals(idMsgPrecedent)){
+                    destinataire = f.getExpediteur();
+                }
+            }
+        }
+
+        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "2160", textarea, idMsgPrecedent);
+        m.setId(""+idTemporaire);
+        idTemporaire++;
         switch (destinataire) {
         case "Magasin":
             listeMessageMagasin.add(m);
@@ -123,8 +166,21 @@ public class MessageController {
             @RequestParam String dateDebut, @RequestParam String dateFin, @RequestParam String validite) {
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        Message m = new Message("demandeCollab", dateFormat.format(new Date()), validite, description, dateDebut,
-                dateFin);
+        
+        Date d = new Date();
+        Date dF = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+            dF = df.parse(dateFin);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Message m = new Message("demandeCollab", dateFormat.format(new Date()), validite, description, dateFormat.format(d),
+                dateFormat.format(dF));
+                m.setId(""+idTemporaire);
+                idTemporaire++;
         switch (destinataire) {
         case "Magasin":
             listeMessageMagasin.add(m);
@@ -144,7 +200,7 @@ public class MessageController {
     }
 
     @RequestMapping(value = "/demandeCatalogue", method = RequestMethod.POST)
-    public String demandeCatalogue(@RequestParam String id, @RequestParam String titreCatalogueDemande, @RequestParam String quantite,
+    public String demandeCatalogue(@RequestParam String id, @RequestParam String titreCatalogueDemande, @RequestParam int quantite,
             @RequestParam String validite) {
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
@@ -163,25 +219,79 @@ public class MessageController {
 
         }
         List<CatalogueDemande> vListTemp = new ArrayList<>();
-        CatalogueDemande cdm = new CatalogueDemande(i, titreCatalogueDemande, Integer.valueOf(quantite));
+        CatalogueDemande cdm = new CatalogueDemande(i, titreCatalogueDemande, quantite);
         aCatalogueDemandeRepository.save(cdm);
         vListTemp.add(cdm);
         DemandeCatalogue dmC = new DemandeCatalogue(vListTemp);
 
         Message m = new Message("demandeCatalogue", dateFormat.format(new Date()), validite, dmC);
+        m.setId(""+idTemporaire);
+        idTemporaire++;
         listeMessageMagasin.add(m);
-
 
         return "redirect:/envoiMessage";
     }
 
+    @RequestMapping(value = "/propositionCommerciale", method = RequestMethod.POST)
+    public String propositionCommerciale(@RequestParam float prixProposition, @RequestParam String description, @RequestParam String validite, @RequestParam String dateDebut, @RequestParam String dateFin){
+        String pattern = "HH:mm:ss dd-MM-YYYY";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+        Date d = new Date();
+        Date dF = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+            dF = df.parse(dateFin);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Forfait forfait = new Forfait(prixProposition);
+        List<Forfait> listeForfait = new ArrayList<>();
+        listeForfait.add(forfait);
+        aForfaitRepository.save(forfait);
+        PropositionCommerciale propositionCommerciale = new PropositionCommerciale(listeForfait, description, dateFormat.format(d));
+        propositionCommerciale.setDateFin(dateFormat.format(dF));
+        propositionCommerciale.setDuree(0);
+        aPropositionCommercialeRepository.save(propositionCommerciale);
+        Message m = new Message("propositionCommerciale", dateFormat.format(new Date()), validite, propositionCommerciale);
+        m.setId(""+idTemporaire);
+        idTemporaire++;
+        listeMessageMagasin.add(m);
+
+        return "redirect:/envoiMessage";
+    }
+
+    @RequestMapping(value = "/demandeCommerciale", method = RequestMethod.POST)
+    public String demandeCommerciale(@RequestParam int prixProposition, @RequestParam String description, @RequestParam String validite, @RequestParam String dateDebut, @RequestParam String dateFin, @RequestParam String duree){
+        String pattern = "HH:mm:ss dd-MM-YYYY";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+        Date d = new Date();
+        Date dF = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+            dF = df.parse(dateFin);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DemandeCommerciale dc = new DemandeCommerciale(prixProposition, description, dateFormat.format(d), dateFormat.format(dF));
+        Message m = new Message("demandeCommerciale", dateFormat.format(new Date()), validite, dc);
+        m.setId(""+idTemporaire);
+        idTemporaire++;
+        aDemandeCommercialeRepository.save(dc);
+        listeMessageMagasin.add(m);
+
+        return "redirect:/envoiMessage";
+    }
 
 
     @RequestMapping(value = "/demandeStage", method = RequestMethod.POST)
     public String demandeStage(@RequestParam String objet, @RequestParam String description, @RequestParam String lieu,
             @RequestParam String remuneration, @RequestParam String dateDebut, @RequestParam String dateFin,
             @RequestParam String duree, @RequestParam String destinataire, @RequestParam String validite) {
-        String pattern = "dd-MM-YYYY";
+        String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 
         // On cherche un ID qui est libre dans les demandes de stages
@@ -195,21 +305,33 @@ public class MessageController {
 
         }
         List<DmStage> vListTemp = new ArrayList<>();
-        DmStage dmS = new DmStage(i, description, objet, lieu, Integer.valueOf(remuneration), dateDebut,
+        Date d = new Date();
+        try {
+            String pat = "YYYY-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(pat);
+            d = df.parse(dateDebut);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DmStage dmS = new DmStage(i, description, objet, lieu, Integer.valueOf(remuneration), dateFormat.format(d),
                 Integer.valueOf(duree));
         aDmStageRepository.save(dmS);
         vListTemp.add(dmS);
         DemandeStage ds = new DemandeStage(vListTemp);
-
+        aDemandeStageRepository.save(ds);
         Message m = new Message("demandeStage", dateFormat.format(new Date()), validite, ds);
+        m.setId(""+idTemporaire);
+        idTemporaire++;
         switch (destinataire) {
         case "Magasin":
             listeMessageMagasin.add(m);
             break;
         case "Entreprise":
+            totalDmStageEntreprise++;
             listeMessageEntreprise.add(m);
             break;
         case "Ecole":
+            totalDmStageEcole++;
             listeMessageEcole.add(m);
             break;
         default:
@@ -218,6 +340,156 @@ public class MessageController {
         }
 
         return "redirect:/envoiMessage";
+    }
+
+    @RequestMapping(value = "/accuseReception", method = RequestMethod.POST)
+    public String accuseReception(@RequestParam String identifiantMessage, @RequestParam String dateReceptionAccuseDeReception){
+        String pattern = "HH:mm:ss dd-MM-YYYY";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+        String dateCommande = "";
+        List<Produit> listeProduit = new ArrayList<>();
+        float prixCommande = 0;
+        String destinataire = "";
+        String identifiantCommande = "";
+        // On retrouve les données via l'identifiant de commande
+    
+        for (Fichier f: aFichierRepository.findAll()){
+            for (Message m: f.getListMess()){
+                if (m.getId().equals(identifiantMessage)){
+                    if (m.getType().equals("envoiBonCommande")){ // On l'a, on récupère les données
+                        identifiantCommande = m.getEnvoiBonCommande().getId();
+                        dateCommande = m.getEnvoiBonCommande().getDateCommande();
+                        listeProduit.addAll(m.getEnvoiBonCommande().getListeProduit());
+                        prixCommande = m.getEnvoiBonCommande().getPrixCommande();
+                        destinataire = f.getExpediteur();
+                    }
+                }
+               
+            }
+        }
+
+        int i = 0;
+        boolean trouve = false;
+        while (i < 5000 && !trouve) {
+            i++;
+            if (aAccuseReceptionRepository.findById("LAB-"+i).isEmpty()) {
+                trouve = true;
+            }
+
+        }
+        System.err.println(i + " " + identifiantCommande + " " + dateCommande + " " + dateReceptionAccuseDeReception);  
+        AccuseReception ar = new AccuseReception("LAB-"+i, identifiantCommande, dateCommande, dateReceptionAccuseDeReception, listeProduit, prixCommande);
+        aAccuseReceptionRepository.save(ar);
+
+        Message mes = new  Message("accuseReception", dateFormat.format(new Date()), "2160", ar);
+
+        mes.setId(""+idTemporaire);
+        idTemporaire++;
+        switch (destinataire) {
+        case "Magasin":
+            listeMessageMagasin.add(mes);
+            break;
+        case "Entreprise":
+            totalDmStageEntreprise++;
+            listeMessageEntreprise.add(mes);
+            break;
+        case "Ecole":
+            totalDmStageEcole++;
+            listeMessageEcole.add(mes);
+            break;
+        default:
+            break;
+
+        }
+        return "redirect:/envoiMessage";
+    }
+
+    @RequestMapping(value = "/waitingRoom")
+    public String waitingRoom(Model model){
+        ArrayList<Message> listeMessageP = new ArrayList<>();
+        listeMessageP.addAll(listeMessageEcole);
+        listeMessageP.addAll(listeMessageEntreprise);
+        listeMessageP.addAll(listeMessageMagasin);
+        model.addAttribute("listeEcole", listeMessageEcole);
+        model.addAttribute("listeEntreprise", listeMessageEntreprise);
+        model.addAttribute("listeMagasin", listeMessageMagasin);
+        model.addAttribute("listeMessage", listeMessageP);
+        return "WaitingRoom";
+    }
+
+    @RequestMapping(value = "/delete/{id}")
+    public String deleteMessage(Model model, @PathVariable int id){
+        Message temp = new Message();
+        int whichOne = -1;
+        // On retrouve le message dans les différentes listes puis on regarde son type
+        // pour bien le supprimer de partout
+        for (Message m : listeMessageEcole){
+            if (m.getId().equals(""+id)){
+                temp = m;
+                whichOne = 0;
+                switch(m.getType()){ // On gère les cas problématiques. A savoir demande de stage et demande de catalogue
+                    case "demandeStage":
+                        DemandeStage dm = m.getDemandeStage();
+                        listeDmStage.removeAll(dm.getListDmStage());
+                        break;
+                    case "demandeCatalogue":
+                        DemandeCatalogue dc = m.getDemandeCatalogue();
+                        listeCatalogueDemande.removeAll(dc.getListCatalogueDemande());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        for (Message m : listeMessageMagasin){
+            if (m.getId().equals(""+id)){
+                temp = m;
+                whichOne = 1;
+                switch(m.getType()){ // On gère les cas problématiques. A savoir demande de stage et demande de catalogue
+                    case "demandeStage":
+                        DemandeStage dm = m.getDemandeStage();
+                        listeDmStage.removeAll(dm.getListDmStage());
+                        break;
+                    case "demandeCatalogue":
+                        DemandeCatalogue dc = m.getDemandeCatalogue();
+                        listeCatalogueDemande.removeAll(dc.getListCatalogueDemande());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        for (Message m : listeMessageEntreprise){
+            if (m.getId().equals(""+id)){
+                temp = m;
+                whichOne = 2;
+                switch(m.getType()){ // On gère les cas problématiques. A savoir demande de stage et demande de catalogue
+                    case "demandeStage":
+                        DemandeStage dm = m.getDemandeStage();
+                        listeDmStage.removeAll(dm.getListDmStage());
+                        break;
+                    case "demandeCatalogue":
+                        DemandeCatalogue dc = m.getDemandeCatalogue();
+                        listeCatalogueDemande.removeAll(dc.getListCatalogueDemande());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        
+        // On regarde laquelle des listes est concernée
+        if (whichOne == 0){
+            listeMessageEcole.remove(temp);
+        }
+        else if (whichOne == 1){
+            listeMessageMagasin.remove(temp);
+        }
+        else if (whichOne == 2){
+            listeMessageEntreprise.remove(temp);
+        }
+        
+        return "redirect:/waitingRoom";
     }
 
     @RequestMapping(value = "/toutEnvoyer", method = RequestMethod.POST)
@@ -229,11 +501,11 @@ public class MessageController {
             EcrireMessages("Ecole");
         }
 
-        if (listeMessageEntreprise.size() > 0) {
+        if (!listeMessageEntreprise.isEmpty()) {
             EcrireMessages("Entreprise");
         }
 
-        if (listeMessageMagasin.size() > 0) {
+        if (!listeMessageMagasin.isEmpty()) {
             EcrireMessages("Magasin");
         }
 
@@ -243,16 +515,61 @@ public class MessageController {
         listeMessageMagasin = new ArrayList<>();
         listeMessage = new ArrayList<>();
         listeDmStage = new ArrayList<>();
-        listeCatalogueDemande = new ArrayList<>();
+        totalDmStageEcole = 0;
+        totalDmStageEntreprise = 0;
+        
+       listeCatalogueDemande = new ArrayList<>();
         return "redirect:/envoiMessage";
     }
 
     @RequestMapping("envoiMessage")
     public String envoiMessage(Model model) {
+        List<String> listeIdMessage = new ArrayList<>();
+        for (Message m : aMessageRepository.findAll()){
+            listeIdMessage.add(m.getId());
+        }
+
+        List<String> listeIdCommande = new ArrayList<>();
+        for (Message m : aMessageRepository.findAll()){
+            if (m.getType().equals("envoiCatalogue") || m.getType().equals("envoiBonCommande")){
+                listeIdCommande.add(m.getId());
+            }
+        }
         model.addAttribute("listeEcole", listeMessageEcole);
         model.addAttribute("listeEntreprise", listeMessageEntreprise);
         model.addAttribute("listeMagasin", listeMessageMagasin);
+        model.addAttribute("listeIdMessage", listeIdMessage);
+        model.addAttribute("listeIdCommande", listeIdCommande);
         return "EnvoiMessage";
+    }
+
+    public int compteNombreMessage(List<Message> listeMess){
+        int total = 0;
+        boolean boolStage = false;
+        boolean boolCatalogue = false;
+        for (Message m: listeMess){
+            switch(m.getType()){
+                case "demandeCollab":
+                    total++;
+                    break;
+                case "demandeStage":
+                    if (!boolStage){
+                        total++;
+                        boolStage = true;
+                    }
+                    break;
+                case "demandeCatalogue":
+                    if (!boolCatalogue){
+                        total++;
+                        boolCatalogue = true;
+                    }
+                    break;
+                default:
+                    total++;
+                    break;
+            }
+        }
+        return total;
     }
 
     public void EcrireMessages(String destinataire) {
@@ -267,15 +584,15 @@ public class MessageController {
         Fichier fic = new Fichier();
         fic.setDestinataire(destinataire);
         fic.setExpediteur("Laboratoire");
-        String pattern = "dd-MM-YYYY";
+        String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 
         int id_fichier = -1;
         while (i < 5000 && !trouve) {
-            if (aFichierRepository.findById(i).isEmpty()) {
+            if (aFichierRepository.findById("LAB-" + i).isEmpty()) {
                 trouve = true;
                 id_fichier = i;
-                fic.setId(i);
+                fic.setId("LAB-" + id_fichier);
             }
             i++;
         }
@@ -306,79 +623,201 @@ public class MessageController {
 
             fic.setChecksum(listeMessage.size());
             out.write(ajoutDTD());
-            out.write(EcrireEnTete(id_fichier, destinataire, listeMessage.size()));
+
+            out.write(EcrireEnTete(id_fichier, destinataire, compteNombreMessage(listeMessage)));
 
             for (Message m : listeMessage) {
 
                 // On cherche un id de message libre
                 switch (m.getType()) {
-                case "reponseGenerique":
-                    while (i < 50000 && !trouve) {
-                        if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
-                            m.setId("LAB-" + i);
-                            trouve = true;
+                    case "reponseGenerique":
+                        while (i < 50000 && !trouve) {
+                            if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                m.setId("LAB-" + i);
+                                trouve = true;
+                            }
+                            i++;
                         }
-                        i++;
-                    }
-                    out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
-                    aMessageRepository.save(m);
-                    // On écrit le message
-                    vMessage = "\n" + "\n\t\t<reponseGenerique>" + "\n\t\t\t<msg>" + m.getMsg() + "</msg>"
-                            + "\n\t\t\t<idMsgPrécédent>" + m.getIdMsgPrecedent() + "</idMsgPrécédent>"
-                            + "\n\t\t</reponseGenerique>" + "\n\t</message>";
-                    out.write(vMessage);
-                    trouve = false;
-                    break;
+                        out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                        aMessageRepository.save(m);
+                        // On écrit le message
+                        vMessage = "\n\t<typeMessage>" + "\n\t\t<reponseGenerique>" + "\n\t\t\t<msg>" + m.getMsg() + "</msg>"
+                                + "\n\t\t\t<idMsgPrécédent>" + m.getIdMsgPrecedent() + "</idMsgPrécédent>"
+                                + "\n\t\t</reponseGenerique>" + "\n\t</typeMessage>" + "\n\t</message>";
+                        out.write(vMessage);
+                        trouve = false;
+                        break;
 
-                case "demandeCollab":
-                    while (i < 50000 && !trouve) {
-                        if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
-                            m.setId("LAB-" + i);
-                            trouve = true;
+                    case "demandeCollab":
+                        while (i < 50000 && !trouve) {
+                            if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                m.setId("LAB-" + i);
+                                trouve = true;
+                            }
+                            i++;
                         }
-                        i++;
-                    }
-                    out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
-                    aMessageRepository.save(m);
-                    // On écrit le message
-                    vMessage = "\n" + "\n\t\t<demandeCollab>" + "\n\t\t\t<description>" + m.getDescription()
-                            + "</description>" + "\n\t\t\t<date>" + "\n\t\t\t\t<dateDebut>" + m.getDateDebut()
-                            + "</dateDebut>" + "\n\t\t\t\t<dateFin>" + m.getDateFin() + "</dateFin>" + "\n\t\t\t</date>"
-                            + "\n\t\t</demandeCollab>" + "\n\t</message>";
-                    out.write(vMessage);
-                    trouve = false;
-                    break;
+                        out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                        aMessageRepository.save(m);
+                        // On écrit le message
+                        vMessage = "\n\t<typeMessage>" + "\n\t\t<demandeCollab>" + "\n\t\t\t<description>" + m.getDescription()
+                                + "</description>" + "\n\t\t\t<date>" + "\n\t\t\t\t<dateDebut>" + m.getDateDebut()
+                                + "</dateDebut>" + "\n\t\t\t\t<dateFin>" + m.getDateFin() + "</dateFin>" + "\n\t\t\t</date>"
+                                + "\n\t\t</demandeCollab>" + "\n\t</typeMessage>" + "\n\t</message>";
+                        out.write(vMessage);
+                        trouve = false;
+                        break;
 
-                case "demandeCatalogue":
-                    /*while (i < 50000 && !trouve) {
-                        if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
-                            m.setId("LAB-" + i);
-                            trouve = true;
+                        case "demandeCommerciale":
+                            while (i < 50000 && !trouve) {
+                                if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                    m.setId("LAB-" + i);
+                                    trouve = true;
+                                }
+                                i++;
+                            }
+                            out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                            aMessageRepository.save(m);
+                            // Ecriture du message
+                            
+
+                            vMessage = "\n\t<typeMessage>" + "\n\t\t<demandeCommerciale>" + 
+                                       "\n\t\t\t<prixProposition>" + "\n\t\t\t\t<forfait>" + m.getDemandeCommerciale().getPrixProposition() +"</forfait>"+ "\n\t\t\t</prixProposition>" +
+                                       "\n\t\t\t<description>" + m.getDemandeCommerciale().getDescription() + "</description>" + 
+                                       "\n\t\t\t<contrat>" +
+                                       "\n\t\t\t\t<dateDebut>" + m.getDemandeCommerciale().getDateDebut() + "</dateDebut>" + 
+                                       "\n\t\t\t\t<dateFin>" + m.getDemandeCommerciale().getDateFin() + "</dateFin>" + 
+                                       "\n\t\t\t</contrat>" + 
+                                       "\n\t\t</demandeCommerciale>" + 
+                                       "\n\t</typeMessage>" + 
+                                       "\n\t</message>";
+                            out.write(vMessage);
+                            trouve = false;
+                            break;
+
+                        case "propositionCommerciale":
+                            while (i < 50000 && !trouve) {
+                                if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                    m.setId("LAB-" + i);
+                                    trouve = true;
+                                }
+                                i++;
+                            }
+                            out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                            aMessageRepository.save(m);
+                            // Ecriture du message
+                            
+
+                            vMessage = "\n\t<typeMessage>" + "\n\t\t<propositionCommerciale>" + 
+                                       "\n\t\t\t<prixProposition>" + "\n\t\t\t\t<forfait>" + m.getPropositionCommerciale().getListeForfait().get(0).getPrix() +"</forfait>"+ "\n\t\t\t</prixProposition>" +
+                                       "\n\t\t\t<description>" + m.getPropositionCommerciale().getDescription() + "</description>" + 
+                                       "\n\t\t\t<contrat>" +
+                                       "\n\t\t\t\t<dateDebut>" + m.getPropositionCommerciale().getDateDebut() + "</dateDebut>" + 
+                                       "\n\t\t\t\t<dateFin>" + m.getPropositionCommerciale().getDateFin() + "</dateFin>" + 
+                                       "\n\t\t\t</contrat>" + 
+                                       "\n\t\t</propositionCommerciale>" + 
+                                       "\n\t</typeMessage>" + 
+                                       "\n\t</message>";
+                            out.write(vMessage);
+                            trouve = false;
+                            break;
+                            
+
+                    case "demandeCatalogue":
+                        m.setId("Temp");
+                        listeCatalogueDemande.add(m.getDemandeCatalogue().getListCatalogueDemande().get(0));
+                        dureeValidite= m.getDureeValidite();
+                        aDemandeCatalogueRepository.save(m.getDemandeCatalogue());
+                        aMessageRepository.save(m);
+                        break;
+
+                    case "demandeStage":
+                        // On regroupe toutes les demandes dans la liste
+                        listeDmStage.add(m.getDemandeStage().getListDmStage().get(0));  
+                        dureeValidite = m.getDureeValidite();
+                        m.setId("Temp");
+                        aDemandeStageRepository.save(m.getDemandeStage());
+                        aMessageRepository.save(m);
+                        // On attend d'être arrivé au nombre total de messages contenant des demandes de stages avant de passer à l'enregistrement
+                        int totalDmStage = 0;
+                        switch(destinataire){
+                            case "Entreprise":
+                                totalDmStage = totalDmStageEntreprise; 
+                                break;
+                            case "Ecole":
+                                totalDmStage = totalDmStageEcole;
+                                break;
+                            default:
+                                totalDmStage = 0;
                         }
-                        i++;
-                    }
-                    out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
-                    // On enregistre message + demande de catalogue
-                    aDemandeCatalogueRepository.save(m.getDemandeCatalogue());
-                    aMessageRepository.save(m);
-                    vMessage = "\n" + "\n\t\t<demandeCatalogue>" + "\n\t\t\t<catalogueDemande>"
-                            + "\n\t\t\t\t<titreCatalogueDemande>" + "\n\t\t\t\t\t<identifiant>"
-                            + m.getDemandeCatalogue().getId() + "</identifiant>" + "\n\t\t\t\t</titreCatalogueDemande>"
-                            + "\n\t\t\t\t<quantite>" + m.getDemandeCatalogue().getQuantite() + "</quantite>"
-                            + "\n\t\t\t</catalogueDemande>" + "\n\t\t</demandeCatalogue>" + "\n\t</message>";
-                    out.write(vMessage);
-                    trouve = false;
-                    break;*/
-                    listeCatalogueDemande.add(m.getDemandeCatalogue().getListCatalogueDemande().get(0));
-                    dureeValidite= m.getDureeValidite();
-                    break;
+                        if (totalDmStage == listeDmStage.size()){
+                            DemandeStage ds = new DemandeStage(listeDmStage);
+                            aDemandeStageRepository.save(ds);
+                            while (i < 50000 && !trouve) {
+                                if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                    id = "LAB-" + i;
+                                    trouve = true;
+                                }
+                                i++;
+                            }
+                            
+                            m.setDemandeStage(ds);
+                            m.setId(id);
+                            out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                            aDemandeStageRepository.save(ds);
+                            aMessageRepository.save(m);
+                            vMessage = "<\n\t<typeMessage>" + "\n\t<demandeStage>";
+                            for (DmStage vDmTemp : ds.getListDmStage()) {
+                                vMessage += "\n\t\t<dmStage>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<objet>"
+                                        + vDmTemp.getObjet() + "</objet>" + "\n\t\t\t<description>" + vDmTemp.getDescription()
+                                        + "</description>" + "\n\t\t\t<lieu>" + vDmTemp.getLieu() + "</lieu>"
+                                        + "\n\t\t\t<remuneration>" + vDmTemp.getRemuneration() + "</remuneration>"
+                                        + "\n\t\t\t<date>" + "\n\t\t\t\t<dateDebut>" + vDmTemp.getDateDebut() + "</dateDebut>"
+                                        + "\n\t\t\t\t<duree>" + vDmTemp.getDuree() + "</duree>" + "\n\t\t\t</date>"
+                                        + "\n\t\t</dmStage>";
+                            }
+                            vMessage += "\n\t</demandeStage>" + "\n\t</typeMessage>" + "\n</message>";
+                            out.write(vMessage);
+                            trouve = false;
+                            listeDmStage = new ArrayList<>();
+                        }
+                        break;
 
-                case "demandeStage":
-                    // On regroupe toutes les demandes dans la liste
-                    listeDmStage.add(m.getDemandeStage().getListDmStage().get(0));
-                    dureeValidite = m.getDureeValidite();
-                    break;
-                }
+                        case "accuseReception":
+                            while (i < 50000 && !trouve) {
+                                if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
+                                    m.setId("LAB-" + i);
+                                    trouve = true;
+                                }
+                                i++;
+                            }
+                            out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
+                            aMessageRepository.save(m);
+                            // On écrit le message
+                            vMessage = "\n\t<typeMessage>" + 
+                                       "\n\t\t<accuseReception>" + 
+                                       "\n\t\t\t<numCommande identifiantCommande=\"" + m.getAccuseReception().getIdentifiantCommande() + "\">" + m.getAccuseReception().getNumCommande() + "</numCommande>" +
+                                       "\n\t\t\t<dateCommande>" + m.getAccuseReception().getDateCommande() + "</dateCommande>" +
+                                       "\n\t\t\t<listeProduit>\n";
+                            for (Produit p: m.getAccuseReception().getListeProduit()){
+                                vMessage += "\n\t\t\t\t<produit identifiant=\"" + p.getId() + "\">" + 
+                                            "\n\t\t\t\t\t<nom>" + p.getNom() + "</nom>" + 
+                                            "\n\t\t\t\t\t<prix>" + p.getPrix() + "</prix>" + 
+                                            "\n\t\t\t\t\t<quantite>" + p.getQuantite() + "</quantite>" + 
+                                            "\n\t\t\t\t</produit>"
+                                            ;
+                            }
+                            vMessage += "\n\t\t\t</listeProduit>" +
+                                        "\n\t\t\t<prixCommande>" + m.getAccuseReception().getPrixCommande() + "</prixCommande>" +
+                                        "\n\t\t</accuseReception>" + 
+                                        "\n\t</typeMessage>" + 
+                                        "\n</message>";
+                            out.write(vMessage);
+                            trouve = false;
+                            break;
+                    default : 
+                        break;
+                    }
+                
                 i++;
             }
 
@@ -396,48 +835,21 @@ public class MessageController {
                 trouve = false;
                 Message ms = new Message("demandeCatalogue", dateFormat.format(new Date()), dureeValidite, dc);
                 ms.setId(id);
-                out.write(ajoutHeaderMessage(ms.getId(), ms.getDateEnvoi(), ms.getDureeValidite()));
                 aMessageRepository.save(ms);
-                vMessage = "\n\t<demandeCatalogue>";
+                out.write(ajoutHeaderMessage(ms.getId(), ms.getDateEnvoi(), ms.getDureeValidite()));
+                
+                vMessage = "\n\t<typeMessage>" + "\n\t<demandeCatalogue>";
                 for (CatalogueDemande vDmTemp : dc.getListCatalogueDemande()) {
-                    vMessage += "\n\t\t<CatalogueDemande>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<titreCatalogueDemande>"
+                    vMessage += "\n\t\t<CatalogueDemande identifiant=\"" + vDmTemp.getId() + "\">" + "\n\t\t\t<titreCatalogueDemande>"
                             + vDmTemp.getTitreCatalogueDemande() + "</titreCatalogueDemande>" + "\n\t\t\t<quantite>" + vDmTemp.getQuantite()
                             + "</quantite>"
                             + "\n\t\t</CatalogueDemande>";
                 }
-                vMessage += "\n\t</demandeCatalogue>" + "\n</message>";
+                vMessage += "\n\t</demandeCatalogue>" + "\n\t</typeMessage>" +  "\n</message>";
                 out.write(vMessage);
             }
 
-            // On écrit le message à la fin pour tout ce qui concerne demande de stage
-            if (listeDmStage.size() != 0) {
-                DemandeStage ds = new DemandeStage(listeDmStage);
-                aDemandeStageRepository.save(ds);
-                while (i < 50000 && !trouve) {
-                    if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
-                        id = "LAB-" + i;
-                        trouve = true;
-                    }
-                    i++;
-                }
-                trouve = false;
-                Message ms = new Message("demandeStage", dateFormat.format(new Date()), dureeValidite, ds);
-                ms.setId(id);
-                out.write(ajoutHeaderMessage(ms.getId(), ms.getDateEnvoi(), ms.getDureeValidite()));
-                aMessageRepository.save(ms);
-                vMessage = "\n\t<demandeStage>";
-                for (DmStage vDmTemp : ds.getListDmStage()) {
-                    vMessage += "\n\t\t<dmStage>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<objet>"
-                            + vDmTemp.getObjet() + "</objet>" + "\n\t\t\t<description>" + vDmTemp.getDescription()
-                            + "</description>" + "\n\t\t\t<lieu>" + vDmTemp.getLieu() + "</lieu>"
-                            + "\n\t\t\t<remuneration>" + vDmTemp.getRemuneration() + "</remuneration>"
-                            + "\n\t\t\t<date>" + "\n\t\t\t\t<dateDebut>" + vDmTemp.getDateDebut() + "</dateDebut>"
-                            + "\n\t\t\t\t<duree>" + vDmTemp.getDuree() + "</duree>" + "\n\t\t\t</date>"
-                            + "\n\t\t</dmStage>";
-                }
-                vMessage += "\n\t</demandeStage>" + "\n</message>";
-                out.write(vMessage);
-            }
+            
             out.write(ajoutFin());
         } catch (IOException e) {
             e.printStackTrace();
@@ -449,6 +861,7 @@ public class MessageController {
         // On clear la liste de message aussi sinon si on envoie plusieurs fichiers on
         // ne fait que ajouter d'autres msg
         listeMessage = new ArrayList<>();
+        listeDmStage = new ArrayList<>();
     }
 
     @RequestMapping(value = "/reponseRapide", method = RequestMethod.POST)
@@ -466,7 +879,7 @@ public class MessageController {
         int i = 0;
         boolean trouve = false;
         
-        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "90", msg, idMsgPrecedent);
+        Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "2160", msg, idMsgPrecedent);
         while (i < 50000 && !trouve) {
             if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                 m.setId("LAB-" + i);
@@ -475,7 +888,6 @@ public class MessageController {
             i++;
         }
         aMessageRepository.save(m);
-
         try (FileWriter fw = new FileWriter(
             "repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-" + m.getId() + ".xml", false);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -483,10 +895,12 @@ public class MessageController {
                 out.write(ajoutDTD());
                 out.write(EcrireEnTete(i, destinataire, 1));
                 out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
-                vMessage += "\t<reponseGenerique>" + 
+                vMessage += "\n\t<typeMessage>" + 
+                            "\n\t<reponseGenerique>" + 
                             "\n\t\t<msg>" + m.getMsg() + "</msg>" + 
                             "\n\t\t<idMsgPrecedent>" + m.getIdMsgPrecedent() + "</idMsgPrecedent>" + 
                             "\n\t</reponseGenerique>" + 
+                            "\n\t </typeMessage>" + 
                             "\n</message>";
                 out.write(vMessage);
                 out.write(ajoutFin());
@@ -595,7 +1009,7 @@ public class MessageController {
 
     public String EcrireEnTete(int id, String destinataire, int nbMessage) {
 
-        return "\n" + "\n<fichierGlobal id =\"" + id + "\">" + "\n" + "\n\t<destinataire>" + destinataire
+        return "\n" + "\n<fichierGlobal id =\"LAB-" + id + "\">" + "\n" + "\n\t<destinataire>" + destinataire
                 + "</destinataire>" + "\n\t<expediteur>Laboratoire</expediteur>" + "\n\t<nbMessages>" + nbMessage
                 + "</nbMessages>";
 

@@ -16,14 +16,14 @@ import lombok.Data;
 public class Fichier {
     
     @Id
-    private int id;
+    private String id;
 
     private String expediteur;
     private String destinataire;
     private int checksum;
     private File fic;
 
-    @ManyToMany(cascade = CascadeType.MERGE)
+    @ManyToMany(cascade = CascadeType.REMOVE)
     private List<Message> listMess = new ArrayList<>();
 
     

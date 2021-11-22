@@ -3,6 +3,7 @@ package com.quartier.quartiercommunicant.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import lombok.Data;
 
@@ -33,6 +34,16 @@ public class Message {
     private DemandeCatalogue demandeCatalogue;
     @OneToOne
     private EnvoiBonCommande envoiBonCommande;
+    @OneToOne
+    private DemandeConference demandeConference;
+    @OneToOne
+    private DemandeCommerciale demandeCommerciale;
+    @OneToOne
+    private AccuseReception accuseReception;
+    @OneToOne
+    private EnvoiCatalogue envoiCatalogue;
+    @OneToOne
+    private PropositionCommerciale propositionCommerciale;
     
     public Message(){
         
@@ -87,6 +98,46 @@ public class Message {
         setDateEnvoi(dateEnvoi);
         setDureeValidite(dureeValidite);
         setEnvoiBonCommande(envoiBonCommande);
+    }
+
+    // Message demande de conférence
+    public Message(String type, String dateEnvoi, String dureeValidite, DemandeConference demandeConference){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setDemandeConference(demandeConference);
+    }
+
+    // Message demande commerciale
+    public Message(String type, String dateEnvoi, String dureeValidite, DemandeCommerciale demandeCommerciale){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setDemandeCommerciale(demandeCommerciale);
+    }
+
+    // Message proposition commerciale
+    public Message(String type, String dateEnvoi, String dureeValidite, PropositionCommerciale propositionCommerciale){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setPropositionCommerciale(propositionCommerciale);
+    }
+
+    // Message accusé de réception
+    public Message(String type, String dateEnvoi, String dureeValidite, AccuseReception accuseReception){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setAccuseReception(accuseReception);
+    }
+
+    // Message envoi de catalogue
+    public Message(String type, String dateEnvoi, String dureeValidite, EnvoiCatalogue envoiCatalogue){
+        setType(type);
+        setDateEnvoi(dateEnvoi);
+        setDureeValidite(dureeValidite);
+        setEnvoiCatalogue(envoiCatalogue);
     }
 }
 

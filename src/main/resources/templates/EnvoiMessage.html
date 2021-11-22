@@ -37,6 +37,15 @@
                   <div th:case="demandeStage">
                     <span>Demande de stage</span>
                   </div>
+                  <div th:case="demandeCommerciale">
+                    <span>Demande commerciale</span>
+                  </div>
+                  <div th:case="accuseReception">
+                    <span>Accusé de réception</span>
+                  </div>
+                  <div th:case="propositionCommerciale">
+                    <span>Proposition commerciale</span>
+                  </div>
                   <div th:case="*">
                     <span>Erreur</span>
                   </div>
@@ -60,6 +69,15 @@
                   </div>
                   <div th:case="demandeStage">
                     <span>Demande de stage</span>
+                  </div>
+                  <div th:case="demandeCommerciale">
+                    <span>Demande commerciale</span>
+                  </div>
+                  <div th:case="accuseReception">
+                    <span>Accusé de réception</span>
+                  </div>
+                  <div th:case="propositionCommerciale">
+                    <span>Proposition commerciale</span>
                   </div>
                   <div th:case="*">
                     <span>Erreur</span>
@@ -85,6 +103,15 @@
                   <div th:case="demandeStage">
                     <span>Demande de stage</span>
                   </div>
+                  <div th:case="demandeCommerciale">
+                    <span>Demande commerciale</span>
+                  </div>
+                  <div th:case="accuseReception">
+                    <span>Accusé de réception</span>
+                  </div>
+                  <div th:case="propositionCommerciale">
+                    <span>Proposition commerciale</span>
+                  </div>
                   <div th:case="*">
                     <span>Erreur</span>
                   </div>
@@ -94,7 +121,7 @@
           </div>
         </div>
         <h1 class="titre-message">Envoyer un message</h1>
-        <form class="middle" method="POST" th:action="@{/toutEnvoyer}">
+        <form class="middle" method="POST" th:action="@{/waitingRoom}">
           <button type="submit" class="btn custom-btn">Tout envoyer</button>
         </form>
         <a th:href="@{/index}"
@@ -102,7 +129,7 @@
             <span>Back to Menu</span>
           </button></a
         >
-        <div id="geneOs" class="box-message">
+                <div id="geneOs" class="box-message">
           <span
             id="buttonGenerique"
             class="ouvreFerme"
@@ -112,42 +139,10 @@
           >
           <h1>Réponse générique</h1>
           <form method="POST" th:action="@{/reponseGenerique}">
-            <h2>Destinataire</h2>
-            <input
-              type="radio"
-              id="Magasin"
-              name="destinataire"
-              value="Magasin"
-              checked
-            />
-            <label for="Magasin">Magasin</label>
-
-            <input
-              type="radio"
-              id="Ecole"
-              name="destinataire"
-              value="Ecole"
-              checked
-            />
-            <label for="Ecole">Ecole</label>
-
-            <input
-              type="radio"
-              id="Entreprise"
-              name="destinataire"
-              value="Entreprise"
-              checked
-            />
-            <label for="Entreprise">Entreprise</label>
-            <br />
-            <input
-              type="text"
-              id="DureeValidite"
-              placeholder="Durée validité"
-              name="validite"
-              class="input-form"
-              required
-            />
+            <h2>Id du message précédent</h2>
+            <select name="idMsgPrecedent">
+              <option th:each="id : ${listeIdMessage}" th:value="${id}" th:text="${id}"></option>
+            </select>
             <br />
             <textarea
               name="textarea"
@@ -159,6 +154,7 @@
             <button type="submit" class="btn custom-btn">Envoyer</button>
           </form>
         </div>
+
         <div id="collOs" class="box-message">
           <span
             id="buttonCollaboration"
@@ -208,7 +204,8 @@
             <input type="date" name="dateFin" class="input-form" required />
             <br />
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               id="DureeValidite"
               placeholder="Durée validité"
               name="validite"
@@ -231,22 +228,27 @@
           <h1>Demande catalogue</h1>
           <form method="POST" th:action="@{/demandeCatalogue}">
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               name="id"
               placeholder="Id"
               class="input-form"
               required
             />
             <br />
+
+            <input type="text" name="titreCatalogueDemande" placeholder="Titre du catalogue" class="input-form" required /> <br/>
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               name="quantite"
               placeholder="Quantité"
               class="input-form"
               required
             />
             <br /><input
-              type="text"
+              type="number"
+              min="0" max="1000"
               id="DureeValidite"
               placeholder="Durée validité"
               name="validite"
@@ -288,7 +290,8 @@
             <label for="Entreprise">Entreprise</label>
             <br />
             <input
-              type="text"
+              type="number"
+              min="0" max="1000"
               id="DureeValidite"
               placeholder="Durée validité"
               name="validite"
@@ -323,14 +326,16 @@
             />
             <input type="date" name="dateFin" class="input-form" required />
             <br /><input
-              type="text"
+              type="number"
+              min="0" max="100000"
               name="remuneration"
               placeholder="Rémunération"
               class="input-form"
               required
             />
             <br /><input
-              type="text"
+              type="number"
+              min="0" max="1000"
               name="duree"
               placeholder="Durée"
               class="input-form"
@@ -339,7 +344,144 @@
             <br /><button type="submit" class="btn custom-btn">Envoyer</button>
           </form>
         </div>
-        <div id="container"></div>
+        <!ELEMENT propositionCommerciale (prixProposition,description,contrat)>
+        <!ELEMENT prixProposition (forfait+)> 
+        <!ELEMENT forfait (#PCDATA)>
+        <!ELEMENT contrat (date)>
+        <div id="proOs" class="box-message">
+          <span
+            id="buttonProposition"
+            class="ouvreFerme"
+            onclick="OuvreFermeProposition();"
+            style="user-select: none"
+            >+</span
+          >
+          <h1>Proposition commerciale</h1>
+          <form method="POST" th:action="@{/propositionCommerciale}">
+            <input
+              type="number"
+              min="0" max="1000"
+              name="prixProposition"
+              placeholder="Montant"
+              class="input-form"
+              required
+            />
+            <br />
+            <textarea
+            name="description"
+            placeholder="Description"
+            class="input-form"
+            required
+            ></textarea>
+            <br /><input
+              type="number"
+              min="0" max="1000"
+              id="DureeValidite"
+              placeholder="Durée validité"
+              name="validite"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="date"
+              name="dateDebut"
+              class="input-form"
+              required
+            />
+
+            <br /><input
+              type="date"
+              name="dateFin"
+              class="input-form"
+              required
+            />
+            
+            <br /><button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
+
+        <div id="comOs" class="box-message">
+          <span
+            id="buttonCommerce"
+            class="ouvreFerme"
+            onclick="OuvreFermeCommerce();"
+            style="user-select: none"
+            >+</span
+          >
+          <h1>Demande commerciale</h1>
+          <form method="POST" th:action="@{/demandeCommerciale}">
+            <input
+              type="number"
+              min="0" max="1000"
+              name="prixProposition"
+              placeholder="Montant"
+              class="input-form"
+              required
+            />
+            <br />
+            <textarea
+            name="description"
+            placeholder="Description"
+            class="input-form"
+            required
+            ></textarea>
+            <br /><input
+              type="number"
+              min="0" max="1000"
+              id="DureeValidite"
+              placeholder="Durée validité"
+              name="validite"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="date"
+              name="dateDebut"
+              class="input-form"
+              required
+            />
+            <input type="date" name="dateFin" class="input-form" required />
+            <br /><input
+              type="number"
+              min="0" max="100000"
+              name="remuneration"
+              placeholder="Rémunération"
+              class="input-form"
+              required
+            />
+            <br /><input
+              type="number"
+              min="0" max="1000"
+              name="duree"
+              placeholder="Durée"
+              class="input-form"
+              required
+            />
+            <br /><button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
+        
+        <div id="recOs" class="box-message">
+          <span
+            id="buttonReception"
+            class="ouvreFerme"
+            onclick="OuvreFermeReception();"
+            style="user-select: none"
+            >+</span
+          >
+        <h1>Accusé de réception</h1>
+          <form method="POST" th:action="@{/accuseReception}">
+            <h2>Id du message précédent</h2>
+            <select name="identifiantMessage">
+              <option th:each="id : ${listeIdCommande}" th:value="${id}" th:text="${id}"></option>
+            </select>
+            <br>
+            <input type="date" name="dateReceptionAccuseDeReception" class="input-form" />
+            <br /><br />
+            <button type="submit" class="btn custom-btn">Envoyer</button>
+          </form>
+        </div>
+
       </div>
       <!-- particles.js container -->
       <div id="particles-js"></div>
@@ -382,6 +524,41 @@
       function OuvreFermeStage() {
         var buttonx = document.getElementById("buttonStage");
         var box = document.getElementById("stageOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+      function OuvreFermeCommerce() {
+        var buttonx = document.getElementById("buttonCommerce");
+        var box = document.getElementById("comOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+
+      function OuvreFermeProposition() {
+        var buttonx = document.getElementById("buttonProposition");
+        var box = document.getElementById("proOs");
+        if (buttonx.textContent == "+") {
+          buttonx.textContent = "-";
+          box.classList.add("ouvrir");
+        } else {
+          buttonx.textContent = "+";
+          box.classList.remove("ouvrir");
+        }
+      }
+
+      function OuvreFermeReception() {
+        var buttonx = document.getElementById("buttonReception");
+        var box = document.getElementById("recOs");
         if (buttonx.textContent == "+") {
           buttonx.textContent = "-";
           box.classList.add("ouvrir");

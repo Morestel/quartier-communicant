@@ -1,9 +1,12 @@
 package com.quartier.quartiercommunicant.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import lombok.Data;
@@ -13,18 +16,20 @@ import lombok.Data;
 public class EnvoiBonCommande {
     
     @Id
-    private int id;
+    private String id;
+    private String identifiantCommande;
     private String dateCommande;
-    @OneToMany
-    private List<Produit> listeProduit; 
-    private int prixCommande;
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    private List<Produit> listeProduit = new ArrayList<>(); 
+    private float prixCommande;
 
     public EnvoiBonCommande(){
         /* */
     }
 
-    public EnvoiBonCommande(int id, String dateCommande, List<Produit> listeProduit, int prixCommande) {
+    public EnvoiBonCommande(String id, String identifiantCommande, String dateCommande, List<Produit> listeProduit, float prixCommande) {
         this.id = id;
+        this.identifiantCommande = identifiantCommande;
         this.dateCommande = dateCommande;
         this.listeProduit = listeProduit;
         this.prixCommande = prixCommande;
