@@ -140,7 +140,7 @@ public class MessageController {
                 }
             }
         }
-
+        System.err.println(destinataire);
         Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "2160", textarea, idMsgPrecedent);
         m.setId(""+idTemporaire);
         idTemporaire++;
@@ -213,13 +213,13 @@ public class MessageController {
         boolean trouve = false;
         while (i < 5000 && !trouve) {
             i++;
-            if (aCatalogueDemandeRepository.findById(i).isEmpty()) {
+            if (aCatalogueDemandeRepository.findById("MAG-catalogue"+i).isEmpty()) {
                 trouve = true;
             }
 
         }
         List<CatalogueDemande> vListTemp = new ArrayList<>();
-        CatalogueDemande cdm = new CatalogueDemande(i, titreCatalogueDemande, quantite);
+        CatalogueDemande cdm = new CatalogueDemande("MAG-catalogue-" +i, titreCatalogueDemande, quantite);
         aCatalogueDemandeRepository.save(cdm);
         vListTemp.add(cdm);
         DemandeCatalogue dmC = new DemandeCatalogue(vListTemp);
@@ -361,24 +361,21 @@ public class MessageController {
                         listeProduit.addAll(m.getEnvoiBonCommande().getListeProduit());
                         prixCommande = m.getEnvoiBonCommande().getPrixCommande();
                         destinataire = f.getExpediteur();
-                        System.err.println(identifiantCommande + " " + dateCommande + " " + prixCommande);
                     }
-                }
-               
+                }    
             }
         }
-
         int i = 0;
         boolean trouve = false;
         while (i < 5000 && !trouve) {
             i++;
-            if (aAccuseReceptionRepository.findById("LAB-"+i).isEmpty()) {
+            if (aAccuseReceptionRepository.findById("LAB-acc-"+i).isEmpty()) {
                 trouve = true;
             }
 
         }
         System.err.println(i + " " + identifiantCommande + " " + dateCommande + " " + dateReceptionAccuseDeReception);  
-        AccuseReception ar = new AccuseReception("LAB-"+i, identifiantCommande, dateCommande, dateReceptionAccuseDeReception, listeProduit, prixCommande);
+        AccuseReception ar = new AccuseReception("LAB-acc-"+i, identifiantCommande, dateCommande, dateReceptionAccuseDeReception, listeProduit, prixCommande);
         aAccuseReceptionRepository.save(ar);
 
         Message mes = new  Message("accuseReception", dateFormat.format(new Date()), "2160", ar);
@@ -531,7 +528,7 @@ public class MessageController {
 
         List<String> listeIdCommande = new ArrayList<>();
         for (Message m : aMessageRepository.findAll()){
-            if (m.getType().equals("envoiCatalogue") || m.getType().equals("envoiBonCommande")){
+            if (m.getType().equals("envoiBonCommande")){
                 listeIdCommande.add(m.getId());
             }
         }
@@ -589,10 +586,10 @@ public class MessageController {
 
         int id_fichier = -1;
         while (i < 5000 && !trouve) {
-            if (aFichierRepository.findById("LAB-" + i).isEmpty()) {
+            if (aFichierRepository.findById("LAB-fic-" + i).isEmpty()) {
                 trouve = true;
                 id_fichier = i;
-                fic.setId("LAB-" + id_fichier);
+                fic.setId("LAB-fic-" + id_fichier);
             }
             i++;
         }
@@ -600,7 +597,7 @@ public class MessageController {
         i = 0;
         trouve = false;
         try (FileWriter fw = new FileWriter(
-                "repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-" + id_fichier + ".xml", false);
+                "repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-fic-" + id_fichier + ".xml", false);
                 BufferedWriter bw = new BufferedWriter(fw);
                 PrintWriter out = new PrintWriter(bw)) {
 
@@ -683,8 +680,10 @@ public class MessageController {
                                        "\n\t\t\t<prixProposition>" + "\n\t\t\t\t<forfait>" + m.getDemandeCommerciale().getPrixProposition() +"</forfait>"+ "\n\t\t\t</prixProposition>" +
                                        "\n\t\t\t<description>" + m.getDemandeCommerciale().getDescription() + "</description>" + 
                                        "\n\t\t\t<contrat>" +
-                                       "\n\t\t\t\t<dateDebut>" + m.getDemandeCommerciale().getDateDebut() + "</dateDebut>" + 
-                                       "\n\t\t\t\t<dateFin>" + m.getDemandeCommerciale().getDateFin() + "</dateFin>" + 
+                                       "\n\t\t\t\t<date>" +
+                                       "\n\t\t\t\t\t<dateDebut>" + m.getDemandeCommerciale().getDateDebut() + "</dateDebut>" + 
+                                       "\n\t\t\t\t\t<dateFin>" + m.getDemandeCommerciale().getDateFin() + "</dateFin>" + 
+                                       "\n\t\t\t\t</date>" +
                                        "\n\t\t\t</contrat>" + 
                                        "\n\t\t</demandeCommerciale>" + 
                                        "\n\t</typeMessage>" + 
@@ -710,8 +709,10 @@ public class MessageController {
                                        "\n\t\t\t<prixProposition>" + "\n\t\t\t\t<forfait>" + m.getPropositionCommerciale().getListeForfait().get(0).getPrix() +"</forfait>"+ "\n\t\t\t</prixProposition>" +
                                        "\n\t\t\t<description>" + m.getPropositionCommerciale().getDescription() + "</description>" + 
                                        "\n\t\t\t<contrat>" +
-                                       "\n\t\t\t\t<dateDebut>" + m.getPropositionCommerciale().getDateDebut() + "</dateDebut>" + 
-                                       "\n\t\t\t\t<dateFin>" + m.getPropositionCommerciale().getDateFin() + "</dateFin>" + 
+                                       "\n\t\t\t\t<date>" +
+                                       "\n\t\t\t\t\t<dateDebut>" + m.getPropositionCommerciale().getDateDebut() + "</dateDebut>" + 
+                                       "\n\t\t\t\t\t<dateFin>" + m.getPropositionCommerciale().getDateFin() + "</dateFin>" + 
+                                       "\n\t\t\t\t</date>" +
                                        "\n\t\t\t</contrat>" + 
                                        "\n\t\t</propositionCommerciale>" + 
                                        "\n\t</typeMessage>" + 
@@ -764,7 +765,7 @@ public class MessageController {
                             out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
                             aDemandeStageRepository.save(ds);
                             aMessageRepository.save(m);
-                            vMessage = "<\n\t<typeMessage>" + "\n\t<demandeStage>";
+                            vMessage = "\n\t<typeMessage>" + "\n\t<demandeStage>";
                             for (DmStage vDmTemp : ds.getListDmStage()) {
                                 vMessage += "\n\t\t<dmStage>" + "\n\t\t\t<id>" + vDmTemp.getId() + "</id>" + "\n\t\t\t<objet>"
                                         + vDmTemp.getObjet() + "</objet>" + "\n\t\t\t<description>" + vDmTemp.getDescription()
@@ -796,6 +797,7 @@ public class MessageController {
                                        "\n\t\t<accuseReception>" + 
                                        "\n\t\t\t<numCommande identifiantCommande=\"" + m.getAccuseReception().getIdentifiantCommande() + "\">" + m.getAccuseReception().getNumCommande() + "</numCommande>" +
                                        "\n\t\t\t<dateCommande>" + m.getAccuseReception().getDateCommande() + "</dateCommande>" +
+                                       "\n\t\t\t<dateReceptionAccuseDeReception>" + m.getAccuseReception().getDateReceptionAccuseDeReception() + "</dateReceptionAccuseDeReception>" +
                                        "\n\t\t\t<listeProduit>\n";
                             for (Produit p: m.getAccuseReception().getListeProduit()){
                                 vMessage += "\n\t\t\t\t<produit identifiant=\"" + p.getId() + "\">" + 
@@ -839,10 +841,10 @@ public class MessageController {
                 
                 vMessage = "\n\t<typeMessage>" + "\n\t<demandeCatalogue>";
                 for (CatalogueDemande vDmTemp : dc.getListCatalogueDemande()) {
-                    vMessage += "\n\t\t<CatalogueDemande identifiant=\"" + vDmTemp.getId() + "\">" + "\n\t\t\t<titreCatalogueDemande>"
+                    vMessage += "\n\t\t<catalogueDemande identifiant=\"" + vDmTemp.getId() + "\">" + "\n\t\t\t<titreCatalogueDemande>"
                             + vDmTemp.getTitreCatalogueDemande() + "</titreCatalogueDemande>" + "\n\t\t\t<quantite>" + vDmTemp.getQuantite()
                             + "</quantite>"
-                            + "\n\t\t</CatalogueDemande>";
+                            + "\n\t\t</catalogueDemande>";
                 }
                 vMessage += "\n\t</demandeCatalogue>" + "\n\t</typeMessage>" +  "\n</message>";
                 out.write(vMessage);
@@ -854,7 +856,7 @@ public class MessageController {
             e.printStackTrace();
         }
         // On a fini on sauvegarde le fichier
-        fic.setFic(new File("repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-" + id_fichier + ".xml"));
+        fic.setFic(new File("repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-fic-" + id_fichier + ".xml"));
         fic.setListMess(listeMessage);
         aFichierRepository.save(fic);
         // On clear la liste de message aussi sinon si on envoie plusieurs fichiers on
@@ -911,7 +913,7 @@ public class MessageController {
 
     // Retourne la DTD dans un string
     public String ajoutDTD() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n<!DOCTYPE fichierGlobal ["
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + "\n<!DOCTYPE fichierGlobal ["
                 + "\n<!ELEMENT fichierGlobal (destinataire+,expediteur,nbMessages,message+)>"
                 + "\n<!ATTLIST fichierGlobal id ID #REQUIRED>" + "\n<!ELEMENT destinataire (#PCDATA)>"
                 + "\n<!ELEMENT expediteur (#PCDATA)>" + "\n<!ELEMENT nbMessages (#PCDATA)>"
@@ -1008,7 +1010,7 @@ public class MessageController {
 
     public String EcrireEnTete(int id, String destinataire, int nbMessage) {
 
-        return "\n" + "\n<fichierGlobal id =\"LAB-" + id + "\">" + "\n" + "\n\t<destinataire>" + destinataire
+        return "\n" + "\n<fichierGlobal id =\"LAB-fic-" + id + "\">" + "\n" + "\n\t<destinataire>" + destinataire
                 + "</destinataire>" + "\n\t<expediteur>Laboratoire</expediteur>" + "\n\t<nbMessages>" + nbMessage
                 + "</nbMessages>";
 

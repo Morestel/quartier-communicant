@@ -156,8 +156,8 @@
                 <div th:case="'propositionCommerciale'">
                   <div class="card">
                     <h1>Proposition commerciale</h1> <br>
-                      <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
-                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
+                    <div class="reponse"><a th:href="@{/delete/{id} (id=${message.id})}"><img src="delete.png" alt="supprimer"></a></div>
+                    <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
                       <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
                       <span th:each="forfait: ${message.propositionCommerciale.listeForfait}">
                         <span class="data">Forfait : </span> <br>

@@ -14,7 +14,7 @@ public class DemandeCommerciale {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private int id;
-    private int prixProposition;
+    private float prixProposition;
     private String description;
     private String dateDebut;
     private String dateFin;
@@ -24,7 +24,7 @@ public class DemandeCommerciale {
         /* */
     }
 
-    public DemandeCommerciale(int prixProposition, String description, String dateDebut, String dateFin) {
+    public DemandeCommerciale(float prixProposition, String description, String dateDebut, String dateFin) {
         this.prixProposition = prixProposition;
         this.description = description;
         this.dateDebut = dateDebut;

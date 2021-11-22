@@ -10,7 +10,7 @@ import lombok.Data;
 public class CatalogueDemande {
     
     @Id
-    private int id;
+    private String id;
     private String titreCatalogueDemande;
     private int quantite;
 
@@ -19,7 +19,7 @@ public class CatalogueDemande {
         /* */
     }
 
-    public CatalogueDemande(int id, String titreCatalogueDemande, int quantite){
+    public CatalogueDemande(String id, String titreCatalogueDemande, int quantite){
         setId(id);
         setTitreCatalogueDemande(titreCatalogueDemande);
         setQuantite(quantite);

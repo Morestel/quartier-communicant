@@ -35,7 +35,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 
 @Controller
@@ -100,6 +102,9 @@ public class MainController {
 
     @Inject
     PropositionCommercialeRepository aPropositionCommercialeRepository;
+
+    @Inject
+    DemandeCommercialeRepository aDemandeCommercialeRepository;
 
     String tmpExpediteur = "";
     String idTmp = "-1";
@@ -277,13 +282,25 @@ public class MainController {
         try{
             
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            
+            dbf.setValidating(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
+            db.setErrorHandler((ErrorHandler) new ErrorHandler() {
+                public void error(SAXParseException exception) throws SAXException {
+                    // do something more useful in each of these handlers
+                    exception.printStackTrace();
+                }
+                public void fatalError(SAXParseException exception) throws SAXException {
+                    exception.printStackTrace();
+                }
+            
+                public void warning(SAXParseException exception) throws SAXException {
+                    exception.printStackTrace();
+                }
+            });
             Document document = db.parse(fic.getFic());
             
             document.getDocumentElement().normalize();
             String id = document.getDocumentElement().getAttribute("id");
-            System.err.println(id);
             String tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
             switch(tmpExpediteur.toLowerCase()){
                 case "magasins":
@@ -309,7 +326,7 @@ public class MainController {
                     System.out.println(this.tmpExpediteur);
                     return "ERR-EXPEDITEUR";
             }
-            fic.setExpediteur(tmpExpediteur);
+            fic.setExpediteur(this.tmpExpediteur);
            
             if (!aFichierRepository.findById(id).isEmpty() && tmpExpediteur.equals("Laboratoire")){ // Si il existe déjà et qu'on est l'expéditeur
                 idTmp = id;
@@ -328,14 +345,14 @@ public class MainController {
             if (!trouveDest){
                 return "ERR-DESTINATAIRE";
             }
-           
+            fic.setId(id);
             System.out.println("Vérification si le fichier a déjà été traité ...");
             for (Fichier f : aFichierRepository.findAll()){
                 if (f.getId().equals(id)){ // Fichier déjà traité
                     return "ERR-IDFICHIER";
                 }
             }
-            fic.setId(id);
+            
             
             
             int check = Integer.parseInt(document.getElementsByTagName("nbMessages").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", ""));
@@ -469,6 +486,7 @@ public class MainController {
             PropositionCommerciale propositionCommerciale = new PropositionCommerciale();
             List<Forfait> listeForfait = new ArrayList<>();
 
+            DemandeCommerciale demandeCommerciale = new DemandeCommerciale();
             NodeList nList = document.getElementsByTagName("message");
 
             
@@ -690,11 +708,11 @@ public class MainController {
                             System.err.println("Nombre de demandes de catalogue: " + nbCatalogueDemande);
                             for (int nbCatalogueDemandeTemp = 0; nbCatalogueDemandeTemp < nbCatalogueDemande; nbCatalogueDemandeTemp++){
 
-                                id = elem.getElementsByTagName("id").item(nbCatalogueDemandeTemp).getTextContent();
+                                id = elem.getElementsByTagName("catalogueDemande").item(nbCatalogueDemandeTemp).getAttributes().item(0).getTextContent();
                                 titreCatalogueDemande = elem.getElementsByTagName("titreCatalogueDemande").item(nbCatalogueDemandeTemp).getTextContent();
                                 quantite = Integer.parseInt(elem.getElementsByTagName("quantite").item(nbCatalogueDemandeTemp).getTextContent());
 
-                                catalogueDemande = new CatalogueDemande(Integer.valueOf(id), titreCatalogueDemande, quantite);
+                                catalogueDemande = new CatalogueDemande(id, titreCatalogueDemande, quantite);
                                 listCatalogueDemande.add(catalogueDemande);
                                 System.err.println("Taille de la liste " + listCatalogueDemande.size());
                                 aCatalogueDemandeRepository.save(catalogueDemande);
@@ -790,6 +808,34 @@ public class MainController {
                             fic.setListMess(lMessage);
                             aMessageRepository.save(m);
                             listeProduit = new ArrayList<>();
+                        }
+
+                        if (elem.getElementsByTagName("demandeCommerciale").getLength() > 0){
+                            // demandeCommerciale (prixProposition,description,contrat)>
+                            float prixProposition = 0;
+                            prixProposition = Float.parseFloat(elem.getElementsByTagName("forfait").item(0).getTextContent());
+                            description = elem.getElementsByTagName("description").item(0).getTextContent();
+                            dateDebut = elem.getElementsByTagName("dateDebut").item(0).getTextContent();
+                            demandeCommerciale= new DemandeCommerciale(prixProposition, description, dateDebut, "");
+                            if (elem.getElementsByTagName("dateFin").getLength() != 0){
+                                demandeCommerciale.setDateFin(elem.getElementsByTagName("dateFin").item(0).getTextContent());
+                            }
+                            else{
+                                demandeCommerciale.setDateFin(null);
+                            }
+                            if (elem.getElementsByTagName("duree").getLength() != 0){
+                                demandeCommerciale.setDuree(Integer.parseInt(elem.getElementsByTagName("duree").item(0).getTextContent()));
+                            }
+                            else{
+                                demandeCommerciale.setDuree(0);
+                            }
+                            aDemandeCommercialeRepository.save(demandeCommerciale);
+                            m = new  Message("demandeCommerciale", dateEnvoi,dureeValidite, demandeCommerciale);
+                            m.setId(id_message);
+                            lMessage = fic.getListMess();
+                            lMessage.add(m);
+                            fic.setListMess(lMessage);
+                            aMessageRepository.save(m);
                         }
 
                         if (elem.getElementsByTagName("propositionCommerciale").getLength() > 0){
