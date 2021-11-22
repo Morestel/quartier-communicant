@@ -352,7 +352,6 @@ public class MessageController {
         String destinataire = "";
         String identifiantCommande = "";
         // On retrouve les données via l'identifiant de commande
-    
         for (Fichier f: aFichierRepository.findAll()){
             for (Message m: f.getListMess()){
                 if (m.getId().equals(identifiantMessage)){
@@ -362,6 +361,7 @@ public class MessageController {
                         listeProduit.addAll(m.getEnvoiBonCommande().getListeProduit());
                         prixCommande = m.getEnvoiBonCommande().getPrixCommande();
                         destinataire = f.getExpediteur();
+                        System.err.println(identifiantCommande + " " + dateCommande + " " + prixCommande);
                     }
                 }
                

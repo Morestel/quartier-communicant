@@ -46,11 +46,11 @@ public class NavigationController {
 
         File repertoire;
         if (expediteur.equalsIgnoreCase("magasin")){
-            repertoire = new File("repertoire/" + source + "/Magasin");
+            repertoire = new File("repertoire/" + source + "/magasin");
         }else if (expediteur.equalsIgnoreCase("entreprise")){
             repertoire = new File("repertoire/" + source + "/entreprise");
         }else{
-            repertoire = new File("repertoire/" + source + "/Ecole");
+            repertoire = new File("repertoire/" + source + "/ecole");
         }
         List<File> lf = new ArrayList<>();
         try{
@@ -75,7 +75,35 @@ public class NavigationController {
             return "Archive";
         }
         else if(source.equals("envoi")){
-            model.addAttribute("listeFichier", listeFichier);
+            if (expediteur.equals("Ecole")){
+                List<Fichier> listeFichierEcole = new ArrayList<>();
+                for (Fichier f: aFichierRepository.findAll()){
+                    if (f.getExpediteur().equals("Laboratoire") && f.getDestinataire().equals("Ecole")){
+                        listeFichierEcole.add(f);
+                    }
+                }
+                model.addAttribute("listeFichier", listeFichierEcole);
+            }
+            if (expediteur.equals("Entreprise")){
+                List<Fichier> listeFichierEntreprise = new ArrayList<>();
+                for (Fichier f: aFichierRepository.findAll()){
+                    if (f.getExpediteur().equals("Laboratoire") && f.getDestinataire().equals("Entreprise")){
+                        listeFichierEntreprise.add(f);
+                    }
+                }
+                model.addAttribute("listeFichier", listeFichierEntreprise);
+            }
+
+            if (expediteur.equals("Magasin")){
+                List<Fichier> listeFichierMagasin = new ArrayList<>();
+                for (Fichier f: aFichierRepository.findAll()){
+                    if (f.getExpediteur().equals("Laboratoire") && f.getDestinataire().equals("Magasin")){
+                        listeFichierMagasin.add(f);
+                    }
+                }
+                model.addAttribute("listeFichier", listeFichierMagasin);
+            }
+            
             return "Envoi";
         }
         else{
