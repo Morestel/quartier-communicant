@@ -56,7 +56,7 @@
         <ul>
           <div class="messages-list">
             <li th:each="message : ${listeMessage}">
-              <div th:switch="${message.type}">
+              <div th:switch="${message.type}" th:if="${message.id != 'Temp'}">
                 <div th:case="'offreCollab'">
                   <div class="card">
                     <h1>Offre de collaboration</h1> <br>
@@ -89,19 +89,26 @@
                     <span class="data">Id message précédent:</span>[[ ${message.idMsgPrecedent}]] <br> <br>
                   </div>
                 </div>
-                <div th:case="'demandesStage'">
+
+                <div th:case="'demandeStage'">
                   <div class="card">
-                    <h1>Demande de stage/h1> <br>
+                    <h1>Demande de stage</h1> <br>
                       <div class="reponse" th:onclick="remplacer([[${message.id}]])" @click="afficher()"><img src="../../reponse.png" alt="reponse" /></div>
-                      <span class="data">Date d'envoi:</span> [[ ${message.dateEnvoi} ]] <br>
-                      <span class="data">Durée de validité:</span> [[ ${message.dureeValidite} ]] <br>
-                      <span class="data">Objet :</span>[[ ${message.demandeStage.objet} ]] <br>
-                      <span class="data">Description:</span>[[ ${message.demandeStage.description} ]] <br>
-                      <span class="data">Lieu:</span>[[ ${message.demandeStage.lieu} ]] <br>
-                      <span class="data">Rémunération:</span>[[ ${message.demandeStage.remuneration} ]] <br>
-                      <span class="data">Date de début:</span>[[ ${message.demandeStage.dateDebut} ]] <br>
-                      <span class="data">Durée:</span>[[ ${message.demandeStage.duree} ]] <br> <br>
-                  </div>
+                      <span class="data">Date dateEnvoi :</span> [[ ${message.dateEnvoi} ]] <br>
+                      <span class="data">dureeValidite :</span> [[ ${message.dureeValidite} ]] <br>
+                      <div th:each="l:${message.DemandeStage.listDmStage}">
+                        <span class="data">Demande de stage : </span> <br>
+                        <span class="data">----------------------------------</span><br>
+                        <span class="data">Objet:</span> [[ ${l.objet} ]]<br>
+                        <span class="data">Description:</span> [[ ${l.description} ]]<br>
+                        <span class="data">lieu:</span> [[ ${l.lieu} ]]<br>
+                        <span class="data">remuneration:</span> [[ ${l.remuneration} ]]<br>
+                        <span class="data">dateDebut:</span> [[ ${l.dateDebut} ]]<br>
+                        <span class="data">duree :</span> [[ ${l.duree } ]]<br>
+                        <span class="data">----------------------------------</span><br>
+                      </div>
+                    </div>
+                  
                 </div>
 
                 <div th:case="'reponseStage'">

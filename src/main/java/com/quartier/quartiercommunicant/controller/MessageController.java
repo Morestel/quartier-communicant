@@ -621,9 +621,8 @@ public class MessageController {
                 break;
             }
 
-            fic.setChecksum(listeMessage.size());
+            fic.setChecksum(compteNombreMessage(listeMessage));
             out.write(ajoutDTD());
-
             out.write(EcrireEnTete(id_fichier, destinataire, compteNombreMessage(listeMessage)));
 
             for (Message m : listeMessage) {
