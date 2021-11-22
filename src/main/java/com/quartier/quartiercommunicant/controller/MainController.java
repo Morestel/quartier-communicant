@@ -203,13 +203,16 @@ public class MainController {
     public String lecture(Model model, @PathVariable String nom){
         
         Fichier fic = new Fichier("repertoire/" + nom);
-        if (fic.getFic().length() > 10000){
-            System.err.println("Trop de caractères");
-        }
+        
 
         try{
             String statut_en_tete = lireEnTete(fic);
-
+            if (fic.getFic().length() > 15000){
+                model.addAttribute("raison", "Fichier trop lourd - Déplacement dans le dossier erreur/" + tmpExpediteur);
+                deplacerFichier(nom, "erreur/" + tmpExpediteur);
+                return "ErreurLecture";
+            }
+            
             switch(statut_en_tete){
                 case "OK": // C'est ok on passe à la suite
                     break;
@@ -284,22 +287,22 @@ public class MainController {
             String tmpExpediteur = document.getElementsByTagName("expediteur").item(0).getTextContent().replace(" ", "").replace("\n", "").replace("\t", "");
             switch(tmpExpediteur.toLowerCase()){
                 case "magasins":
-                    tmpExpediteur = "Magasin";
+                    this.tmpExpediteur = "Magasin";
                     break;
                 case "ecoles":
-                    tmpExpediteur = "Ecole";
+                    this.tmpExpediteur = "Ecole";
                     break;
                 case "entreprises":
-                    tmpExpediteur = "Entreprise";
+                    this.tmpExpediteur = "Entreprise";
                     break;
                 case "magasin":
-                    tmpExpediteur = "Magasin";
+                    this.tmpExpediteur = "Magasin";
                     break;
                 case "ecole":
-                    tmpExpediteur = "Ecole";
+                    this.tmpExpediteur = "Ecole";
                     break;
                 case "entreprise":
-                    tmpExpediteur = "Entreprise";
+                    this.tmpExpediteur = "Entreprise";
                     break;
                 default:
                     this.tmpExpediteur = "Autre";
@@ -420,8 +423,8 @@ public class MainController {
             String msg;
             String idMsgPrecedent;
 
-            String dateEnvoi;
-            String dureeValidite;
+            String dateEnvoi = "";
+            String dureeValidite = "2160";
 
             String dateCommande;
 
@@ -494,31 +497,31 @@ public class MainController {
                     if (formatIdMessage(id_message)){ // On regarde si c'est déjà au bon format, sinon on le met nous même
                         id_message = ajoutPrefixe(id_message, fic.getExpediteur());
                     }
-                    System.err.println(id_message);
-                    System.out.println("Date d'envoi : " + elem.getElementsByTagName("dateEnvoi").item(0).getTextContent());
-                    System.out.println("Durée validité : " + elem.getElementsByTagName("dureeValidite").item(0).getTextContent());
-                    dateEnvoi = elem.getElementsByTagName("dateEnvoi").item(0).getTextContent().replaceAll("\\s", "");
-                    dureeValidite = elem.getElementsByTagName("dureeValidite").item(0).getTextContent().replaceAll("\\s", "");
-                    dateEnvoi = dateEnvoi.substring(0, 8) + " " + dateEnvoi.substring(8);
-                    System.err.println(dateEnvoi + " " + dureeValidite);
-                    // On récupère la date d'envoi, on ajoute la durée de validité et on compare à la date d'aujourd'hui
-                    String pattern = "HH:mm:ss dd-MM-yyyy";
-                    SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-                    Date debut = new Date();
                     Calendar cal = Calendar.getInstance();
-                    
-                    try {
-                        debut = dateFormat.parse(dateEnvoi);
-                        cal.setTime(debut);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+                    if (elem.getTextContent().length() != 0){
+                        dateEnvoi = elem.getElementsByTagName("dateEnvoi").item(0).getTextContent().replaceAll("\\s", "");
+                        dureeValidite = elem.getElementsByTagName("dureeValidite").item(0).getTextContent().replaceAll("\\s", "");
+                        dateEnvoi = dateEnvoi.substring(0, 8) + " " + dateEnvoi.substring(8);
+                        // On récupère la date d'envoi, on ajoute la durée de validité et on compare à la date d'aujourd'hui
+                        String pattern = "HH:mm:ss dd-MM-yyyy";
+                        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+                        Date debut = new Date();
+                        cal = Calendar.getInstance();
+                        
+                        try {
+                            debut = dateFormat.parse(dateEnvoi);
+                            cal.setTime(debut);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        cal.add(Calendar.HOUR_OF_DAY, Integer.parseInt(dureeValidite));
+                        
                     }
-                    cal.add(Calendar.HOUR_OF_DAY, Integer.parseInt(dureeValidite));
-                    
+                   
                     // ASCII elem.getTextContent().matches("\\A\\p{ASCII}*\\z") && 
                     if (cal.getTime().after(new Date()) && 
                         elem.getTextContent().length() < 1001 &&
-                        Integer.parseInt(dureeValidite) < 2160 &&
+                        Integer.parseInt(dureeValidite) < 2161 &&
                         elem.getTextContent().length() != 0){// Vérification du message en ASCII 
                                                             // ET si la date n'est pas dépassée
                                                             // ET si le message fait moins de 1000 caractères 
