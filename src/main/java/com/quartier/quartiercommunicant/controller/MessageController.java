@@ -875,12 +875,27 @@ public class MessageController {
         Fichier fic = new Fichier();
         fic.setDestinataire(destinataire);
         fic.setExpediteur("Laboratoire");
+        fic.setChecksum(1);
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
         int i = 0;
         boolean trouve = false;
-        
+        List<Message> listeMessage = new ArrayList<>();
         Message m = new Message("reponseGenerique", dateFormat.format(new Date()), "2160", msg, idMsgPrecedent);
+        listeMessage.add(m);
+        int id_fichier = -1;
+        while (i < 5000 && !trouve) {
+            if (aFichierRepository.findById("LAB-fic-" + i).isEmpty()) {
+                trouve = true;
+                id_fichier = i;
+                fic.setId("LAB-fic-" + id_fichier);
+            }
+            i++;
+        }
+        // On remet i à 0 et trouve a false
+        i = 0;
+        trouve = false;
+
         while (i < 50000 && !trouve) {
             if (aMessageRepository.findById("LAB-" + i).isEmpty()) {
                 m.setId("LAB-" + i);
@@ -890,24 +905,27 @@ public class MessageController {
         }
         aMessageRepository.save(m);
         try (FileWriter fw = new FileWriter(
-            "repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-" + m.getId() + ".xml", false);
+            "repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-fic-" + i + ".xml", false);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
                 out.write(ajoutDTD());
                 out.write(EcrireEnTete(i, destinataire, 1));
                 out.write(ajoutHeaderMessage(m.getId(), m.getDateEnvoi(), m.getDureeValidite()));
-                vMessage += "\n\t<typeMessage>" + 
-                            "\n\t<reponseGenerique>" + 
-                            "\n\t\t<msg>" + m.getMsg() + "</msg>" + 
-                            "\n\t\t<idMsgPrecedent>" + m.getIdMsgPrecedent() + "</idMsgPrecedent>" + 
-                            "\n\t</reponseGenerique>" + 
-                            "\n\t </typeMessage>" + 
-                            "\n</message>";
+                vMessage += "\n\t\t<typeMessage>" + 
+                            "\n\t\t<reponseGenerique>" + 
+                            "\n\t\t\t<msg>" + m.getMsg() + "</msg>" + 
+                            "\n\t\t\t<idMsgPrecedent>" + m.getIdMsgPrecedent() + "</idMsgPrecedent>" + 
+                            "\n\t\t</reponseGenerique>" + 
+                            "\n\t\t</typeMessage>" + 
+                            "\n\t</message>";
                 out.write(vMessage);
                 out.write(ajoutFin());
             }catch(IOException e){
                 e.printStackTrace();
             }
+            fic.setFic(new File("repertoire/envoi/" + destinataire.toLowerCase() + "/LAB-fic-" + id_fichier + ".xml"));
+            fic.setListMess(listeMessage);
+            aFichierRepository.save(fic);
         return "redirect:/index ";
     }
 

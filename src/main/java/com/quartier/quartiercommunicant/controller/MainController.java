@@ -126,7 +126,7 @@ public class MainController {
                         vTemp = f;
                     }
                 }
-                if (compteur == 1){
+                if (compteur > 0){
                     return "redirect:/lecture/" + vTemp.getName();
                 }
             }
@@ -538,6 +538,7 @@ public class MainController {
                    
                     // ASCII elem.getTextContent().matches("\\A\\p{ASCII}*\\z") && 
                     if (cal.getTime().after(new Date()) && 
+                        elem.getTextContent().matches("\\A\\p{ASCII}*\\z") &&
                         elem.getTextContent().length() < 1001 &&
                         Integer.parseInt(dureeValidite) < 2161 &&
                         elem.getTextContent().length() != 0){// Vérification du message en ASCII 
