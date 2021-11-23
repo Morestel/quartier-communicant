@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE fichierGlobal [
+<!ELEMENT fichierGlobal (destinataire+,expediteur,nbMessages,message+)>
+<!ATTLIST fichierGlobal id ID #REQUIRED>
+<!ELEMENT destinataire (#PCDATA)>
+<!ELEMENT expediteur (#PCDATA)>
+<!ELEMENT nbMessages (#PCDATA)>
+<!ELEMENT message (dateEnvoi,dureeValidite,typeMessage)>
+<!ATTLIST message id ID #REQUIRED>
+<!-- Nomenclature dateEnvoi : hh:mm:ss JJ-MM-AAAA -->
+<!ELEMENT dateEnvoi (#PCDATA)>
+<!-- Nomenclature dureeValidite : nombre entier : nombres d'heures -->
+<!ELEMENT dureeValidite (#PCDATA)>
+<!ELEMENT typeMessage (
+    envoiCatalogue | 
+    demandeCatalogue | 
+    envoiBonCommande | 
+    accuseReception | 
+    offreCollab | 
+    demandeCollab | 
+    reponseGenerique | 
+    propositionCommerciale | 
+    demandeCommerciale | 
+    rechercheSousTraitant | 
+    propositionSousTraitant | 
+    demandeConference | 
+    reponseConference | 
+    demandeListeFormation | 
+    reponseListeFormation | 
+    demandeStage | 
+    reponseStage)>
+
+<!-- DTD de l'envoi de catalogue -->
+<!ELEMENT envoiCatalogue (titreCatalogue,listeProduit)>
+<!ELEMENT titreCatalogue (#PCDATA)>
+<!ELEMENT listeProduit (produit+)>
+<!ELEMENT produit (nom,prix,quantite)>
+<!ATTLIST produit identifiant ID #REQUIRED>
+<!ELEMENT nom (#PCDATA)>
+<!ELEMENT prix (#PCDATA)>
+<!ELEMENT quantite (#PCDATA)>
+
+<!-- DTD de la demande de catalogue -->
+<!ELEMENT demandeCatalogue (catalogueDemande+)>
+<!ELEMENT catalogueDemande (titreCatalogueDemande,quantite)>
+<!ATTLIST catalogueDemande identifiant ID #REQUIRED>
+<!ELEMENT titreCatalogueDemande (#PCDATA)>
+
+<!-- DTD de l'envoi de Bon de commande -->
+<!ELEMENT envoiBonCommande (numCommande,dateCommande,listeProduit,prixCommande)>
+<!ELEMENT numCommande (#PCDATA)>
+<!ELEMENT dateCommande (#PCDATA)>
+<!ELEMENT prixCommande (#PCDATA)>
+
+<!-- DTD de l'accusé de réception de commande -->
+<!ELEMENT accuseReception (numCommande, dateCommande, dateReceptionAccuseDeReception, listeProduit, prixCommande)>
+<!ATTLIST numCommande identifiantCommande ID #REQUIRED>
+<!ELEMENT dateReceptionAccuseDeReception (#PCDATA)>
+
+<!-- Offre Collab -->
+<!ELEMENT offreCollab (description,date)>
+<!ELEMENT description (#PCDATA)>
+
+<!-- Demande Collab -->
+<!ELEMENT demandeCollab (description,date)>
+
+<!-- Réponse Générique -->
+<!ELEMENT reponseGenerique (msg, idMsgPrécédent)>
+<!ELEMENT msg (#PCDATA)>
+<!ELEMENT idMsgPrécédent (#PCDATA)>
+
+<!-- Proposition commerciale -->
+<!ELEMENT propositionCommerciale (prixProposition,description,contrat)>
+<!ELEMENT prixProposition (forfait+)> 
+<!ELEMENT forfait (#PCDATA)>
+<!ELEMENT contrat (date)>
+
+<!-- Demande Commerciale -->
+<!ELEMENT demandeCommerciale (prixProposition,description,contrat)>
+
+<!-- Proposition Sous Traitant -->
+<!ELEMENT propositionSousTraitant (prixProposition,description,contrat)>
+
+<!-- Recherche Sous Traitant -->
+<!ELEMENT rechercheSousTraitant (prixProposition,description,contrat)>
+
+<!-- Demande de conférence -->
+<!ELEMENT demandeConference (conf+)>
+<!ELEMENT conf (id,sujet,lieu,dateDebut,dureeConference)>
+<!ELEMENT id (#PCDATA)>
+<!ELEMENT sujet (#PCDATA)>
+<!ELEMENT lieu (#PCDATA)>
+<!-- dureeConference en heure -->
+<!ELEMENT dureeConference (#PCDATA)>
+
+<!-- Réponse de conférence -->
+<!ELEMENT reponseConference (reponseGenerique)>
+
+<!-- Demande de listes de formations -->
+<!ELEMENT demandeListeFormation (form+)>
+<!ELEMENT form (id,branche)>
+<!ELEMENT branche (filiere+)>
+<!ELEMENT filiere (#PCDATA)>
+
+<!-- Reponse de listes de formations -->
+<!ELEMENT reponseListeFormation (catalogue+)>
+<!ELEMENT catalogue (id,liste)>
+<!ELEMENT liste (formation+)>
+<!ELEMENT formation (titre,description,filiere)>
+<!ELEMENT titre (#PCDATA)>
+
+<!-- Demande de stage -->
+<!ELEMENT demandeStage (dmStage+)>
+<!ELEMENT dmStage (id,objet,description,lieu,remuneration,date)>
+<!ELEMENT date (dateDebut, (dateFin | duree))>
+<!-- Nomenclature dateDebut : hh:mm:ss JJ-MM-AAAA -->
+<!ELEMENT dateDebut (#PCDATA)>
+<!ELEMENT dateFin (#PCDATA)>
+<!-- Nomenclature duree : nombre entier : nombres de jours -->
+<!ELEMENT duree (#PCDATA)>
+<!ELEMENT objet (#PCDATA)>
+<!ELEMENT remuneration (#PCDATA)>
+
+<!-- Réponse de stage -->
+<!ELEMENT reponseStage (rpStage+)>
+<!ELEMENT rpStage (id,objet,cv,lettre)>
+<!ELEMENT cv (etatcivil,formationStage+,experience*)>
+<!ELEMENT lettre (etatcivil,description)>
+<!ELEMENT etatcivil (nom,prenom,dateNaissance,lieuNaissance,lieuResidence,photo?,email?,tel?)>
+<!ELEMENT formationStage (titre,date,lieu?,mention?,description?)>
+<!ELEMENT experience (titre,date,lieu,fonction?,description?)>
+<!ELEMENT prenom (#PCDATA)>
+<!ELEMENT dateNaissance (#PCDATA)>
+<!ELEMENT lieuNaissance (#PCDATA)>
+<!ELEMENT lieuResidence (#PCDATA)>
+<!ELEMENT photo (#PCDATA)>
+<!ELEMENT email (#PCDATA)>
+<!ELEMENT tel (#PCDATA)>
+<!ELEMENT mention (#PCDATA)>
+<!ELEMENT fonction (#PCDATA)>
+
+]>
+
+<!-- 
+Fichier qui nous a été envoyé par nos camarades représentant les magasins. Leur manière d'écrire les données au sein des balises
+diffère de la notre: Il est donc nécessaire de gérer cette possibilité 
+Le système doit être capable de lire ce fichier à condition qu'il ne contienne pas d'erreur et que les messages soient conformes 
+-->
+<fichierGlobal id="MAG-fichier-7">
+	<destinataire>
+		Laboratoires
+	</destinataire>
+	<expediteur>
+		Magasins
+	</expediteur>
+	<nbMessages>
+		4
+	</nbMessages>
+	<message id="MAG-message-6">
+		<dateEnvoi>
+			09:57:12 20-11-2021
+		</dateEnvoi>
+		<dureeValidite>
+			2160
+		</dureeValidite>
+		<typeMessage>
+			<reponseGenerique>
+				<msg>
+					Nous acceptons la proposition commerciale que vous nous avez envoye
+				</msg>
+				<idMsgPrécédent>
+					LAB-4
+				</idMsgPrécédent>
+			</reponseGenerique>
+		</typeMessage>
+	</message>
+	<message id="MAG-message-7">
+		<dateEnvoi>
+			09:57:12 20-11-2021
+		</dateEnvoi>
+		<dureeValidite>
+			2160
+		</dureeValidite>
+		<typeMessage>
+			<envoiCatalogue>
+				<titreCatalogue>
+					Bois
+				</titreCatalogue>
+				<listeProduit>
+					<produit identifiant="MAG-produit-4">
+						<nom>
+							Poutre
+						</nom>
+						<prix>
+							50
+						</prix>
+						<quantite>
+							20
+						</quantite>
+					</produit>
+					<produit identifiant="MAG-produit-5">
+						<nom>
+							Armoire en bois massif
+						</nom>
+						<prix>
+							99
+						</prix>
+						<quantite>
+							15
+						</quantite>
+					</produit>
+				</listeProduit>
+			</envoiCatalogue>
+		</typeMessage>
+	</message>
+	<message id="MAG-message-8">
+		<dateEnvoi>
+			09:57:12 20-11-2021
+		</dateEnvoi>
+		<dureeValidite>
+			2160
+		</dureeValidite>
+		<typeMessage>
+			<envoiBonCommande>
+				<numCommande identifiantCommande="MAG-commande-2">
+					VKUFR4165
+				</numCommande>
+				<dateCommande>
+					2021-11-20
+				</dateCommande>
+				<listeProduit>
+					<produit identifiant="MAG-produit-6">
+						<nom>
+							Gel hydroalcoolique
+						</nom>
+						<prix>
+							1.05
+						</prix>
+						<quantite>
+							100
+						</quantite>
+					</produit>
+					<produit identifiant="MAG-produit-7">
+						<nom>
+							Acide sulfurique concentre
+						</nom>
+						<prix>
+							10.99
+						</prix>
+						<quantite>
+							5
+						</quantite>
+					</produit>
+				</listeProduit>
+				<prixCommande>
+					160
+				</prixCommande>
+			</envoiBonCommande>
+		</typeMessage>
+	</message>
+	<message id="MAG-message-9">
+		<dateEnvoi>
+			09:57:12 20-11-2021
+		</dateEnvoi>
+		<dureeValidite>
+			2160
+		</dureeValidite>
+		<typeMessage>
+			<propositionCommerciale>
+				<prixProposition>
+					<forfait>
+						100
+					</forfait>
+				</prixProposition>
+				<description>
+					Nous acceptons votre demande commerciale a condition de toucher 100 euros au lieu des 90 euros proposes.
+				</description>
+				<contrat>
+					<date>
+						<dateDebut>
+							00:00:00 19-11-2021
+						</dateDebut>
+						<dateFin>
+							00:00:00 21-11-2021
+						</dateFin>
+					</date>
+				</contrat>
+			</propositionCommerciale>
+		</typeMessage>
+	</message>
+</fichierGlobal>

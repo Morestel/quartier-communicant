@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE fichierGlobal [
+<!ELEMENT fichierGlobal (destinataire+,expediteur,nbMessages,message+)>
+<!ATTLIST fichierGlobal id ID #REQUIRED>
+<!ELEMENT destinataire (#PCDATA)>
+<!ELEMENT expediteur (#PCDATA)>
+<!ELEMENT nbMessages (#PCDATA)>
+<!ELEMENT message (dateEnvoi,dureeValidite,typeMessage)>
+<!ATTLIST message id ID #REQUIRED>
+<!-- Nomenclature dateEnvoi : hh:mm:ss JJ-MM-AAAA -->
+<!ELEMENT dateEnvoi (#PCDATA)>
+<!-- Nomenclature dureeValidite : nombre entier : nombres d'heures -->
+<!ELEMENT dureeValidite (#PCDATA)>
+<!ELEMENT typeMessage (
+    envoiCatalogue | 
+    demandeCatalogue | 
+    envoiBonCommande | 
+    accuseReception | 
+    offreCollab | 
+    demandeCollab | 
+    reponseGenerique | 
+    propositionCommerciale | 
+    demandeCommerciale | 
+    rechercheSousTraitant |
+    propositionSousTraitant |
+    demandeConference | 
+    reponseConference | 
+    demandeListeFormation | 
+    reponseListeFormation | 
+    demandeStage | 
+    reponseStage)>
+<!-- DTD de l'envoi de catalogue -->
+<!ELEMENT envoiCatalogue (titreCatalogue,listeProduit)> 
+<!ELEMENT titreCatalogue (#PCDATA)> 
+<!ELEMENT listeProduit (produit+)> 
+<!ELEMENT produit (nom,prix,quantite)> 
+<!ATTLIST produit identifiant ID #REQUIRED> 
+<!ELEMENT nom (#PCDATA)> 
+<!ELEMENT prix (#PCDATA)>
+<!ELEMENT quantite (#PCDATA)>
+<!-- DTD de la demande de catalogue -->
+<!ELEMENT demandeCatalogue (catalogueDemande+)> 
+<!ELEMENT catalogueDemande (titreCatalogueDemande,quantite)>
+<!ATTLIST catalogueDemande identifiant ID #REQUIRED>
+<!ELEMENT titreCatalogueDemande (#PCDATA)>
+<!-- DTD de l'envoi de Bon de commande -->
+<!ELEMENT envoiBonCommande (numCommande,dateCommande,listeProduit,prixCommande)>
+<!ELEMENT numCommande (#PCDATA)>
+<!ELEMENT dateCommande (#PCDATA)>
+<!ELEMENT prixCommande (#PCDATA)>
+<!-- DTD de l'accusé de réception de commande -->
+<!ELEMENT accuseReception (numCommande, dateCommande, dateReceptionAccuseDeReception, listeProduit, prixCommande)>
+<!ATTLIST numCommande identifiantCommande ID #REQUIRED>
+<!ELEMENT dateReceptionAccuseDeReception (#PCDATA)>
+<!-- Offre Collab -->
+<!ELEMENT offreCollab (description,date)>
+<!ELEMENT description (#PCDATA)>
+<!-- Demande Collab -->
+<!ELEMENT demandeCollab (description,date)>
+<!-- Réponse Générique -->
+<!ELEMENT reponseGenerique (msg, idMsgPrécédent)>
+<!ELEMENT msg (#PCDATA)>
+<!ELEMENT idMsgPrécédent (#PCDATA)>
+<!-- Proposition commerciale -->
+<!ELEMENT propositionCommerciale (prixProposition,description,contrat)>
+<!ELEMENT prixProposition (forfait+)> 
+<!ELEMENT forfait (#PCDATA)>
+<!ELEMENT contrat (date)>
+<!-- Demande Commerciale -->
+<!ELEMENT demandeCommerciale (prixProposition,description,contrat)>
+<!-- Proposition Sous Traitant -->
+<!ELEMENT propositionSousTraitant (prixProposition,description,contrat)>
+<!-- Recherche Sous Traitant -->
+<!ELEMENT rechercheSousTraitant (prixProposition,description,contrat)>
+<!-- Demande de conférence -->
+<!ELEMENT demandeConference (conf+)>
+<!ELEMENT conf (id,sujet,lieu,dateDebut,dureeConference)>
+<!ELEMENT id (#PCDATA)>
+<!ELEMENT sujet (#PCDATA)>
+<!ELEMENT lieu (#PCDATA)>
+<!-- dureeConference en heure -->
+<!ELEMENT dureeConference (#PCDATA)>
+<!-- Réponse de conférence -->
+<!ELEMENT reponseConference (reponseGenerique)>
+<!-- Demande de listes de formations -->
+<!ELEMENT demandeListeFormation (form+)>
+<!ELEMENT form (id,branche)>
+<!ELEMENT branche (filiere+)>
+<!ELEMENT filiere (#PCDATA)>
+<!-- Reponse de listes de formations -->
+<!ELEMENT reponseListeFormation (catalogue+)>
+<!ELEMENT catalogue (id,liste)>
+<!ELEMENT liste (formation+)>
+<!ELEMENT formation (titre,description,filiere)>
+<!ELEMENT titre (#PCDATA)>
+<!-- Demande de stage -->
+<!ELEMENT demandeStage (dmStage+)>
+<!ELEMENT dmStage (id,objet,description,lieu,remuneration,date)>
+<!ELEMENT date (dateDebut, (dateFin | duree))>
+<!-- Nomenclature dateDebut : hh:mm:ss JJ-MM-AAAA -->
+<!ELEMENT dateDebut (#PCDATA)>
+<!ELEMENT dateFin (#PCDATA)>
+<!-- Nomenclature duree : nombre entier : nombres de jours -->
+<!ELEMENT duree (#PCDATA)>
+<!ELEMENT objet (#PCDATA)>
+<!ELEMENT remuneration (#PCDATA)>
+<!-- Réponse de stage -->
+<!ELEMENT reponseStage (rpStage+)>
+<!ELEMENT rpStage (id,objet,cv,lettre)>
+<!ELEMENT cv (etatcivil,formationStage+,experience*)>
+<!ELEMENT lettre (etatcivil,description)>
+<!ELEMENT etatcivil (nom,prenom,dateNaissance,lieuNaissance,lieuResidence,photo?,email?,tel?)>
+<!ELEMENT formationStage (titre,date,lieu?,mention?,description?)>
+<!ELEMENT experience (titre,date,lieu,fonction?,description?)>
+<!ELEMENT prenom (#PCDATA)>
+<!ELEMENT dateNaissance (#PCDATA)>
+<!ELEMENT lieuNaissance (#PCDATA)>
+<!ELEMENT lieuResidence (#PCDATA)>
+<!ELEMENT photo (#PCDATA)>
+<!ELEMENT email (#PCDATA)>
+<!ELEMENT tel (#PCDATA)>
+<!ELEMENT mention (#PCDATA)>
+<!ELEMENT fonction (#PCDATA)>
+]>
+
+<fichierGlobal id ="ENT-fic-3">
+
+	<!-- De multiples destinataires sont autorisés, il est donc nécessaire de les gérer. -->
+	<destinataire>Magasin</destinataire>
+	<destinataire>Laboratoire</destinataire>
+	<expediteur>Entreprise</expediteur>
+	<nbMessages>3</nbMessages>
+
+	<message id="ENT-5652">
+		<dateEnvoi>14:07:17 22-11-2021</dateEnvoi>
+		<dureeValidite>2160</dureeValidite>
+		<typeMessage>
+			<demandeCollab>
+				<description>Demande collab</description>
+				<date>
+					<dateDebut>00:00:00 19-11-2021</dateDebut>
+					<dateFin>00:00:00 19-11-2021</dateFin>
+				</date>
+			</demandeCollab>
+		</typeMessage>
+	</message>
+
+	<message id="ENT-45646">
+		<dateEnvoi>14:07:36 22-11-2021</dateEnvoi>
+		<dureeValidite>2160</dureeValidite>
+		<typeMessage>
+			<demandeCollab>
+				<description>Re test</description>
+				<date>
+					<dateDebut>00:00:00 19-11-2021</dateDebut>
+					<dateFin>00:00:00 19-11-2021</dateFin>
+				</date>
+			</demandeCollab>
+		</typeMessage>
+	</message>
+
+	<message id="ENT-0887">
+		<dateEnvoi>14:07:50 22-11-2021</dateEnvoi>
+		<dureeValidite>2160</dureeValidite>
+		<typeMessage>
+			<demandeCollab>
+				<description>Demande collab</description>
+				<date>
+					<dateDebut>00:00:00 19-11-2021</dateDebut>
+					<dateFin>00:00:00 19-11-2021</dateFin>
+				</date>
+			</demandeCollab>
+		</typeMessage>
+	</message>
+</fichierGlobal>
