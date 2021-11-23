@@ -251,6 +251,7 @@ public class MainController {
                     break;
                 case "ERR-CHECKSUM":
                     model.addAttribute("raison", "Checksum non conforme - Rejet du fichier");
+                    deplacerFichier(nom,"erreur/" + tmpExpediteur);
                     return "ErreurLecture";
                     
             }

@@ -289,7 +289,7 @@ public class MessageController {
 
     @RequestMapping(value = "/demandeStage", method = RequestMethod.POST)
     public String demandeStage(@RequestParam String objet, @RequestParam String description, @RequestParam String lieu,
-            @RequestParam String remuneration, @RequestParam String dateDebut, @RequestParam String dateFin,
+            @RequestParam String remuneration, @RequestParam String dateDebut,
             @RequestParam String duree, @RequestParam String destinataire, @RequestParam String validite) {
         String pattern = "HH:mm:ss dd-MM-YYYY";
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
